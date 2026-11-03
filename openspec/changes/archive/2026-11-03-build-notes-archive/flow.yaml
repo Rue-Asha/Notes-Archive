@@ -1,0 +1,21 @@
+triage: 'feature — new app from scratch: Notion-style block editor, nested folders, tags, full-text search, editorial light UI. Appetite: several long sessions, one change for everything.'
+gate0: 2026-11-02
+gate1: 2026-11-02
+gate2: 2026-11-03
+ship_note: 'Rue 2026-11-03 at Gate 2: leave the empty remote public, push main + flow/build-notes-archive, PR, merge, tag v0.1.0. Known limits accepted: explicit delete of a note after cut drops its marked uploads at once; back-morph names first card.'
+ship_override: 'Rue 2026-11-02: pre-approved Gate 2 and shipping - run to the end: PR, merge, push new release tag (overrides ship: ask / release: none). Still stop for red proof, unfixable findings, or an unclear version.'
+look_pick: 'bronze / clear / glass (4.6 approved 2026-11-02)'
+base: main
+learnings:
+  - 'gate1: Rue declined HEIC, accepted immediate upload deletion and ß folding, but wrote "literally" for the ß pick and needed one clarifying question -> state each addition as a yes/no with the concrete result, not a mechanism'
+  - 'explore: home layout (photo hero) and photo placement were asked in separate rounds; Rue picked a photo hero, then photos on folder covers only, and a third question had to resolve it -> ask hero and photo placement in the same round'
+  - 'build U11/U12: look-walk screenshot servers outlived their timeout and held the unit port, so the next proof:full exited without running (both builders hit it) -> brief says to check ss -ltn for the unit port before every proof:full, not only before the first'
+  - 'build U12: core.ts imports @tiptap/extension-code, reachable only through starter-kit and not in package.json -> a brief for editor units says to list any directly imported package in package.json or report it as a deviation'
+  - 'wave merge: U14 tag-page test matched /Reise/ and collided with the real tree row from U13 (placeholder tree when U14 was written); a proof wrapper "&& echo ok || echo FAIL" always exits 0 -> a placeholder-era e2e test must scope by section, and read the "N failed" line of the log, not the exit status'
+  - 'build U15: units that add real tree rows or cards to the shell make loose name regexps in older e2e files collide (tags-section.test.ts still has /Reise/ and /Übung/) -> brief for a UI unit says to rg the e2e dir for loose link regexps over seeded names and scope them'
+  - 'wave 7 merge: U18 palette-editor passed in its worktree, then failed on phone after U16.5 made the bottom bar inert while the editor has focus; the fixer made it desktop-only -> a brief for a unit that clicks a shell control from inside the editor lists which shell units can hide or inert it, and the orchestrator checks that unit-time green tests touching BottomBar run after merge'
+  - 'wave 7: Playwright MCP could not start (Chrome missing at /opt/google/chrome/chrome) and all three builders fell back to the repo Playwright; look walks skipped the mockup side-by-side -> check Chrome before dispatching a look-walk unit, or say in the brief that the repo Playwright is the tool'
+  - 'wave 7: U18 first proof:full failed on port 4173 (scripts read PORT); U16/U17 builders hit it too -> brief names PORT=<unit port> on every proof:full, not only the e2e server'
+  - 'verify: the repo remote origin exists but is empty (no refs, public on GitHub) so origin/main is missing; verifier and reviewer briefs said origin/main and an agent reported a missing remote -> check git ls-remote origin before writing the base into briefs, and name local main when the remote is empty'
+  - 'fix r1: the fixer named D scenario tests with a suffix after the exact scenario title -> the fixer brief says the test name is the scenario title verbatim, the verifier counts names that contain it'
+  - 'fix r1: the review found weak folder-delete coverage only after the scoped review -> a fixer that adds a server hand-over adds one test per owner kind (image, file card) on each path (save, note delete, folder delete)'
