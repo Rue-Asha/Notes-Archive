@@ -42,3 +42,9 @@ The production server (`node build`) reads these environment variables:
 | `MOCKUP_PHOTOS_DIR` | unset | folder of CC0 photos for the mockups and e2e fixtures; the e2e config points it at `fixtures/mockups` |
 
 `GET /healthz` answers `ok` (200) while the database responds, 503 otherwise.
+
+## Release
+
+Bump `version` in `package.json`, merge to `main`, then push the tag `vX.Y.Z` that matches it. The release workflow
+publishes the tarball built by the CI run on that commit, with its checksum and a build attestation, and opens a pin-bump
+PR in `Rue-Asha/Homelab-Managment`.

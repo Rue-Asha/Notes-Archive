@@ -5,9 +5,10 @@ import { MAX_UPLOAD_BYTES } from './images.ts';
 
 export function storeFile(noteId: Id, file: { name: string; mime: string; bytes: Uint8Array }): UploadedFile {
 	if (file.bytes.length > MAX_UPLOAD_BYTES) throw new UploadError('file-too-large');
+	// Node 22's node:sqlite binds the empty buffer from request.arrayBuffer() as NULL; a copy binds as an empty blob
 	const { lastInsertRowid } = getDb()
 		.prepare('INSERT INTO files (note_id, name, mime, size, bytes, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-		.run(noteId, file.name, file.mime, file.bytes.length, file.bytes, new Date().toISOString());
+		.run(noteId, file.name, file.mime, file.bytes.length, Buffer.from(file.bytes), new Date().toISOString());
 	return { id: Number(lastInsertRowid), name: file.name, size: file.bytes.length, mime: file.mime };
 }
 
