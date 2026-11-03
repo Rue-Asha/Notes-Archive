@@ -28,10 +28,13 @@ test('Scenario: Package produces a verifiable tarball', () => {
 	);
 
 	const entries = execFileSync('tar', ['-tzf', join(dist, tarball)], { encoding: 'utf8' }).split('\n');
-	const top = [...new Set(entries.filter(Boolean).map((e) => e.split('/')[0]))].sort();
-	expect(top).toEqual(['build', 'migrations', 'node_modules', 'package-lock.json', 'package.json']);
-	expect(entries).toContain('build/index.js');
-	expect(entries).toContain('migrations/0001_images.sql');
-	expect(entries).toContain('package.json');
-	expect(entries).toContain('package-lock.json');
+	const wrapper = `notes-archive-${version}`;
+	const top = [...new Set(entries.filter(Boolean).map((e) => e.split('/')[0]))];
+	expect(top).toEqual([wrapper]);
+	const inner = [...new Set(entries.filter((e) => e.startsWith(`${wrapper}/`)).map((e) => e.split('/')[1]).filter(Boolean))].sort();
+	expect(inner).toEqual(['build', 'migrations', 'node_modules', 'package-lock.json', 'package.json']);
+	expect(entries).toContain(`${wrapper}/build/index.js`);
+	expect(entries).toContain(`${wrapper}/migrations/0001_images.sql`);
+	expect(entries).toContain(`${wrapper}/package.json`);
+	expect(entries).toContain(`${wrapper}/package-lock.json`);
 });

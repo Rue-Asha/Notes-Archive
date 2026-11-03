@@ -97,11 +97,11 @@ Reset deletes every row of every table including the search index; seed inserts 
 - **proof:** e2e
 
 ### Requirement: Package tarball
-`npm run package` SHALL build and write `dist/notes-archive-<version>.tgz` plus a `.sha256` file whose top level holds exactly `build`, `migrations`, `node_modules`, `package.json` and `package-lock.json`.
+`npm run package` SHALL build and write `dist/notes-archive-<version>.tgz` plus a `.sha256` file. The tarball SHALL hold a single top-level folder `notes-archive-<version>/` (Homelab-Managment's service roles unpack with `--strip-components=1`) that holds exactly `build`, `migrations`, `node_modules`, `package.json` and `package-lock.json`.
 
 #### Scenario: Package produces a verifiable tarball
 - **WHEN** `npm run package` runs
-- **THEN** the tarball and its checksum exist, the checksum matches, and the top level holds exactly the five entries
+- **THEN** the tarball and its checksum exist, the checksum matches, the only top-level entry is `notes-archive-<version>/`, and it holds exactly the five entries
 - **proof:** unit
 
 ### Requirement: Harness declaration
