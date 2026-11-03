@@ -47,7 +47,7 @@ jobs:
       - name: Unpack tarball
         run: |
           mkdir "$RUNNER_TEMP/artifact"
-          tar -xzf dist/*.tgz -C "$RUNNER_TEMP/artifact"
+          tar -xzf dist/*.tgz --strip-components=1 -C "$RUNNER_TEMP/artifact"
           echo "E2E_APP_DIR=$RUNNER_TEMP/artifact" >> "$GITHUB_ENV"
 
       - name: e2e against the unpacked tarball

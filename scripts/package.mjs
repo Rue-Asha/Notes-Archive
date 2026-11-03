@@ -7,7 +7,7 @@ const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
 const name = `notes-archive-${version}`;
 const tarball = `${name}.tgz`;
 const staging = join('dist', 'staging');
-const root = staging;
+const root = join(staging, name);
 
 rmSync('dist', { recursive: true, force: true });
 mkdirSync(root, { recursive: true });
@@ -25,8 +25,8 @@ execFileSync('npm', ['ci', '--omit=dev', '--ignore-scripts', '--no-audit', '--no
 // npm ci creates no node_modules while there are no production dependencies; the tarball layout stays fixed
 mkdirSync(join(root, 'node_modules'), { recursive: true });
 
-// the five entries sit at the archive's top level, with no wrapping folder
-execFileSync('tar', ['-czf', join('dist', tarball), '-C', staging, 'build', 'migrations', 'node_modules', 'package.json', 'package-lock.json']);
+// Homelab-Managment's service roles unpack with --strip-components=1, so everything sits in one wrapping folder
+execFileSync('tar', ['-czf', join('dist', tarball), '-C', staging, name]);
 rmSync(staging, { recursive: true });
 
 const hash = createHash('sha256').update(readFileSync(join('dist', tarball))).digest('hex');
