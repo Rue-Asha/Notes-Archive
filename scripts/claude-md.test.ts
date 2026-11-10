@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 
-test('Scenario: Harness is declared in CLAUDE.md', () => {
-	const md = readFileSync('CLAUDE.md', 'utf8');
+test('Scenario: Harness is declared in AGENTS.md', () => {
+	const md = readFileSync('AGENTS.md', 'utf8');
 	const section = md.split(/^## /m).find((s) => s.startsWith('Harness'));
 
 	expect(section).toBeDefined();

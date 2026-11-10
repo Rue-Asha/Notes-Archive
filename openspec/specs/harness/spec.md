@@ -105,10 +105,10 @@ Reset deletes every row of every table including the search index; seed inserts 
 - **proof:** unit
 
 ### Requirement: Harness declaration
-`CLAUDE.md` SHALL declare `## Harness` with proof `npm run proof`, proof-full `npm run proof:full`, run `npm run dev` → http://localhost:5173, package `npm run package`, `ship: ask` and `release: none`, followed by the e2e conventions paragraph.
+`AGENTS.md` SHALL declare `## Harness` with proof `npm run proof`, proof-full `npm run proof:full`, run `npm run dev` → http://localhost:5173, package `npm run package`, `ship: ask` and `release: none`, followed by the e2e conventions paragraph.
 
-#### Scenario: Harness is declared in CLAUDE.md
-- **WHEN** `CLAUDE.md` is read
+#### Scenario: Harness is declared in AGENTS.md
+- **WHEN** `AGENTS.md` is read
 - **THEN** its `## Harness` section lists proof, proof-full, run, package, `ship: ask` and `release: none` with those exact commands
 - **proof:** unit
 
