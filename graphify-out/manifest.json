@@ -2050,5 +2050,65 @@
     "seen": 1793867403.7846737,
     "ast_hash": "def32b3ddffbeb84009ae081a4098b2a",
     "semantic_hash": "def32b3ddffbeb84009ae081a4098b2a"
+  },
+  "PRODUCT.md": {
+    "mtime": 1794473074.4601882,
+    "seen": 1794473279.6513128,
+    "ast_hash": "983d4d89804d705b0e4f8ff3520dab4d",
+    "semantic_hash": "983d4d89804d705b0e4f8ff3520dab4d"
+  },
+  "docs/functional-contract.md": {
+    "mtime": 1794473067.8804967,
+    "seen": 1794473279.6513155,
+    "ast_hash": "27b713de6c806104fbf0f38526cfc11a",
+    "semantic_hash": "27b713de6c806104fbf0f38526cfc11a"
+  },
+  "openspec/changes/gate-1-decisions/.openspec.yaml": {
+    "mtime": 1794472955.562997,
+    "seen": 1794473279.6507723,
+    "ast_hash": "3d81d1267eddd749eda85fff90308b20",
+    "semantic_hash": "3d81d1267eddd749eda85fff90308b20"
+  },
+  "openspec/changes/gate-1-decisions/design.md": {
+    "mtime": 1794473034.2638183,
+    "seen": 1794473279.6513183,
+    "ast_hash": "c41a14b6f057574aee2f6372fe7e44b1",
+    "semantic_hash": "c41a14b6f057574aee2f6372fe7e44b1"
+  },
+  "openspec/changes/gate-1-decisions/proposal.md": {
+    "mtime": 1794473000.424175,
+    "seen": 1794473279.6513216,
+    "ast_hash": "30d0eca851de21cb45ee1beec411ce39",
+    "semantic_hash": "30d0eca851de21cb45ee1beec411ce39"
+  },
+  "openspec/changes/gate-1-decisions/specs/folders/spec.md": {
+    "mtime": 1794473000.4272244,
+    "seen": 1794473279.6513243,
+    "ast_hash": "0a59faa0227d02b8d75b05deb427692a",
+    "semantic_hash": "0a59faa0227d02b8d75b05deb427692a"
+  },
+  "openspec/changes/gate-1-decisions/specs/notes/spec.md": {
+    "mtime": 1794473000.4263957,
+    "seen": 1794473279.6513267,
+    "ast_hash": "402854ed73e42ed1dbc6f67d99eaead3",
+    "semantic_hash": "402854ed73e42ed1dbc6f67d99eaead3"
+  },
+  "openspec/changes/gate-1-decisions/specs/shell/spec.md": {
+    "mtime": 1794473000.4295151,
+    "seen": 1794473279.651329,
+    "ast_hash": "f860db57bc6c2650a80dc2707f8225fb",
+    "semantic_hash": "f860db57bc6c2650a80dc2707f8225fb"
+  },
+  "openspec/changes/gate-1-decisions/specs/tags/spec.md": {
+    "mtime": 1794473000.4283657,
+    "seen": 1794473279.6513314,
+    "ast_hash": "10c4123886f574f9da613d1c8e0301b8",
+    "semantic_hash": "10c4123886f574f9da613d1c8e0301b8"
+  },
+  "openspec/changes/gate-1-decisions/tasks.md": {
+    "mtime": 1794473034.2665708,
+    "seen": 1794473279.6513333,
+    "ast_hash": "48b54f4f8080dd29df6296a983a0f09b",
+    "semantic_hash": "48b54f4f8080dd29df6296a983a0f09b"
   }
 }
