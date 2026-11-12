@@ -8,7 +8,7 @@ Conventions: "MUST" = behaviour the redesign has to preserve. "Applies" in a rou
 
 ## 1. Purpose and context
 
-Notes Archive is a private notes archive for one person on her homelab: notes live in nested folders, carry tags, are written in a block editor and found through full-text search. It is single-user and self-hosted; there is no sign-in, sharing, or collaboration in the app.
+Notes Archive is a private notes archive for one person on their homelab: notes live in nested folders, carry tags, are written in a block editor and found through full-text search. It is single-user and self-hosted; there is no sign-in, sharing, or collaboration in the app.
 
 Usage context: used daily on a desktop browser (keyboard-first, mouse) and on a phone (touch, soft keyboard, one hand). Both are first-class: capture on the phone, organising and long writing on the desktop. Every note and every action is reachable from both. Two devices may edit the same note; the last write wins.
 
