@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 import { png } from './media-helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 
 const ITEMS: [label: string, type: string, attrs?: Record<string, unknown>][] = [
@@ -28,7 +27,7 @@ test('Scenario: Slash menu lists every block type', async ({ page, request }) =>
 	const { notes } = await seed(request, { notes: [{ title: 'Alle Blöcke', body: '' }] });
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 
 	await page.keyboard.type('/');
 
@@ -42,7 +41,7 @@ for (const [label, type, attrs] of ITEMS) {
 		await calm(page);
 		const saves = watchSaves(page);
 		await open(page, `/notes/${notes[0]}`);
-		await body(page).click();
+		await editor(page).click();
 
 		await page.keyboard.type('/');
 		const option = menu(page).getByRole('option', { name: label, exact: true });
@@ -53,13 +52,13 @@ for (const [label, type, attrs] of ITEMS) {
 					? { name: 'bild.png', mimeType: 'image/png', buffer: await png(32, 32) }
 					: { name: 'datei.txt', mimeType: 'text/plain', buffer: Buffer.from('Hallo') }
 			);
-			await expect(body(page).locator(type === 'image' ? 'figure.image-block img' : 'a.file-card')).toBeVisible();
+			await expect((type === 'image' ? editor(page).getByRole('figure').getByRole('presentation') : editor(page).getByRole('link'))).toBeVisible();
 		} else {
 			await option.click();
 		}
 
 		await expect(menu(page)).toBeHidden();
-		await expect(body(page)).not.toContainText('/');
+		await expect(editor(page)).not.toContainText('/');
 		await saves.settled();
 		const blocks = (await storedNote(request, notes[0]))!.content.content ?? [];
 		const found = blocks.find((b) => b.type === type);

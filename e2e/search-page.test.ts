@@ -1,8 +1,8 @@
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import { calm, open, reset, seed } from './helpers.ts';
 
-const cards = (page: Page) => page.locator('[data-note-card]');
-const titles = (page: Page) => cards(page).locator('[data-card-title]');
+const cards = (page: Page) => page.getByRole('article');
+const titles = (page: Page) => cards(page).getByRole('heading');
 const field = (page: Page) => page.getByRole('searchbox', { name: 'Search notes' });
 const folder = (page: Page) => page.getByRole('combobox', { name: 'Folder' });
 const tag = (page: Page) => page.getByRole('combobox', { name: 'Tag' });
@@ -30,7 +30,8 @@ test('Scenario: Search page lists results for the query in the URL', async ({ pa
 	await expect(cards(page)).toHaveCount(4);
 	await expect(titles(page).filter({ hasText: 'Packliste' })).toHaveCount(0);
 	const kyoto = cards(page).filter({ hasText: 'Garten in Kyoto' });
-	await expect(kyoto.locator('[data-card-snippet] mark').first()).toHaveText('Garten');
+	// <mark> has no ARIA role, so the highlight can only be found by tag
+	await expect(kyoto.locator('mark').first()).toHaveText('Garten');
 });
 
 test('Scenario: Folder filter includes sub-folders', async ({ page, request }) => {
@@ -61,22 +62,22 @@ test('Scenario: Folder and tag filters combine and stay in the URL', async ({ pa
 	await page.reload();
 	await page.locator('html[data-hydrated]').waitFor({ state: 'attached' });
 	await expect(field(page)).toHaveValue('garten');
-	await expect(folder(page).locator('option:checked')).toHaveText('Reisen');
-	await expect(tag(page).locator('option:checked')).toHaveText('Reise');
+	await expect(folder(page).getByRole('option', { selected: true })).toHaveText('Reisen');
+	await expect(tag(page).getByRole('option', { selected: true })).toHaveText('Reise');
 	await expect(titles(page)).toHaveCount(2);
 	await expect(titles(page).filter({ hasText: 'Garten Notiz' })).toHaveCount(0);
 
 	await page.goBack();
 	await expect(page).toHaveURL((url) => url.searchParams.has('folder') && !url.searchParams.has('tag') && url.searchParams.get('q') === 'garten');
 	await expect(titles(page)).toHaveCount(3);
-	await expect(tag(page).locator('option:checked')).toHaveText('Any tag');
+	await expect(tag(page).getByRole('option', { selected: true })).toHaveText('Any tag');
 });
 
 test('Scenario: Search page with only filters lists matching notes', async ({ page, request }) => {
 	await seedGarden(request);
 	await calm(page);
 	await open(page, '/search');
-	const id = await tag(page).locator('option', { hasText: /^Reise$/ }).getAttribute('value');
+	const id = await tag(page).getByRole('option', { name: 'Reise', exact: true }).getAttribute('value');
 
 	await open(page, `/search?tag=${id}`);
 	await expect(field(page)).toHaveValue('');

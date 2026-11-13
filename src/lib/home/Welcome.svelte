@@ -4,8 +4,8 @@
 	import Button from '#lib/ui/Button.svelte';
 </script>
 
-<section class="welcome" data-welcome>
-	<h2 class="display">{COPY.welcome}</h2>
+<section class="welcome" aria-labelledby="welcome-title" data-welcome>
+	<h2 id="welcome-title" class="display">{COPY.welcome}</h2>
 	<Button onclick={() => newNote()}>{COPY.newNote}</Button>
 </section>
 

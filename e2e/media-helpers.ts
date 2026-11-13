@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import sharp from 'sharp';
+import { editor } from './helpers.ts';
 
 export interface FileSpec {
 	name: string;
@@ -22,10 +23,8 @@ export const jpeg = (width = 64, height = 48): Promise<Buffer> =>
 const wire = (files: FileSpec[]) =>
 	files.map((f) => ({ name: f.name, mime: f.mime, b64: f.buffer?.toString('base64') ?? null, size: f.size ?? 0 }));
 
-const PM = '[data-editor-root] .ProseMirror';
-
 export async function pasteFiles(page: Page, files: FileSpec[]): Promise<void> {
-	await page.locator(PM).evaluate((el, items) => {
+	await editor(page).evaluate((el, items) => {
 		const dt = new DataTransfer();
 		for (const f of items) {
 			const bytes = f.b64 ? Uint8Array.from(atob(f.b64), (c) => c.charCodeAt(0)) : new Uint8Array(f.size);
@@ -36,7 +35,7 @@ export async function pasteFiles(page: Page, files: FileSpec[]): Promise<void> {
 }
 
 export async function pasteText(page: Page, text: string): Promise<void> {
-	await page.locator(PM).evaluate((el, value) => {
+	await editor(page).evaluate((el, value) => {
 		const dt = new DataTransfer();
 		dt.setData('text/plain', value);
 		el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
@@ -50,7 +49,7 @@ export interface Clip {
 
 // a cut event carrying its own DataTransfer takes the path a real Ctrl+X takes: ProseMirror fills it and deletes the selection
 export async function cutSelection(page: Page): Promise<Clip> {
-	return page.locator(PM).evaluate((el) => {
+	return editor(page).evaluate((el) => {
 		const dt = new DataTransfer();
 		el.dispatchEvent(new ClipboardEvent('cut', { clipboardData: dt, bubbles: true, cancelable: true }));
 		return { html: dt.getData('text/html'), text: dt.getData('text/plain') };
@@ -58,7 +57,7 @@ export async function cutSelection(page: Page): Promise<Clip> {
 }
 
 export async function pasteClip(page: Page, clip: Clip): Promise<void> {
-	await page.locator(PM).evaluate((el, value) => {
+	await editor(page).evaluate((el, value) => {
 		const dt = new DataTransfer();
 		dt.setData('text/html', value.html);
 		dt.setData('text/plain', value.text);
@@ -67,8 +66,8 @@ export async function pasteClip(page: Page, clip: Clip): Promise<void> {
 }
 
 export async function dropFiles(page: Page, files: FileSpec[], at?: { x: number; y: number }): Promise<void> {
-	const box = (await page.locator(PM).boundingBox())!;
-	await page.locator(PM).evaluate(
+	const box = (await editor(page).boundingBox())!;
+	await editor(page).evaluate(
 		(el, args) => {
 			const dt = new DataTransfer();
 			for (const f of args.items) {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { calm, clientNav, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, clientNav, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
 test('typing in the next note saves after an empty note was discarded', async ({ page, request }) => {
 	await reset(request);
@@ -12,7 +12,7 @@ test('typing in the next note saves after an empty note was discarded', async ({
 
 	await clientNav(page, `/notes/${notes[0]}`);
 	expect(await storedNote(request, blank)).toBeNull();
-	await page.locator('[data-editor-root] .ProseMirror').click();
+	await editor(page).click();
 	await page.keyboard.press('ControlOrMeta+End');
 	await page.keyboard.type(' Ende');
 	await saves.settled();

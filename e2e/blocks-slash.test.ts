@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 
 test('Scenario: Slash menu inserts toggle, callout and table', async ({ page, request }) => {
@@ -14,12 +13,13 @@ test('Scenario: Slash menu inserts toggle, callout and table', async ({ page, re
 	await open(page, `/notes/${notes[0]}`);
 
 	// the table goes last: its menu sits above it and would cover the paragraph before
-	for (const [index, name] of [
-		[0, 'Toggle'],
-		[1, 'Callout'],
-		[2, 'Table']
+	// the callout holds a paragraph of its own, so the third block's target is the second visible paragraph
+	for (const [index, name, nth] of [
+		[0, 'Toggle', 0],
+		[1, 'Callout', 0],
+		[2, 'Table', 1]
 	] as const) {
-		await body(page).locator(':scope > p').first().click();
+		await editor(page).getByRole('paragraph').nth(nth).click();
 		// ProseMirror reads the click's selection a tick later
 		await page.waitForFunction((at) => (document.querySelector('.ProseMirror') as any).editor.state.selection.$from.index(0) === at, index);
 		await page.keyboard.type('/' + name.toLowerCase());

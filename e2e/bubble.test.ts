@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const toolbar = (page: Page) => page.getByRole('toolbar', { name: 'Format' });
 
 function nodes(doc: JSONContent): JSONContent[] {
@@ -27,7 +26,7 @@ test('Scenario: Selecting text shows the bubble toolbar', async ({ page, request
 	await openNote(page, request, doc(paragraph('Hallo Welt')));
 	await expect(toolbar(page)).toBeHidden();
 
-	await body(page).getByText('Hallo Welt').dblclick({ position: { x: 5, y: 8 } });
+	await editor(page).getByText('Hallo Welt').dblclick({ position: { x: 5, y: 8 } });
 	await expect.poll(() => selected(page)).toContain('Hallo');
 
 	await expect(toolbar(page)).toBeVisible();
@@ -37,7 +36,7 @@ test('Scenario: Selecting text shows the bubble toolbar', async ({ page, request
 
 test('Scenario: Bubble toolbar applies marks', async ({ page, request }) => {
 	const { id, saves } = await openNote(page, request, doc(paragraph('Welt')));
-	await body(page).getByText('Welt').dblclick({ position: { x: 10, y: 8 } });
+	await editor(page).getByText('Welt').dblclick({ position: { x: 10, y: 8 } });
 	await expect(toolbar(page)).toBeVisible();
 
 	for (const name of ['Bold', 'Italic', 'Strikethrough', 'Inline code']) {
@@ -56,19 +55,19 @@ test('Scenario: Bubble toolbar applies marks', async ({ page, request }) => {
 
 test('Scenario: Text colour from the palette', async ({ page, request }) => {
 	const { id, saves } = await openNote(page, request, doc(paragraph('Welt')));
-	await body(page).getByText('Welt').dblclick({ position: { x: 10, y: 8 } });
+	await editor(page).getByText('Welt').dblclick({ position: { x: 10, y: 8 } });
 	await expect(toolbar(page)).toBeVisible();
 
 	await toolbar(page).getByRole('button', { name: 'Text colour' }).click();
 	await toolbar(page).getByRole('button', { name: 'clay' }).click();
-	await expect(body(page).locator('[data-color="clay"]')).toHaveText('Welt');
+	await expect(editor(page).locator('[data-color="clay"]')).toHaveText('Welt');
 	await saves.settled();
 	const colored = nodes((await storedNote(request, id))!.content).find((n) => n.type === 'text')!;
 	expect(colored.marks).toEqual([{ type: 'textStyle', attrs: { color: 'clay' } }]);
 
 	await toolbar(page).getByRole('button', { name: 'Text colour' }).click();
 	await toolbar(page).getByRole('button', { name: 'Default' }).click();
-	await expect(body(page).locator('[data-color]')).toHaveCount(0);
+	await expect(editor(page).locator('[data-color]')).toHaveCount(0);
 	await saves.settled();
 	const plain = nodes((await storedNote(request, id))!.content).find((n) => n.type === 'text')!;
 	expect(plain.marks ?? []).toEqual([]);
@@ -84,10 +83,10 @@ test('Scenario: Bubble toolbar is hidden in code blocks', async ({ page, request
 			paragraph('Welt')
 		));
 
-	await body(page).getByText('Welt').dblclick({ position: { x: 10, y: 8 } });
+	await editor(page).getByText('Welt').dblclick({ position: { x: 10, y: 8 } });
 	await expect(toolbar(page)).toBeVisible();
 
-	await body(page).locator('pre').getByText('const wert').dblclick({ position: { x: 5, y: 8 } });
+	await editor(page).getByRole('code').getByText('const wert').dblclick({ position: { x: 5, y: 8 } });
 	await expect.poll(() => selected(page)).toContain('const');
 	await expect(toolbar(page)).toBeHidden();
 });
@@ -96,7 +95,7 @@ test('Scenario: On touch the toolbar sits below the selection', async ({ page, r
 	test.skip(info.project.name !== 'phone', 'touch placement');
 	await openNote(page, request, doc(paragraph('Hallo Welt')));
 
-	await body(page).getByText('Hallo Welt').dblclick({ position: { x: 5, y: 8 } });
+	await editor(page).getByText('Hallo Welt').dblclick({ position: { x: 5, y: 8 } });
 	await expect(toolbar(page)).toBeVisible();
 
 	await expect
@@ -111,7 +110,7 @@ test('On touch the toolbar stays below a selection on the last visible line', as
 	test.skip(info.project.name !== 'phone', 'touch placement');
 	const lines = Array.from({ length: 40 }, (_, i) => paragraph(`Zeile ${i + 1} mit etwas Text`));
 	await openNote(page, request, doc(...lines));
-	await body(page).getByText('Zeile 3 mit').dblclick({ position: { x: 5, y: 8 } });
+	await editor(page).getByText('Zeile 3 mit').dblclick({ position: { x: 5, y: 8 } });
 	await expect(toolbar(page)).toBeVisible();
 
 	// the viewport ends right under the selection, as it does above the keyboard

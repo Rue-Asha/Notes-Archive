@@ -1,7 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
-
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
 test.beforeEach(({}, info) => {
 	test.skip(info.project.name !== 'desktop', 'the phone bottom bar is inert while the editor is focused; the scenario opens from the sidebar');
@@ -13,7 +11,7 @@ test('Scenario: Palette keeps the editor\'s selection and content', async ({ pag
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 	await page.keyboard.press('Home');
 	for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+ArrowRight');
 	const selected = () => page.evaluate(() => getSelection()!.toString());
@@ -28,14 +26,14 @@ test('Scenario: Palette keeps the editor\'s selection and content', async ({ pag
 	await page.keyboard.press('Escape');
 	await expect(palette).toHaveCount(0);
 
-	await expect(body(page)).toBeFocused();
+	await expect(editor(page)).toBeFocused();
 	expect(await selected()).toBe('Schöne');
-	await expect(body(page)).toHaveText('Schöne Tulpen im Beet');
+	await expect(editor(page)).toHaveText('Schöne Tulpen im Beet');
 	await saves.settled();
 	expect(await storedNote(request, notes[0])).toEqual(before);
 
 	await page.keyboard.type('X');
-	await expect(body(page)).toHaveText('X Tulpen im Beet');
+	await expect(editor(page)).toHaveText('X Tulpen im Beet');
 });
 
 test('Escape returns the focus to the editor after a selection across two paragraphs', async ({ page, request }) => {
@@ -44,7 +42,7 @@ test('Escape returns the focus to the editor after a selection across two paragr
 	const { notes } = await seed(request, { notes: [{ title: 'Garten', content: { type: 'doc', content: [paragraph('Erster Absatz'), paragraph('Zweiter Absatz')] } }] });
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 	await page.keyboard.press('ControlOrMeta+Home');
 	await page.keyboard.press('Shift+ArrowDown');
 	await page.keyboard.press('Shift+ArrowRight');
@@ -56,6 +54,6 @@ test('Escape returns the focus to the editor after a selection across two paragr
 	await expect(page.getByRole('dialog', { name: 'Search' })).toBeVisible();
 	await page.keyboard.press('Escape');
 
-	await expect(body(page)).toBeFocused();
+	await expect(editor(page)).toBeFocused();
 	expect(await page.evaluate(() => getSelection()!.toString())).toBe(selected);
 });

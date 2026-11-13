@@ -32,7 +32,7 @@ test('Scenario: New folder from a folder page creates a sub-folder', async ({ pa
 	await open(page, `/folders/${folders[1]}`);
 
 	await page.getByRole('main').getByRole('button', { name: 'New folder' }).click();
-	const tile = page.locator('[data-folder-tile]', { hasText: 'Untitled folder' });
+	const tile = page.getByRole('region', { name: 'Folders' }).getByRole('link', { name: /Untitled folder/ });
 	await expect(tile).toBeVisible();
 	const id = Number((await tile.getAttribute('href'))!.split('/').pop());
 	const res = await request.get(`/api/folders/${id}`);

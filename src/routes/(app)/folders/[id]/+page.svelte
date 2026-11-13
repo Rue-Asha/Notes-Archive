@@ -15,14 +15,14 @@
 	<Breadcrumb crumbs={data.breadcrumb} />
 	<FolderHeader folder={data.folder} folders={data.counts.folders} notes={data.counts.notes} />
 	{#if data.tiles.length}
-		<section class="block" data-subfolders>
-			<header><h2>Folders</h2><span class="eyebrow tnum">{data.tiles.length}</span></header>
+		<section class="block" aria-labelledby="folder-subfolders" data-subfolders>
+			<header><h2 id="folder-subfolders">Folders</h2><span class="eyebrow tnum">{data.tiles.length}</span></header>
 			<FolderGrid tiles={data.tiles} />
 		</section>
 	{/if}
 	{#if data.notes.length}
-		<section class="block" data-notes>
-			<header><h2>Notes</h2><span class="sort">Last edited</span></header>
+		<section class="block" aria-labelledby="folder-notes" data-notes>
+			<header><h2 id="folder-notes">Notes</h2><span class="sort">Last edited</span></header>
 			<NoteGrid notes={data.notes} />
 		</section>
 	{/if}

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { calm, open, reset, seed } from './helpers.ts';
 
 async function twelve(request: Parameters<typeof reset>[0]) {
@@ -15,8 +15,8 @@ async function twelve(request: Parameters<typeof reset>[0]) {
 	});
 }
 
-async function cards(page: Page, root: string) {
-	const boxes = await page.locator(`${root} [data-note-card]`).evaluateAll((els) =>
+async function cards(root: Locator) {
+	const boxes = await root.getByRole('article').evaluateAll((els) =>
 		els.map((el) => {
 			const r = el.getBoundingClientRect();
 			return { x: Math.round(r.x), y: Math.round(r.y), width: r.width };
@@ -36,9 +36,9 @@ test('Scenario: Grids add columns instead of stretching cards', async ({ page, r
 	const at = async (width: number) => {
 		await page.setViewportSize({ width, height: 900 });
 		await open(page, '/');
-		const home = await cards(page, '[data-recent]');
+		const home = await cards(page.getByRole('region', { name: 'Recently edited' }));
 		await open(page, `/folders/${folders[0]}`);
-		const folder = await cards(page, 'main');
+		const folder = await cards(page.getByRole('main'));
 		return { home, folder };
 	};
 	const w1280 = await at(1280);
@@ -56,17 +56,17 @@ test('Scenario: Mid-width shows the sidebar with fewer columns', async ({ page, 
 
 	await page.setViewportSize({ width: 1280, height: 800 });
 	await open(page, '/');
-	const wideHome = await cards(page, '[data-recent]');
+	const wideHome = await cards(page.getByRole('region', { name: 'Recently edited' }));
 	await open(page, `/folders/${folders[0]}`);
-	const wide = await cards(page, 'main');
+	const wide = await cards(page.getByRole('main'));
 
 	await page.setViewportSize({ width: 1100, height: 800 });
 	await open(page, '/');
 	await expect(page.getByRole('navigation', { name: 'Sidebar' })).toBeVisible();
 	expect(await noScroll(page)).toBe(true);
-	const home = await cards(page, '[data-recent]');
+	const home = await cards(page.getByRole('region', { name: 'Recently edited' }));
 	await open(page, `/folders/${folders[0]}`);
-	const folder = await cards(page, 'main');
+	const folder = await cards(page.getByRole('main'));
 
 	expect(folder.columns).toBeLessThan(wide.columns);
 	expect(home.columns).toBeLessThan(wideHome.columns);

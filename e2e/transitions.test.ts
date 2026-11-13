@@ -85,6 +85,6 @@ test('Scenario: Browser without View Transitions navigates plainly', async ({ pa
 
 	await expect(page).toHaveURL(/\/tags\/\d+$/);
 	await expect(page.getByRole('heading', { level: 1, name: 'Reise' })).toBeVisible();
-	await expect(page.locator('[data-note-card]')).toHaveCount(1);
+	await expect(page.getByRole('article')).toHaveCount(1);
 	expect(errors).toEqual([]);
 });

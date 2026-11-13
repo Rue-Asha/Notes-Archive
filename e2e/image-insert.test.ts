@@ -1,9 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 import { dropFiles, jpeg, pasteFiles, png } from './media-helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 
 async function openEmptyNote(page: Page, request: Parameters<typeof reset>[0]) {
@@ -12,7 +11,7 @@ async function openEmptyNote(page: Page, request: Parameters<typeof reset>[0]) {
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 	return { id: notes[0], saves };
 }
 
@@ -23,7 +22,7 @@ test('Scenario: Paste an image into a note', async ({ page, request }) => {
 
 	await pasteFiles(page, [{ name: 'balkon.png', mime: 'image/png', buffer: await png(64, 48) }]);
 
-	const img = body(page).locator('figure.image-block img');
+	const img = editor(page).getByRole('figure').getByRole('presentation');
 	await expect(img).toHaveAttribute('src', /^\/images\/\d+$/);
 	await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(0);
 	await saves.settled();
@@ -37,7 +36,7 @@ test('a dropped image shows up in an empty note', async ({ page, request }) => {
 
 	await dropFiles(page, [{ name: 'ausblick.jpg', mime: 'image/jpeg', buffer: await jpeg(80, 60) }]);
 
-	const img = body(page).locator('figure.image-block img');
+	const img = editor(page).getByRole('figure').getByRole('presentation');
 	await expect(img).toHaveAttribute('src', /^\/images\/\d+$/);
 	await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(0);
 });
@@ -49,15 +48,15 @@ test('Scenario: Drop an image into a note', async ({ page, request }) => {
 	const { notes } = await seed(request, { notes: [{ title: 'Bilder', content }] });
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
-	const zwei = (await body(page).getByText('Zwei').boundingBox())!;
+	const zwei = (await editor(page).getByText('Zwei').boundingBox())!;
 
 	await dropFiles(page, [{ name: 'ausblick.jpg', mime: 'image/jpeg', buffer: await jpeg(80, 60) }], { x: zwei.x + 4, y: zwei.y + zwei.height / 2 });
 
-	const img = body(page).locator('figure.image-block img');
+	const img = editor(page).getByRole('figure').getByRole('presentation');
 	await expect(img).toHaveAttribute('src', /^\/images\/\d+$/);
 	const [eins, drei, at] = await Promise.all([
-		body(page).getByText('Eins').boundingBox(),
-		body(page).getByText('Drei').boundingBox(),
+		editor(page).getByText('Eins').boundingBox(),
+		editor(page).getByText('Drei').boundingBox(),
 		img.boundingBox()
 	]);
 	expect(at!.y).toBeGreaterThan(eins!.y);
@@ -75,6 +74,6 @@ test('Scenario: Insert an image with the slash command', async ({ page, request 
 	]);
 	await chooser.setFiles({ name: 'wohnzimmer.png', mimeType: 'image/png', buffer: await png(32, 32) });
 
-	await expect(body(page).locator('figure.image-block img')).toHaveAttribute('src', /^\/images\/\d+$/);
-	await expect(body(page)).not.toContainText('/image');
+	await expect(editor(page).getByRole('figure').getByRole('presentation')).toHaveAttribute('src', /^\/images\/\d+$/);
+	await expect(editor(page)).not.toContainText('/image');
 });

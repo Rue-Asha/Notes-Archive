@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { COPY } from '../src/lib/copy.ts';
-import { calm, clientNav, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, clientNav, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
 async function newNoteId(request: APIRequestContext): Promise<number> {
 	return (await (await request.post('/api/notes', { data: {} })).json()).id;
@@ -30,7 +30,7 @@ test('Scenario: Typing saves automatically', async ({ page, request }) => {
 	await saves.settled();
 	await page.reload();
 	await expect(page.getByRole('textbox', { name: 'Title' })).toHaveValue('Gartenplan');
-	await expect(page.locator('[data-editor-root] .ProseMirror > p')).toHaveText(['Erste Zeile', 'Zweite Zeile']);
+	await expect(editor(page).getByRole('paragraph')).toHaveText(['Erste Zeile', 'Zweite Zeile']);
 });
 
 test('Scenario: Leaving flushes a pending save', async ({ page, request }) => {
@@ -39,7 +39,7 @@ test('Scenario: Leaving flushes a pending save', async ({ page, request }) => {
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	await page.locator('[data-editor-root] .ProseMirror').click();
+	await editor(page).click();
 	await page.keyboard.type('Wort');
 	await clientNav(page, '/');
 
@@ -55,13 +55,13 @@ test('Scenario: Saves settle before a reload', async ({ page, request }) => {
 
 	let expected = 'x';
 	for (let i = 0; i < 10; i++) {
-		await page.locator('[data-editor-root] .ProseMirror p').click();
+		await editor(page).getByRole('paragraph').click();
 		await page.keyboard.press('End');
 		await page.keyboard.type(String(i));
 		expected += String(i);
 		await saves.settled();
 		await page.reload();
-		await expect(page.locator('[data-editor-root] .ProseMirror p')).toHaveText(expected);
+		await expect(editor(page).getByRole('paragraph')).toHaveText(expected);
 	}
 });
 

@@ -1,8 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
-
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
 function nodes(doc: JSONContent): JSONContent[] {
 	return [doc, ...(doc.content ?? []).flatMap(nodes)];
@@ -16,7 +14,7 @@ test('Scenario: Markdown shortcuts turn into blocks', async ({ page, request }) 
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 
 	// Enter on an empty list item or quote line leaves the block, so the next shortcut starts on a plain line
 	for (const [shortcut, exits] of [
@@ -51,23 +49,23 @@ test('Scenario: Keyboard marks and undo', async ({ page, request }) => {
 	const { notes } = await seed(request, { notes: [{ title: 'Marken', body: 'Wort' }] });
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).locator('p').click();
+	await editor(page).getByRole('paragraph').click();
 	// the note holds only this word; Shift+Home would leave ProseMirror a tick behind the DOM selection
 	await page.keyboard.press('ControlOrMeta+a');
 
-	const p = body(page).locator('p');
+	const p = editor(page).getByRole('paragraph');
 	await page.keyboard.press('ControlOrMeta+b');
 	await page.keyboard.press('ControlOrMeta+i');
 	await page.keyboard.press('ControlOrMeta+e');
-	for (const tag of ['strong', 'em', 'code']) await expect(p.locator(tag)).toHaveText('Wort');
+	for (const role of ['strong', 'emphasis', 'code'] as const) await expect(p.getByRole(role)).toHaveText('Wort');
 
 	for (let i = 0; i < 3; i++) await page.keyboard.press('ControlOrMeta+z');
 	await expect(p).toHaveText('Wort');
-	await expect(p.locator('strong, em, code')).toHaveCount(0);
+	await expect(p.getByRole('strong').or(p.getByRole('emphasis')).or(p.getByRole('code'))).toHaveCount(0);
 
 	await page.keyboard.press('ControlOrMeta+Shift+z');
-	await expect(p.locator('strong')).toHaveText('Wort');
-	await expect(p.locator('em, code')).toHaveCount(0);
+	await expect(p.getByRole('strong')).toHaveText('Wort');
+	await expect(p.getByRole('emphasis').or(p.getByRole('code'))).toHaveCount(0);
 });
 
 test('Scenario: Shortcuts do not fire inside code blocks', async ({ page, request }) => {
@@ -76,7 +74,7 @@ test('Scenario: Shortcuts do not fire inside code blocks', async ({ page, reques
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 
 	await page.keyboard.type('``` ');
 	await page.keyboard.type('# x');
@@ -94,14 +92,14 @@ test('Scenario: Typing in the editor runs no animations', async ({ page, request
 	await reset(request);
 	const { notes } = await seed(request, { notes: [{ title: 'Ruhig', icon: '🌿', body: 'Erste Zeile' }] });
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).locator('p').click();
+	await editor(page).getByRole('paragraph').click();
 	await page.keyboard.press('End');
 
 	await page.keyboard.type(' und ein ganzer Satz, der ruhig bleibt.');
 
-	await expect(body(page)).toContainText('der ruhig bleibt.');
+	await expect(editor(page)).toContainText('der ruhig bleibt.');
 	const running = await page.evaluate(() => {
-		const scope = document.querySelector('[data-note-page]')!;
+		const scope = document.querySelector('main')!;
 		return document
 			.getAnimations()
 			.map((a) => (a.effect as KeyframeEffect | null)?.target)
@@ -119,12 +117,12 @@ test('Scenario: Note column is capped and centred on wide screens', async ({ pag
 	await page.setViewportSize({ width: 1600, height: 900 });
 	await open(page, `/notes/${notes[0]}`);
 
-	const editor = (await page.locator('[data-editor-root]').boundingBox())!;
-	expect(editor.width).toBeLessThanOrEqual(720);
-	expect(editor.width).toBeGreaterThan(700);
+	const box = (await page.locator('[data-editor-root]').boundingBox())!;
+	expect(box.width).toBeLessThanOrEqual(720);
+	expect(box.width).toBeGreaterThan(700);
 
 	const sidebar = page.getByRole('navigation', { name: 'Sidebar' });
 	const left = (await sidebar.isVisible()) ? ((b) => b.x + b.width)((await sidebar.boundingBox())!) : 0;
 	const right = await page.evaluate(() => document.documentElement.clientWidth);
-	expect(Math.abs(editor.x + editor.width / 2 - (left + right) / 2)).toBeLessThanOrEqual(2);
+	expect(Math.abs(box.x + box.width / 2 - (left + right) / 2)).toBeLessThanOrEqual(2);
 });

@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 const text = (value: string): JSONContent => ({ type: 'paragraph', content: [{ type: 'text', text: value }] });
 const details = (summary: string, content: JSONContent[]): JSONContent => ({
@@ -18,9 +17,10 @@ test("Scenario: Toggle opens and closes and doesn't save its state", async ({ pa
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	const toggle = body(page).locator('[data-type="details"]');
-	const button = toggle.locator(':scope > button');
-	const hidden = body(page).getByText('Versteckter Satz');
+	const toggle = editor(page).locator('[data-type="details"]');
+	// the toggle's own button is unnamed and the first button in the details node; nested content has none before it
+	const button = toggle.getByRole('button').first();
+	const hidden = editor(page).getByText('Versteckter Satz');
 
 	await expect(hidden).toBeHidden();
 	await button.click();
@@ -33,10 +33,10 @@ test("Scenario: Toggle opens and closes and doesn't save its state", async ({ pa
 	await saves.settled();
 	expect(JSON.stringify((await storedNote(request, notes[0]))!.content)).not.toContain('"open"');
 	await page.reload();
-	await expect(body(page).getByText('Mehr dazu')).toBeVisible();
-	await expect(body(page).getByText('Versteckter Satz')).toBeHidden();
-	await body(page).locator('[data-type="details"] > button').click();
-	await expect(body(page).getByText('Versteckter Satz')).toBeVisible();
+	await expect(editor(page).getByText('Mehr dazu')).toBeVisible();
+	await expect(editor(page).getByText('Versteckter Satz')).toBeHidden();
+	await editor(page).locator('[data-type="details"]').getByRole('button').first().click();
+	await expect(editor(page).getByText('Versteckter Satz')).toBeVisible();
 });
 
 test('Scenario: Nested lists and toggles inside toggles work', async ({ page, request }) => {
@@ -50,14 +50,14 @@ test('Scenario: Nested lists and toggles inside toggles work', async ({ page, re
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	await body(page).locator('[data-type="details"] > button').click();
+	await editor(page).locator('[data-type="details"]').getByRole('button').first().click();
 	const caretIn = (value: string) =>
 		// ProseMirror reads the click's selection a tick later
 		page.waitForFunction((v) => (document.querySelector('.ProseMirror') as any).editor.state.selection.$from.parent.textContent === v, value);
-	await body(page).getByText('Zwei', { exact: true }).click();
+	await editor(page).getByText('Zwei', { exact: true }).click();
 	await caretIn('Zwei');
 	await page.keyboard.press('Tab');
-	await body(page).locator('[data-type="detailsContent"] > p').click();
+	await editor(page).locator('[data-type="detailsContent"]').getByRole('paragraph').last().click();
 	await caretIn('');
 	await page.keyboard.type('/toggle');
 	await menu(page).getByRole('option', { name: 'Toggle', exact: true }).click();
@@ -83,13 +83,14 @@ test('Scenario: Dragging a toggle moves its content', async ({ page, request }, 
 	await open(page, `/notes/${notes[0]}`);
 	const handle = page.getByRole('button', { name: 'Block actions' });
 
-	await body(page).getByText('Block', { exact: true }).hover();
+	await editor(page).getByText('Block', { exact: true }).hover();
 	await expect(handle).toBeVisible();
 	const grip = (await handle.boundingBox())!;
-	const last = (await body(page).getByText('Zwei', { exact: true }).boundingBox())!;
+	const last = (await editor(page).getByText('Zwei', { exact: true }).boundingBox())!;
 	await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
 	await page.mouse.down();
 	await page.mouse.move(last.x + last.width - 1, last.y + last.height / 2, { steps: 15 });
+	// allow-listed hook, see docs/functional-contract.md section 9
 	await expect(page.locator('.prosemirror-dropcursor-block')).toBeVisible();
 	await page.mouse.up();
 

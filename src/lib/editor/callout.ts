@@ -44,6 +44,7 @@ export const Callout = Node.create({
 		return ({ node: initial, editor, getPos }) => {
 			const dom = document.createElement('div');
 			dom.className = 'callout';
+			dom.setAttribute('role', 'note');
 			const button = document.createElement('button');
 			button.type = 'button';
 			button.className = 'callout-emoji';

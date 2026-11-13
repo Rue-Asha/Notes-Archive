@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 
 async function openEmptyNote(page: Page, request: Parameters<typeof reset>[0]) {
@@ -10,7 +9,7 @@ async function openEmptyNote(page: Page, request: Parameters<typeof reset>[0]) {
 	const { notes } = await seed(request, { notes: [{ title: 'Schrägstrich', body: '' }] });
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 	return notes[0];
 }
 
@@ -29,7 +28,7 @@ test('Scenario: Slash opens the block menu at a block start or after a space', a
 	await page.keyboard.press('Enter');
 
 	await page.keyboard.type('a/b');
-	await expect(body(page)).toContainText('a/b');
+	await expect(editor(page)).toContainText('a/b');
 	await expect(menu(page)).toBeHidden();
 });
 
@@ -47,7 +46,7 @@ test('Scenario: Arrow keys and Enter choose a block', async ({ page, request }) 
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 
 	await page.keyboard.type('/head');
 	await expect(menu(page).getByRole('option').first()).toHaveAttribute('aria-selected', 'true');
@@ -56,7 +55,7 @@ test('Scenario: Arrow keys and Enter choose a block', async ({ page, request }) 
 	await page.keyboard.press('Enter');
 
 	await expect(menu(page)).toBeHidden();
-	await expect(body(page).locator('h2')).toBeVisible();
+	await expect(editor(page).getByRole('heading', { level: 2 })).toBeVisible();
 	await saves.settled();
 	const { content } = (await storedNote(request, notes[0]))!;
 	const blocks: JSONContent[] = content.content ?? [];
@@ -73,7 +72,7 @@ test('Scenario: Escape closes the slash menu and keeps the text', async ({ page,
 	await page.keyboard.press('Escape');
 
 	await expect(menu(page)).toBeHidden();
-	await expect(body(page).locator('p')).toHaveText('/quo');
+	await expect(editor(page).getByRole('paragraph')).toHaveText('/quo');
 });
 
 test('Scenario: Space with no match closes the slash menu', async ({ page, request }) => {
@@ -84,5 +83,5 @@ test('Scenario: Space with no match closes the slash menu', async ({ page, reque
 	await page.keyboard.type(' ');
 
 	await expect(menu(page)).toBeHidden();
-	await expect(body(page).locator('p')).toHaveText('/zzz ');
+	await expect(editor(page).getByRole('paragraph')).toHaveText('/zzz ');
 });

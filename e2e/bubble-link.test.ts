@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const toolbar = (page: Page) => page.getByRole('toolbar', { name: 'Format' });
 const field = (page: Page) => toolbar(page).getByRole('textbox', { name: 'Link URL' });
 
@@ -27,13 +26,13 @@ async function setup(page: Page, request: Parameters<typeof reset>[0]) {
 
 test('Scenario: Add, edit and remove a link', async ({ page, request }) => {
 	const { href } = await setup(page, request);
-	await body(page).getByText('Welt').dblclick({ position: { x: 10, y: 8 } });
+	await editor(page).getByText('Welt').dblclick({ position: { x: 10, y: 8 } });
 	await expect(toolbar(page)).toBeVisible();
 
 	await toolbar(page).getByRole('button', { name: 'Link' }).click();
 	await field(page).fill('https://example.org');
 	await field(page).press('Enter');
-	await expect(body(page).locator('a')).toHaveAttribute('href', 'https://example.org');
+	await expect(editor(page).getByRole('link')).toHaveAttribute('href', 'https://example.org');
 	expect(await href()).toBe('https://example.org');
 
 	await expect(toolbar(page).getByRole('button', { name: 'Link' })).toHaveAttribute('aria-pressed', 'true');
@@ -41,18 +40,18 @@ test('Scenario: Add, edit and remove a link', async ({ page, request }) => {
 	await expect(field(page)).toHaveValue('https://example.org');
 	await field(page).fill('https://example.com/zwei');
 	await field(page).press('Enter');
-	await expect(body(page).locator('a')).toHaveAttribute('href', 'https://example.com/zwei');
+	await expect(editor(page).getByRole('link')).toHaveAttribute('href', 'https://example.com/zwei');
 	expect(await href()).toBe('https://example.com/zwei');
 
 	await toolbar(page).getByRole('button', { name: 'Link' }).click();
 	await toolbar(page).getByRole('button', { name: 'Remove link' }).click();
-	await expect(body(page).locator('a')).toHaveCount(0);
+	await expect(editor(page).getByRole('link')).toHaveCount(0);
 	expect(await href()).toBeNull();
 });
 
 test('Scenario: Cmd or Ctrl+K on a selection edits the link', async ({ page, request }) => {
 	const { href } = await setup(page, request);
-	await body(page).click();
+	await editor(page).click();
 	await page.keyboard.press('ControlOrMeta+A');
 	await expect(toolbar(page)).toBeVisible();
 
@@ -61,7 +60,7 @@ test('Scenario: Cmd or Ctrl+K on a selection edits the link', async ({ page, req
 	await page.keyboard.type('https://example.org');
 	await page.keyboard.press('Enter');
 
-	await expect(body(page).locator('a')).toHaveAttribute('href', 'https://example.org');
+	await expect(editor(page).getByRole('link')).toHaveAttribute('href', 'https://example.org');
 	expect(await href()).toBe('https://example.org');
 	await expect(page.getByRole('dialog')).toHaveCount(0);
 });

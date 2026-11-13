@@ -37,7 +37,7 @@ test('The content keeps clear of the rail', async ({ page, request }) => {
 	await reset(request);
 	await calm(page);
 	await open(page, '/');
-	const left = () => page.locator('main').evaluate((el) => el.getBoundingClientRect().left + parseFloat(getComputedStyle(el).paddingLeft));
+	const left = () => page.getByRole('main').evaluate((el) => el.getBoundingClientRect().left + parseFloat(getComputedStyle(el).paddingLeft));
 	const wide = await left();
 
 	await sidebar(page).getByRole('button', { name: 'Collapse sidebar' }).click();

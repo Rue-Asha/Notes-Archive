@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { calm, open, reset, seed } from './helpers.ts';
+import { calm, editor, open, reset, seed } from './helpers.ts';
 
 test('Scenario: Note page shows icon, title and body', async ({ page, request }) => {
 	await reset(request);
@@ -7,11 +7,11 @@ test('Scenario: Note page shows icon, title and body', async ({ page, request })
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	await expect(page.locator('[data-note-header]').getByText('🌿', { exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Change icon' })).toHaveText('🌿');
 	const title = page.getByRole('heading', { level: 1 }).getByRole('textbox', { name: 'Title' });
 	await expect(title).toHaveValue('Garten');
 	expect(await title.evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Newsreader');
-	const paragraph = page.locator('[data-editor-root] .ProseMirror p');
+	const paragraph = editor(page).getByRole('paragraph');
 	await expect(paragraph).toHaveText('Beete umgraben');
 	expect((await paragraph.boundingBox())!.y).toBeGreaterThan((await title.boundingBox())!.y);
 });
@@ -67,7 +67,7 @@ test('Scenario: Unknown blocks render as text', async ({ page, request }) => {
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	await expect(page.locator('[data-editor-root] .ProseMirror > p')).toHaveText('Altes Format');
+	await expect(editor(page).getByRole('paragraph')).toHaveText('Altes Format');
 	expect(errors).toEqual([]);
 });
 
