@@ -14,18 +14,18 @@ test('Scenario: Note card shows its parts', async ({ page, request }) => {
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	const card = page.locator('[data-note-card]');
+	const card = page.getByRole('article');
 	await expect(card).toHaveCount(1);
-	await expect(card.locator('[data-card-icon]')).toHaveText('🌿');
-	await expect(card.locator('[data-card-title]')).toHaveText('Frühling');
-	const snippet = card.locator('[data-card-snippet]');
+	await expect(card.getByText('🌿', { exact: true })).toBeVisible();
+	await expect(card.getByRole('heading')).toHaveText('Frühling');
+	const snippet = card.getByRole('paragraph');
 	await expect(snippet).toContainText('Im Garten blühen');
 	const clamp = await snippet.evaluate((el) => ({ lineHeight: parseFloat(getComputedStyle(el).lineHeight), height: el.clientHeight, full: el.scrollHeight }));
 	expect(clamp.height).toBeLessThanOrEqual(clamp.lineHeight * 3 + 1);
 	expect(clamp.full).toBeGreaterThan(clamp.height);
-	await expect(card.locator('[data-card-tag]')).toHaveText(['Beet', 'Saat']);
-	await expect(card.locator('[data-card-time]')).toHaveText('2h ago');
-	await expect(card.locator('[data-card-pin]')).toBeVisible();
+	await expect(card.getByRole('listitem')).toHaveText(['Beet', 'Saat']);
+	await expect(card.getByText('2h ago', { exact: true })).toBeVisible();
+	await expect(card.getByRole('img', { name: 'Pinned' })).toBeVisible();
 	expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
@@ -38,9 +38,8 @@ test('Scenario: Card shows at most three tags and +n', async ({ page, request })
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	const card = page.locator('[data-note-card]');
-	await expect(card.locator('[data-card-tag]')).toHaveText(['eins', 'zwei', 'drei']);
-	await expect(card.locator('[data-card-more-tags]')).toHaveText('+2');
+	const tags = page.getByRole('article').getByRole('listitem');
+	await expect(tags).toHaveText(['eins', 'zwei', 'drei', '+2']);
 });
 
 test('Scenario: Note without text shows Empty note', async ({ page, request }) => {
@@ -49,7 +48,7 @@ test('Scenario: Note without text shows Empty note', async ({ page, request }) =
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	await expect(page.locator('[data-note-card] [data-card-snippet]')).toHaveText('Empty note');
+	await expect(page.getByRole('article').getByRole('paragraph')).toHaveText('Empty note');
 });
 
 test('Scenario: Untitled note card reads Untitled', async ({ page, request }) => {
@@ -58,8 +57,8 @@ test('Scenario: Untitled note card reads Untitled', async ({ page, request }) =>
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	await expect(page.locator('[data-note-card] [data-card-title]')).toHaveText('Untitled');
-	await expect(page.locator('[data-note-card] [data-card-snippet]')).toHaveText('Nur Text');
+	await expect(page.getByRole('article').getByRole('heading')).toHaveText('Untitled');
+	await expect(page.getByRole('article').getByRole('paragraph')).toHaveText('Nur Text');
 });
 
 test('a whitespace-only title reads Untitled on the card', async ({ page, request }) => {
@@ -68,5 +67,5 @@ test('a whitespace-only title reads Untitled on the card', async ({ page, reques
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	await expect(page.locator('[data-note-card] [data-card-title]')).toHaveText('Untitled');
+	await expect(page.getByRole('article').getByRole('heading')).toHaveText('Untitled');
 });

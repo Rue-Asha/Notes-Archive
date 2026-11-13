@@ -1,5 +1,5 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
-import { calm, clientNav, counts, open, reset, seed, storedNote } from './helpers.ts';
+import { calm, clientNav, counts, editor, open, reset, seed, storedNote } from './helpers.ts';
 
 async function newNoteId(request: APIRequestContext): Promise<number> {
 	return (await (await request.post('/api/notes', { data: {} })).json()).id;
@@ -48,7 +48,7 @@ test('an existing note cleared by hand is kept on leaving', async ({ page, reque
 	await open(page, `/notes/${notes[0]}`);
 	const title = page.getByRole('textbox', { name: 'Title' });
 	await title.fill('');
-	await page.locator('[data-editor-root] .ProseMirror').click();
+	await editor(page).click();
 	await page.keyboard.press('ControlOrMeta+a');
 	await page.keyboard.press('Backspace');
 

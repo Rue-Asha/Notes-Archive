@@ -6,7 +6,7 @@
 </script>
 
 {#if tags.length}
-	<section>
+	<section aria-label="Tags">
 		<h2 class="eyebrow section-head">Tags</h2>
 		<ul class="tags">
 			{#each tags as tag (tag.id)}

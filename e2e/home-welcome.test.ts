@@ -12,7 +12,7 @@ test('Scenario: Empty archive shows the welcome state', async ({ page, request }
 	await calm(page);
 	await open(page, '/');
 
-	const welcome = page.locator('[data-welcome]');
+	const welcome = page.getByRole('region', { name: 'Write your first note' });
 	await expect(welcome).toContainText('Write your first note');
 	await expect(welcome.getByRole('button', { name: 'New note' })).toBeVisible();
 	for (const name of ['Pinned', 'Recently edited', 'Folders']) await expect(page.getByRole('region', { name })).toHaveCount(0);
@@ -28,12 +28,12 @@ test('Scenario: Home reflects a move without reload', async ({ page, request }) 
 	await open(page, '/');
 	await page.evaluate(() => (window.__homeLoaded = true));
 
-	const tile = page.getByRole('region', { name: 'Folders' }).locator('[data-folder-tile]');
-	await expect(tile.locator('[data-tile-count]')).toHaveText('0 notes');
+	const tile = page.getByRole('region', { name: 'Folders' }).getByRole('link', { name: /Reisen/ });
+	await expect(tile.getByText('0 notes', { exact: true })).toBeVisible();
 	await page.getByRole('region', { name: 'Recently edited' }).getByRole('button', { name: 'Note actions' }).click();
 	await page.getByRole('menuitem', { name: 'Move to…' }).click();
 	await page.getByRole('dialog', { name: 'Choose a folder' }).getByRole('option', { name: 'Reisen' }).click();
 
-	await expect(tile.locator('[data-tile-count]')).toHaveText('1 note');
+	await expect(tile.getByText('1 note', { exact: true })).toBeVisible();
 	expect(await page.evaluate(() => window.__homeLoaded)).toBe(true);
 });

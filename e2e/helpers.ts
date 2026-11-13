@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import { expect, type APIRequestContext, type Page } from '@playwright/test';
+import { expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import type { Id } from '../src/lib/types.ts';
 import type { SeedInput, SeedResult, StoredNote } from '../src/lib/server/testing.ts';
 
@@ -37,6 +37,9 @@ export async function open(page: Page, path: string): Promise<void> {
 	await page.goto(path);
 	await page.locator('html[data-hydrated]').waitFor({ state: 'attached' });
 }
+
+// the note body carries the label "Note body"; it is the ProseMirror editable root
+export const editor = (page: Page): Locator => page.getByLabel('Note body', { exact: true });
 
 export const calm = (page: Page): Promise<void> => page.emulateMedia({ reducedMotion: 'reduce' });
 

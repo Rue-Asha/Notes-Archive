@@ -13,6 +13,7 @@ export function fileKind(mime: string, name: string): string {
 
 // the kinds with a recognisable extension get a lettered badge; anything else keeps the generic file glyph
 const BADGES: Record<string, string> = { pdf: 'PDF', text: 'TXT', audio: 'AUD', video: 'VID', archive: 'ZIP' };
+const KIND_NAMES: Record<string, string> = { pdf: 'PDF file', text: 'Text file', audio: 'Audio file', video: 'Video file', archive: 'Archive' };
 
 export const FileCard = Node.create({
 	name: 'fileCard',
@@ -52,6 +53,7 @@ export const FileCard = Node.create({
 			dom.rel = 'noopener';
 			const badge = document.createElement('span');
 			badge.className = 'file-icon';
+			badge.setAttribute('role', 'img');
 			const icon = mount(Icon, { target: badge, props: { name: 'file', size: 22 } });
 			const text = document.createElement('span');
 			text.className = 'file-text';
@@ -70,6 +72,7 @@ export const FileCard = Node.create({
 				size.textContent = formatSize(attrs.size);
 				const kind = fileKind(attrs.mime, attrs.name);
 				badge.dataset.kind = kind;
+				badge.setAttribute('aria-label', KIND_NAMES[kind] ?? 'File');
 				if (BADGES[kind]) badge.dataset.badge = BADGES[kind];
 				else delete badge.dataset.badge;
 			};

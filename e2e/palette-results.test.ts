@@ -20,6 +20,7 @@ test('Scenario: Typing shows results with highlighted snippets', async ({ page, 
 	const results = palette(page).getByRole('group', { name: 'Notes' }).getByRole('option');
 	await expect(results).toHaveCount(1);
 	await expect(results.first()).toContainText('Tulpenbeet');
+	// <mark> has no ARIA role, so the highlight can only be found by tag
 	await expect(results.first().locator('mark')).toHaveText('Garten');
 	await expect(palette(page).getByRole('group', { name: 'Recent' })).toHaveCount(0);
 });

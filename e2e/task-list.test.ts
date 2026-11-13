@@ -1,8 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
-
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
 test('Scenario: Task checkbox persists after reload', async ({ page, request }) => {
 	await reset(request);
@@ -17,7 +15,7 @@ test('Scenario: Task checkbox persists after reload', async ({ page, request }) 
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	const boxes = body(page).getByRole('checkbox');
+	const boxes = editor(page).getByRole('checkbox');
 	await boxes.nth(1).check();
 	await expect(boxes.nth(1)).toBeChecked();
 
@@ -25,7 +23,7 @@ test('Scenario: Task checkbox persists after reload', async ({ page, request }) 
 	const items = (await storedNote(request, notes[0]))!.content.content![0].content!;
 	expect(items.map((i) => i.attrs?.checked)).toEqual([false, true]);
 	await page.reload();
-	await expect(body(page).getByRole('checkbox')).toHaveCount(2);
-	await expect(body(page).getByRole('checkbox').nth(1)).toBeChecked();
-	await expect(body(page).getByRole('checkbox').nth(0)).not.toBeChecked();
+	await expect(editor(page).getByRole('checkbox')).toHaveCount(2);
+	await expect(editor(page).getByRole('checkbox').nth(1)).toBeChecked();
+	await expect(editor(page).getByRole('checkbox').nth(0)).not.toBeChecked();
 });

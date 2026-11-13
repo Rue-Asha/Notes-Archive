@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { calm, counts, open, photo, reset, seed } from './helpers.ts';
 
-const cover = (page: import('@playwright/test').Page) => page.locator('[data-cover-header] img');
+const cover = (page: import('@playwright/test').Page) => page.getByRole('main').getByRole('img').or(page.getByRole('main').getByRole('presentation'));
 
 async function bare(request: Parameters<typeof reset>[0]) {
 	await reset(request);
@@ -37,9 +37,9 @@ test('Scenario: Removing the cover brings back the typographic tile', async ({ p
 	await expect(cover(page)).toHaveCount(0);
 
 	await open(page, `/folders/${folders[0]}`);
-	const tile = page.locator('[data-folder-tile]', { hasText: 'Japan' });
+	const tile = page.getByRole('region', { name: 'Folders' }).getByRole('link', { name: /Japan/ });
 	await expect(tile).toBeVisible();
-	await expect(tile.locator('img')).toHaveCount(0);
+	await expect(tile.getByRole('img').or(tile.getByRole('presentation'))).toHaveCount(0);
 });
 
 test('Scenario: Wrong cover file is refused with a toast', async ({ page, request }) => {

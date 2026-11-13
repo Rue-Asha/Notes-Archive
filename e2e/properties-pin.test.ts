@@ -8,7 +8,7 @@ test('Scenario: Pin from the properties row', async ({ page, request }) => {
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	const props = page.locator('[data-properties]');
+	const props = page.getByRole('group', { name: 'Properties' });
 	await expect(props.getByRole('button', { name: 'Folder' })).toBeVisible();
 	const pinned = props.getByRole('switch', { name: 'Pinned' });
 	await expect(pinned).toHaveAttribute('aria-checked', 'false');
@@ -19,9 +19,9 @@ test('Scenario: Pin from the properties row', async ({ page, request }) => {
 
 	await page.reload();
 	await page.locator('html[data-hydrated]').waitFor({ state: 'attached' });
-	await expect(page.locator('[data-properties]').getByRole('switch', { name: 'Pinned' })).toHaveAttribute('aria-checked', 'true');
+	await expect(page.getByRole('group', { name: 'Properties' }).getByRole('switch', { name: 'Pinned' })).toHaveAttribute('aria-checked', 'true');
 
-	await page.locator('[data-properties]').getByRole('switch', { name: 'Pinned' }).click();
+	await page.getByRole('group', { name: 'Properties' }).getByRole('switch', { name: 'Pinned' }).click();
 	await saves.settled();
 	expect((await storedNote(request, notes[0]))!.pinnedAt).toBeNull();
 });
@@ -35,7 +35,7 @@ test('Scenario: Pin from the note menu', async ({ page, request }) => {
 
 	await page.getByRole('button', { name: 'Note menu' }).click();
 	await page.getByRole('menuitem', { name: 'Pin', exact: true }).click();
-	await expect(page.locator('[data-properties]').getByRole('switch', { name: 'Pinned' })).toHaveAttribute('aria-checked', 'true');
+	await expect(page.getByRole('group', { name: 'Properties' }).getByRole('switch', { name: 'Pinned' })).toHaveAttribute('aria-checked', 'true');
 	await saves.settled();
 	expect((await storedNote(request, notes[0]))!.pinnedAt).not.toBeNull();
 	await page.getByRole('button', { name: 'Note menu' }).click();

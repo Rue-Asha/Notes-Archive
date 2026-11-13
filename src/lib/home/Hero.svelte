@@ -7,9 +7,9 @@
 	import Icon from '#lib/ui/Icon.svelte';
 </script>
 
-<section class="hero" data-hero>
+<section class="hero" aria-labelledby="hero-title" data-hero>
 	<Eyebrow>Notes — Folders — Tags</Eyebrow>
-	<h1 class="display"><span data-line>Every note,</span> <span data-line><em>in its place</em></span></h1>
+	<h1 id="hero-title" class="display"><span data-line>Every note,</span> <span data-line><em>in its place</em></span></h1>
 	<div class="actions">
 		<button type="button" class="glass search" onclick={openPalette}>
 			<Icon name="search" size={20} />

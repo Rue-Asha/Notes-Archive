@@ -28,7 +28,7 @@ test('Scenario: Long names truncate with a tooltip', async ({ page, request }, i
 
 	const row = tree.getByRole('link', { name, exact: true });
 	await expect(row).toHaveAttribute('title', name);
-	const label = row.locator('.name');
+	const label = row.getByText(name, { exact: true });
 	expect(await label.evaluate((el) => getComputedStyle(el).textOverflow)).toBe('ellipsis');
 	expect(await label.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
 	expect((await row.boundingBox())!.height).toBeLessThan(48);

@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { docFromText } from '../src/lib/editor/doc.ts';
-import { calm, open, reset, seed } from './helpers.ts';
+import { calm, editor, open, reset, seed } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 
 test('Scenario: Slash menu stays within the visible viewport on phone', async ({ page, request }, info) => {
@@ -15,7 +14,7 @@ test('Scenario: Slash menu stays within the visible viewport on phone', async ({
 	// the soft keyboard leaves little of the visual viewport; headless has none, so shrink the window
 	await page.setViewportSize({ width: 390, height: 320 });
 
-	await body(page).locator('p').last().click();
+	await editor(page).getByRole('paragraph').last().click();
 	await page.keyboard.press('ControlOrMeta+End');
 	await page.keyboard.press('Enter');
 	await page.keyboard.type('/');
@@ -57,7 +56,7 @@ for (const motion of ['allowed', 'reduced'] as const) {
 			};
 		});
 
-		await body(page).click();
+		await editor(page).click();
 		await page.keyboard.type('/');
 		await expect(menu(page)).toBeVisible();
 

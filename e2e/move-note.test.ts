@@ -12,7 +12,7 @@ test('Scenario: Move a note from its properties row', async ({ page, request }, 
 	await open(page, `/notes/${notes[0]}`);
 	await page.evaluate(() => ((window as unknown as { __kept: boolean }).__kept = true));
 
-	const field = page.locator('[data-properties]').getByRole('button', { name: 'Folder' });
+	const field = page.getByRole('group', { name: 'Properties' }).getByRole('button', { name: 'Folder' });
 	await expect(field).toContainText('Reisen');
 	await field.click();
 	await page.getByRole('dialog', { name: 'Choose a folder' }).getByRole('option', { name: 'Japan' }).click();
@@ -37,7 +37,7 @@ test('Scenario: Move a note to the root from its properties row', async ({ page,
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	const field = page.locator('[data-properties]').getByRole('button', { name: 'Folder' });
+	const field = page.getByRole('group', { name: 'Properties' }).getByRole('button', { name: 'Folder' });
 	await field.click();
 	await page.getByRole('dialog', { name: 'Choose a folder' }).getByRole('option', { name: 'Root' }).click();
 	await expect(field).toContainText('Root');
@@ -55,7 +55,7 @@ test('Scenario: Move a note from the note menu', async ({ page, request }) => {
 	await page.getByRole('button', { name: 'Note menu' }).click();
 	await page.getByRole('menuitem', { name: 'Move to…' }).click();
 	await page.getByRole('dialog', { name: 'Choose a folder' }).getByRole('option', { name: 'Reisen' }).click();
-	await expect(page.locator('[data-properties]').getByRole('button', { name: 'Folder' })).toContainText('Reisen');
+	await expect(page.getByRole('group', { name: 'Properties' }).getByRole('button', { name: 'Folder' })).toContainText('Reisen');
 	await saves.settled();
 	expect((await storedNote(request, notes[0]))!.folderId).toBe(folders[0]);
 });

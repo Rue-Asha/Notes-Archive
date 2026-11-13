@@ -1,14 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 import { COPY } from '../src/lib/copy.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
-
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
 async function openNote(page: Page, id: number) {
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${id}`);
-	await body(page).click();
+	await editor(page).click();
 	return saves;
 }
 
@@ -20,7 +18,7 @@ test('Scenario: Failed save shows a toast and keeps the content', async ({ page,
 
 	await page.keyboard.type('Eins');
 	await expect(page.getByRole('status').filter({ hasText: COPY.saveFailed })).toBeVisible();
-	await expect(body(page)).toHaveText('Eins');
+	await expect(editor(page)).toHaveText('Eins');
 
 	await page.keyboard.type(' Zwei');
 	await saves.settled();
@@ -35,7 +33,7 @@ test('Scenario: Unreachable server retries on the next change', async ({ page, r
 
 	await page.keyboard.type('Eins');
 	await expect(page.locator('[data-save-state="error"]')).toBeVisible();
-	await expect(body(page)).toHaveText('Eins');
+	await expect(editor(page)).toHaveText('Eins');
 
 	await page.keyboard.type(' Zwei');
 	await saves.settled();

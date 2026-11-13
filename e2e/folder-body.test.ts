@@ -23,12 +23,13 @@ test('Scenario: Folder page shows sub-folders and notes by last edited', async (
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	const tiles = page.locator('[data-folder-tile]');
+	const tiles = page.getByRole('region', { name: 'Folders' }).getByRole('link');
 	await expect(tiles).toHaveCount(2);
-	await expect(tiles.locator('[data-tile-name]')).toHaveText(['Island', 'Japan']);
-	await expect(tiles.first().locator('[data-tile-count]')).toHaveText('2 notes');
+	await expect(tiles.nth(0).getByText('Island', { exact: true })).toBeVisible();
+	await expect(tiles.nth(1).getByText('Japan', { exact: true })).toBeVisible();
+	await expect(tiles.first().getByText('2 notes', { exact: true })).toBeVisible();
 	await expect(tiles.first()).toHaveAttribute('href', `/folders/${folders[2]}`);
-	await expect(page.locator('[data-note-card] [data-card-title]')).toHaveText(['Neueste', 'Mittlere', 'Älteste']);
+	await expect(page.getByRole('article').getByRole('heading')).toHaveText(['Neueste', 'Mittlere', 'Älteste']);
 	expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
@@ -37,14 +38,15 @@ test('Scenario: Folder without a cover shows a typographic tile', async ({ page,
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	const plain = page.locator('[data-folder-tile]', { hasText: 'Island' });
-	await expect(plain.locator('img')).toHaveCount(0);
-	const name = plain.locator('[data-tile-name]');
+	const folderTiles = page.getByRole('region', { name: 'Folders' });
+	const plain = folderTiles.getByRole('link', { name: /Island/ });
+	await expect(plain.getByRole('img').or(plain.getByRole('presentation'))).toHaveCount(0);
+	const name = plain.getByText('Island', { exact: true });
 	expect(await name.evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Newsreader');
 	expect(await plain.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
 
-	const covered = page.locator('[data-folder-tile]', { hasText: 'Japan' });
-	await expect(covered.locator('img')).toHaveCount(1);
+	const covered = folderTiles.getByRole('link', { name: /Japan/ });
+	await expect(covered.getByRole('presentation')).toHaveCount(1);
 });
 
 test('Unknown folder is a 404', async ({ request }) => {

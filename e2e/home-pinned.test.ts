@@ -11,7 +11,7 @@ test('Scenario: Pinned notes appear on Home most recently pinned first', async (
 	await open(page, '/');
 
 	const pinned = page.getByRole('region', { name: 'Pinned' });
-	await expect(pinned.locator('[data-card-title]')).toHaveText(['Neu', 'Alt', 'Mitte']);
+	await expect(pinned.getByRole('heading', { level: 3 })).toHaveText(['Neu', 'Alt', 'Mitte']);
 });
 
 test('Scenario: Pinned tile is hidden without pinned notes', async ({ page, request }) => {
@@ -35,5 +35,5 @@ test('Scenario: Unpinning the last note hides the Pinned tile', async ({ page, r
 	await page.getByRole('menuitem', { name: 'Unpin' }).click();
 
 	await expect(pinned).toHaveCount(0);
-	await expect(page.getByRole('region', { name: 'Recently edited' }).locator('[data-note-card]')).toHaveCount(1);
+	await expect(page.getByRole('region', { name: 'Recently edited' }).getByRole('article')).toHaveCount(1);
 });

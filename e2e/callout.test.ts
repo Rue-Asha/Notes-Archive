@@ -1,7 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 const picker = (page: Page) => page.getByRole('dialog', { name: 'Choose an emoji' });
 
@@ -11,19 +10,19 @@ test('Scenario: Callout shows an emoji and a tinted panel', async ({ page, reque
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 
 	await page.keyboard.type('/callout');
 	await menu(page).getByRole('option', { name: 'Callout', exact: true }).click();
 	await page.keyboard.type('Nicht vergessen');
-	const callout = body(page).locator('.callout');
-	await expect(callout.locator('.callout-emoji')).toHaveText('💡');
+	const callout = editor(page).getByRole('note');
+	await expect(callout.getByRole('button', { name: 'Change emoji' })).toHaveText('💡');
 
-	await callout.locator('.callout-emoji').click();
+	await callout.getByRole('button', { name: 'Change emoji' }).click();
 	await picker(page).getByRole('button', { name: 'pushpin', exact: true }).click();
 	await expect(picker(page)).toBeHidden();
 
-	await expect(callout.locator('.callout-emoji')).toHaveText('📌');
+	await expect(callout.getByRole('button', { name: 'Change emoji' })).toHaveText('📌');
 	await expect(callout).toContainText('Nicht vergessen');
 	const panel = await callout.evaluate((el) => getComputedStyle(el).backgroundColor);
 	const wash = await page.evaluate(() => {
@@ -51,7 +50,7 @@ test('Turn into Callout wraps the block', async ({ page, request }, info) => {
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	const block = body(page).getByText('Merken', { exact: true });
+	const block = editor(page).getByText('Merken', { exact: true });
 	const handle = page.getByRole('button', { name: 'Block actions' });
 	if (info.project.name === 'phone') {
 		await block.click();
@@ -63,7 +62,7 @@ test('Turn into Callout wraps the block', async ({ page, request }, info) => {
 	await page.getByRole('menuitem', { name: 'Turn into' }).click();
 	await page.getByRole('menu', { name: 'Turn into' }).getByRole('menuitem', { name: 'Callout' }).click();
 
-	await expect(body(page).locator('.callout')).toContainText('Merken');
+	await expect(editor(page).getByRole('note')).toContainText('Merken');
 	await saves.settled();
 	const node = (await storedNote(request, notes[0]))!.content.content![0];
 	expect([node.type, node.attrs?.emoji, node.content![0].content![0].text]).toEqual(['callout', '💡', 'Merken']);

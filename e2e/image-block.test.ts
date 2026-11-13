@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
-import { calm, clientNav, counts, open, reset, seed, watchSaves } from './helpers.ts';
+import { calm, clientNav, counts, editor, open, reset, seed, watchSaves } from './helpers.ts';
 import { cutSelection, pasteClip, pasteFiles, png } from './media-helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 const toast = (page: Page, text: string) => page.getByText(text, { exact: true });
 
@@ -12,7 +11,7 @@ async function openEmptyNote(page: Page, request: Parameters<typeof reset>[0]) {
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 	return { id: notes[0], saves };
 }
 
@@ -27,7 +26,7 @@ test('Scenario: Image block shows at column width with a caption', async ({ page
 	const { id, saves } = await openEmptyNote(page, request);
 
 	await pasteFiles(page, [{ name: 'breit.png', mime: 'image/png', buffer: await png(3000, 1200) }]);
-	const img = body(page).locator('figure.image-block img');
+	const img = editor(page).getByRole('figure').getByRole('presentation');
 	await expect(img).toHaveAttribute('src', /^\/images\/\d+$/);
 	await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
 
@@ -38,11 +37,11 @@ test('Scenario: Image block shows at column width with a caption', async ({ page
 	});
 	expect(imageWidth).toBeCloseTo(columnWidth, 0);
 
-	await body(page).getByLabel('Caption').fill('Blick vom Balkon');
+	await editor(page).getByLabel('Caption').fill('Blick vom Balkon');
 	await saves.settled();
 	await page.reload();
 	await page.locator('html[data-hydrated]').waitFor({ state: 'attached' });
-	await expect(body(page).getByLabel('Caption')).toHaveValue('Blick vom Balkon');
+	await expect(editor(page).getByLabel('Caption')).toHaveValue('Blick vom Balkon');
 	void id;
 });
 
@@ -56,7 +55,7 @@ test('Scenario: Oversized or non-image upload is refused in the editor', async (
 	await chooser.setFiles({ name: 'vertrag.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4') });
 	await expect(toast(page, "That file isn't an image")).toBeVisible();
 
-	await expect(body(page).locator('figure.image-block, .upload-placeholder')).toHaveCount(0);
+	await expect(editor(page).getByRole('figure').or(editor(page).getByRole('status', { name: 'Uploading' }))).toHaveCount(0);
 	expect((await counts(request)).images).toBe(0);
 });
 
@@ -73,22 +72,22 @@ test('Scenario: Upload shows a placeholder and a failure removes it', async ({ p
 	});
 
 	await pasteFiles(page, [{ name: 'eins.png', mime: 'image/png', buffer: await png() }]);
-	await expect(body(page).locator('.upload-placeholder')).toBeVisible();
-	await expect(body(page).locator('figure.image-block img')).toHaveAttribute('src', /^\/images\/\d+$/);
-	await expect(body(page).locator('.upload-placeholder')).toHaveCount(0);
+	await expect(editor(page).getByRole('status', { name: 'Uploading' })).toBeVisible();
+	await expect(editor(page).getByRole('figure').getByRole('presentation')).toHaveAttribute('src', /^\/images\/\d+$/);
+	await expect(editor(page).getByRole('status', { name: 'Uploading' })).toHaveCount(0);
 
 	await pasteFiles(page, [{ name: 'zwei.png', mime: 'image/png', buffer: await png() }]);
-	await expect(body(page).locator('.upload-placeholder')).toBeVisible();
+	await expect(editor(page).getByRole('status', { name: 'Uploading' })).toBeVisible();
 	await expect(toast(page, "Couldn't upload — try again")).toBeVisible();
-	await expect(body(page).locator('.upload-placeholder')).toHaveCount(0);
-	await expect(body(page).locator('figure.image-block')).toHaveCount(1);
+	await expect(editor(page).getByRole('status', { name: 'Uploading' })).toHaveCount(0);
+	await expect(editor(page).getByRole('figure')).toHaveCount(1);
 });
 
 test('Scenario: Deleting an image block releases the upload', async ({ page, request }) => {
 	const { saves } = await openEmptyNote(page, request);
 
 	await pasteFiles(page, [{ name: 'weg.png', mime: 'image/png', buffer: await png() }]);
-	const img = body(page).locator('figure.image-block img');
+	const img = editor(page).getByRole('figure').getByRole('presentation');
 	await expect(img).toHaveAttribute('src', /^\/images\/\d+$/);
 	const src = (await img.getAttribute('src'))!;
 	await saves.settled();
@@ -96,12 +95,12 @@ test('Scenario: Deleting an image block releases the upload', async ({ page, req
 
 	await img.click();
 	await page.keyboard.press('Backspace');
-	await expect(body(page).locator('figure.image-block')).toHaveCount(0);
+	await expect(editor(page).getByRole('figure')).toHaveCount(0);
 	await saves.settled();
 
 	await page.reload();
 	await page.locator('html[data-hydrated]').waitFor({ state: 'attached' });
-	await expect(body(page).locator('figure.image-block')).toHaveCount(0);
+	await expect(editor(page).getByRole('figure')).toHaveCount(0);
 	expect((await request.get(src)).status()).toBe(200);
 });
 
@@ -111,20 +110,20 @@ test('Scenario: A cut image can be pasted into another note', async ({ page, req
 	await calm(page);
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 	await pasteFiles(page, [{ name: 'umzug.png', mime: 'image/png', buffer: await png() }]);
-	const img = body(page).locator('figure.image-block img');
+	const img = editor(page).getByRole('figure').getByRole('presentation');
 	await expect(img).toHaveAttribute('src', /^\/images\/\d+$/);
 	const src = (await img.getAttribute('src'))!;
 	await saves.settled();
 
 	await img.click();
 	const clip = await cutSelection(page);
-	await expect(body(page).locator('figure.image-block')).toHaveCount(0);
+	await expect(editor(page).getByRole('figure')).toHaveCount(0);
 	await clientNav(page, `/notes/${notes[1]}`);
 	await expect(page).toHaveTitle(/^Ziel/);
 	await saves.settled();
-	await body(page).click();
+	await editor(page).click();
 	await pasteClip(page, clip);
 	await expect(img).toHaveAttribute('src', src);
 	await saves.settled();

@@ -1,8 +1,7 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const handle = (page: Page) => page.getByRole('button', { name: 'Block actions' });
 const menu = (page: Page) => page.getByRole('menu', { name: 'Block menu' });
 
@@ -29,7 +28,7 @@ async function openThree(page: Page, request: Parameters<typeof reset>[0]) {
 
 // the handle shows on hover with a mouse and next to the cursor's block on phone
 async function openMenu(page: Page, info: TestInfo, text: string) {
-	const block = body(page).getByText(text, { exact: true });
+	const block = editor(page).getByText(text, { exact: true });
 	if (info.project.name === 'phone') {
 		await block.click();
 		await handle(page).tap();
@@ -74,7 +73,7 @@ test('Scenario: Turn a block into another type', async ({ page, request }, info)
 	await openMenu(page, info, 'Zwei');
 	await menu(page).getByRole('menuitem', { name: 'Turn into' }).click();
 	await page.getByRole('menu', { name: 'Turn into' }).getByRole('menuitem', { name: 'Heading 1' }).click();
-	await expect(body(page).locator('h1')).toHaveText('Zwei');
+	await expect(editor(page).getByRole('heading', { level: 1 })).toHaveText('Zwei');
 	const heading = (await stored())[1];
 	expect(heading.type).toBe('heading');
 	expect(heading.attrs?.level).toBe(1);
@@ -82,7 +81,7 @@ test('Scenario: Turn a block into another type', async ({ page, request }, info)
 	await openMenu(page, info, 'Zwei');
 	await menu(page).getByRole('menuitem', { name: 'Turn into' }).click();
 	await page.getByRole('menu', { name: 'Turn into' }).getByRole('menuitem', { name: 'Quote' }).click();
-	await expect(body(page).locator('blockquote')).toHaveText('Zwei');
+	await expect(editor(page).getByRole('blockquote')).toHaveText('Zwei');
 	const quote = (await stored())[1];
 	expect(quote.type).toBe('blockquote');
 	expect(quote.content?.[0].content?.[0].text).toBe('Zwei');
@@ -94,7 +93,7 @@ test('Scenario: Delete a block from the block menu', async ({ page, request }, i
 	await openMenu(page, info, 'Zwei');
 	await menu(page).getByRole('menuitem', { name: 'Delete' }).click();
 
-	await expect(body(page).locator('p')).toHaveText(['Eins', 'Drei']);
+	await expect(editor(page).getByRole('paragraph')).toHaveText(['Eins', 'Drei']);
 	expect(await texts()).toEqual(['Eins', 'Drei']);
 });
 
@@ -102,7 +101,7 @@ test('Scenario: Tapping the handle on phone opens the block menu', async ({ page
 	test.skip(info.project.name !== 'phone', 'touch handle');
 	await openThree(page, request);
 
-	await body(page).getByText('Zwei').click();
+	await editor(page).getByText('Zwei').click();
 	await handle(page).tap();
 
 	for (const name of ['Move up', 'Move down', 'Turn into', 'Delete'])

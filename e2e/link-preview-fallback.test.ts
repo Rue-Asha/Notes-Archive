@@ -1,9 +1,7 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 import { pasteText } from './media-helpers.ts';
-
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 
 async function pasteAlone(page: Page, request: Parameters<typeof reset>[0], url: string) {
 	await reset(request);
@@ -12,19 +10,19 @@ async function pasteAlone(page: Page, request: Parameters<typeof reset>[0], url:
 	const saves = watchSaves(page);
 	const preview = page.waitForResponse((res) => new URL(res.url()).pathname === '/api/preview');
 	await open(page, `/notes/${notes[0]}`);
-	await body(page).click();
+	await editor(page).click();
 	await pasteText(page, url);
 	await preview;
 	await saves.settled();
 	const node = ((await storedNote(request, notes[0]))!.content.content ?? []).find((b: JSONContent) => b.type === 'linkPreview');
-	return { card: body(page).locator('a.link-card'), node };
+	return { card: editor(page).getByRole('link'), node };
 }
 
-async function expectDomainOnly(card: ReturnType<typeof body>, domain: string, url: string) {
-	await expect(card.locator('strong')).toHaveText(domain);
-	await expect(card.locator('small')).toHaveText(url);
-	await expect(card.locator('img')).toHaveCount(0);
-	await expect(card.locator('p')).toBeHidden();
+async function expectDomainOnly(card: Locator, domain: string, url: string) {
+	await expect(card.getByText(domain, { exact: true })).toBeVisible();
+	await expect(card.getByText(url, { exact: true })).toBeVisible();
+	await expect(card.getByRole('img').or(card.getByRole('presentation'))).toHaveCount(0);
+	await expect(card.getByRole('paragraph')).toBeHidden();
 }
 
 test('Scenario: Failed preview shows domain and URL only', async ({ page, request }) => {

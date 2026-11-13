@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { calm, open, reset, seed } from './helpers.ts';
+import { calm, editor, open, reset, seed } from './helpers.ts';
 
 const palette = (page: Page) => page.getByRole('dialog', { name: 'Search' });
 const input = (page: Page) => palette(page).getByRole('combobox', { name: 'Search notes' });
@@ -22,7 +22,7 @@ test('Scenario: Cmd or Ctrl+K opens the palette anywhere', async ({ page, reques
 	}
 
 	await open(page, `/notes/${notes[0]}`);
-	await page.locator('[data-editor-root] .ProseMirror').click();
+	await editor(page).click();
 	await page.keyboard.press('ControlOrMeta+k');
 	await expect(palette(page)).toBeVisible();
 	await expect(input(page)).toBeFocused();

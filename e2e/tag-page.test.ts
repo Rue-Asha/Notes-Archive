@@ -25,11 +25,11 @@ test('Scenario: Tag page lists its notes by last edited', async ({ page, request
 	await calm(page);
 	await open(page, '/');
 	const scope = await tagsScope(page, info);
-	await scope.locator('section').filter({ has: page.getByRole('heading', { name: 'Tags' }) }).getByRole('link', { name: /Reise/ }).click();
+	await scope.getByRole('region', { name: 'Tags' }).getByRole('link', { name: /Reise/ }).click();
 
 	await expect(page).toHaveURL(/\/tags\/\d+$/);
 	await expect(page.getByRole('heading', { level: 1, name: 'Reise' })).toBeVisible();
-	await expect(page.locator('[data-note-card] [data-card-title]')).toHaveText(['Neueste', 'Mittlere', 'Ältere']);
+	await expect(page.getByRole('article').getByRole('heading')).toHaveText(['Neueste', 'Mittlere', 'Ältere']);
 	expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 

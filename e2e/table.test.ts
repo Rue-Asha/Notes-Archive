@@ -1,8 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { JSONContent } from '../src/lib/types.ts';
-import { calm, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, editor, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
 
-const body = (page: Page) => page.locator('[data-editor-root] .ProseMirror');
 const bar = (page: Page) => page.getByRole('toolbar', { name: 'Table' });
 
 const cell = (type: 'tableHeader' | 'tableCell', value: string): JSONContent => ({
@@ -31,7 +30,7 @@ test('Scenario: Table adds and removes rows and columns', async ({ page, request
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
 	await expect(bar(page)).toBeHidden();
-	await body(page).locator('td').first().click();
+	await editor(page).getByRole('cell').first().click();
 	await expect(bar(page)).toBeVisible();
 
 	const steps: [string, number, number][] = [
@@ -45,10 +44,11 @@ test('Scenario: Table adds and removes rows and columns', async ({ page, request
 		await saves.settled();
 		const stored = (await storedNote(request, notes[0]))!.content.content![0];
 		expect(shape(stored), name).toEqual({ rows, cols, header: true });
-		await expect(body(page).locator('tr')).toHaveCount(rows);
+		await expect(editor(page).getByRole('row')).toHaveCount(rows);
 	}
 
-	await body(page).locator(':scope > p').click();
+	// the seeded table is followed by one plain paragraph outside it, which is the last paragraph in the body
+	await editor(page).getByRole('paragraph').last().click();
 	await expect(bar(page)).toBeHidden();
 });
 
@@ -61,9 +61,13 @@ test('Scenario: Wide table scrolls inside its block on phone', async ({ page, re
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
 
-	const scroll = body(page).locator('.table-scroll');
-	await expect(scroll).toBeVisible();
-	const sizes = await scroll.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, overflowX: getComputedStyle(el).overflowX }));
+	const grid = editor(page).getByRole('table');
+	await expect(grid).toBeVisible();
+	// the table's parent is the block that scrolls
+	const sizes = await grid.evaluate((t) => {
+		const el = t.parentElement!;
+		return { scroll: el.scrollWidth, client: el.clientWidth, overflowX: getComputedStyle(el).overflowX };
+	});
 	expect(sizes.overflowX).toBe('auto');
 	expect(sizes.scroll).toBeGreaterThan(sizes.client);
 	const page$ = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { calm, open, reset, seed } from './helpers.ts';
+import { calm, editor, open, reset, seed } from './helpers.ts';
 
 test('Scenario: Search in the note menu opens the palette', async ({ page, request }, info) => {
 	await reset(request);
@@ -8,8 +8,8 @@ test('Scenario: Search in the note menu opens the palette', async ({ page, reque
 	await open(page, `/notes/${notes[0]}`);
 
 	if (info.project.name === 'phone') {
-		await page.locator('[data-editor-root] .ProseMirror').click();
-		await expect(page.locator('[data-bottom-bar]')).toHaveAttribute('aria-hidden', 'true');
+		await editor(page).click();
+		await expect(page.getByRole('navigation', { name: 'Bottom bar', includeHidden: true })).toHaveAttribute('aria-hidden', 'true');
 	}
 
 	await page.getByRole('button', { name: 'Note menu' }).click();

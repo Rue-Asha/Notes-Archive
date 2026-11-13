@@ -14,13 +14,14 @@ test('Scenario: Folder page shows breadcrumb, cover header and counts', async ({
 	await expect(crumbs.getByRole('link')).toHaveText(['Reisen', 'Japan']);
 	await expect(crumbs.getByRole('link').nth(0)).toHaveAttribute('href', `/folders/${folders[0]}`);
 	await expect(crumbs.getByRole('link').nth(1)).toHaveAttribute('href', `/folders/${folders[1]}`);
-	await expect(crumbs.locator('[aria-current="page"]')).toHaveText('Kyoto');
+	await expect(crumbs.getByText('Kyoto', { exact: true })).toHaveAttribute('aria-current', 'page');
 
-	const header = page.locator('[data-cover-header]');
-	await expect(header.locator('img')).toHaveCount(1);
-	await expect(header.locator('img')).toHaveAttribute('src', /^\/images\/\d+$/);
+	// a plain <header> inside main has no landmark role; the folder header is the one holding the level-1 heading
+	const header = page.getByRole('main').locator('header').filter({ has: page.getByRole('heading', { level: 1 }) });
+	await expect(header.getByRole('img').or(header.getByRole('presentation'))).toHaveCount(1);
+	await expect(header.getByRole('presentation')).toHaveAttribute('src', /^\/images\/\d+$/);
 	await expect(header.getByRole('heading', { level: 1 })).toHaveText('Kyoto');
-	await expect(header.locator('[data-folder-counts]')).toHaveText('1 folder · 4 notes');
+	await expect(header.getByText('1 folder · 4 notes', { exact: true })).toBeVisible();
 	expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
@@ -30,8 +31,9 @@ test('Folder without a cover gets a typographic band', async ({ page, request })
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	const header = page.locator('[data-cover-header]');
-	await expect(header.locator('img')).toHaveCount(0);
+	// a plain <header> inside main has no landmark role; the folder header is the one holding the level-1 heading
+	const header = page.getByRole('main').locator('header').filter({ has: page.getByRole('heading', { level: 1 }) });
+	await expect(header.getByRole('img').or(header.getByRole('presentation'))).toHaveCount(0);
 	await expect(header.getByRole('heading', { level: 1 })).toHaveText('Island');
-	await expect(header.locator('[data-folder-counts]')).toHaveText('0 folders · 0 notes');
+	await expect(header.getByText('0 folders · 0 notes', { exact: true })).toBeVisible();
 });
