@@ -39,3 +39,7 @@ Pinned order today is `ORDER BY pinned_at DESC, id DESC` (`listPinned`, `notes.t
 - `edited` sort recomputes folder recency on every tree load; the tree already reads every note, so the extra cost is one pass.
 - Existing e2e tests assert "1 folder · 4 notes" style direct counts (`folder-header`); they change with the rule.
 - Titles with line breaks are stored by the server before the UI can make them; harmless, and covered by tests.
+
+## Gate-1 sign-off
+
+Confirmed by Rue on 2026-11-13 (gate 1 / task 2.5), as written in this design: title Enter inserts a line break and Cmd/Ctrl+Enter or ArrowDown on the last line moves to the body; four tree sort modes stored on the server; tag page redirect done client-side; folder counts include all sub-folders. No open questions remain for these points. Storing the pin order across devices was not part of the sign-off.
