@@ -1,6 +1,6 @@
 import { COPY } from '#lib/copy.ts';
 import { NotFoundError, ValidationError } from '#lib/errors.ts';
-import type { Crumb, Folder, FolderDeleteCounts, FolderTile, Id, NoteRef, Tree, TreeFolder } from '#lib/types.ts';
+import type { Crumb, Folder, FolderDeleteCounts, FolderTile, Id, NoteRef, Tree, TreeFolder, TreeSort } from '#lib/types.ts';
 import { getDb } from './db.ts';
 import { handOverUploads } from './notes.ts';
 import { pruneTags } from './tags.ts';
@@ -137,29 +137,75 @@ export function listFolderTiles(parentId: Id | null): FolderTile[] {
 		.sort(byName);
 }
 
-export function getTree(): Tree {
+interface Stamps {
+	created: string;
+	edited: string;
+}
+
+const newest = (a: Stamps, b: Stamps, key: keyof Stamps, idA: Id, idB: Id) =>
+	a[key] < b[key] ? 1 : a[key] > b[key] ? -1 : idB - idA;
+
+export function getTree(sort: TreeSort = 'mixed'): Tree {
 	const db = getDb();
-	const notes = new Map<Id | null, NoteRef[]>();
-	for (const r of db.prepare('SELECT id, title, icon, folder_id FROM notes ORDER BY updated_at DESC, id DESC').all()) {
+	const notes = new Map<Id | null, (NoteRef & Stamps)[]>();
+	for (const r of db.prepare('SELECT id, title, icon, folder_id, created_at, updated_at FROM notes').all()) {
 		const key = r.folder_id === null ? null : Number(r.folder_id);
 		const list = notes.get(key) ?? [];
-		list.push({ id: Number(r.id), title: String(r.title), icon: r.icon === null ? null : String(r.icon) });
+		list.push({
+			id: Number(r.id),
+			title: String(r.title),
+			icon: r.icon === null ? null : String(r.icon),
+			created: String(r.created_at),
+			edited: String(r.updated_at)
+		});
 		notes.set(key, list);
 	}
-	const nodes = new Map<Id, TreeFolder>();
-	const rows = db.prepare('SELECT id, name, parent_id FROM folders').all();
-	for (const r of rows) {
+	const noteOrder = (a: NoteRef & Stamps, b: NoteRef & Stamps): number => {
+		if (sort === 'name') return collator.compare(a.title.trim() || 'Untitled', b.title.trim() || 'Untitled') || b.id - a.id;
+		return newest(a, b, sort === 'created' ? 'created' : 'edited', a.id, b.id);
+	};
+	const toRef = ({ id, title, icon }: NoteRef): NoteRef => ({ id, title, icon });
+	for (const list of notes.values()) list.sort(noteOrder);
+
+	const nodes = new Map<Id, TreeFolder & Stamps>();
+	for (const r of db.prepare('SELECT id, name, parent_id, created_at, updated_at FROM folders').all()) {
 		const id = Number(r.id);
 		nodes.set(id, {
 			id,
 			name: String(r.name),
 			parentId: r.parent_id === null ? null : Number(r.parent_id),
 			children: [],
-			notes: notes.get(id) ?? []
+			notes: (notes.get(id) ?? []).map(toRef),
+			created: String(r.created_at),
+			edited: String(r.updated_at)
 		});
 	}
-	const folders: TreeFolder[] = [];
-	for (const node of nodes.values()) (node.parentId === null ? folders : nodes.get(node.parentId)!.children).push(node);
-	for (const node of nodes.values()) node.children.sort(byName);
-	return { folders: folders.sort(byName), rootNotes: notes.get(null) ?? [] };
+	const roots: (TreeFolder & Stamps)[] = [];
+	for (const node of nodes.values()) (node.parentId === null ? roots : nodes.get(node.parentId)!.children as (TreeFolder & Stamps)[]).push(node);
+
+	// a folder's edit time is its newest descendant note, else its own update time
+	const lift = (node: TreeFolder & Stamps): string | null => {
+		let latest: string | null = null;
+		for (const n of notes.get(node.id) ?? []) if (latest === null || n.edited > latest) latest = n.edited;
+		for (const c of node.children as (TreeFolder & Stamps)[]) {
+			const t = lift(c);
+			if (t !== null && (latest === null || t > latest)) latest = t;
+		}
+		if (sort === 'edited') node.edited = latest ?? node.edited;
+		return latest;
+	};
+	if (sort === 'edited') for (const root of roots) lift(root);
+
+	const folderOrder = (a: TreeFolder & Stamps, b: TreeFolder & Stamps): number =>
+		sort === 'edited' || sort === 'created' ? newest(a, b, sort, a.id, b.id) : byName(a, b);
+	for (const node of nodes.values()) (node.children as (TreeFolder & Stamps)[]).sort(folderOrder);
+	roots.sort(folderOrder);
+	const strip = (node: TreeFolder & Stamps): TreeFolder => ({
+		id: node.id,
+		name: node.name,
+		parentId: node.parentId,
+		children: (node.children as (TreeFolder & Stamps)[]).map(strip),
+		notes: node.notes
+	});
+	return { folders: roots.map(strip), rootNotes: (notes.get(null) ?? []).map(toRef) };
 }

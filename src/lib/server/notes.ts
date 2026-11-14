@@ -1,4 +1,4 @@
-import { ValidationError, NotFoundError } from '#lib/errors.ts';
+import { ConflictError, ValidationError, NotFoundError } from '#lib/errors.ts';
 import type { Id, IsoDateTime, Note, NoteCard, NotePatch, TagRef } from '#lib/types.ts';
 import { getDb } from './db.ts';
 import { isEmptyDoc, plainText, referencedUploads, snippet } from './plaintext.ts';
@@ -111,15 +111,20 @@ export function updateNote(id: Id, patch: NotePatch): { updatedAt: IsoDateTime }
 		sets.push(`${column} = ?`);
 		values.push(value);
 	};
-	if (patch.title !== undefined) set('title', patch.title);
+	if (patch.title !== undefined) set('title', patch.title.replace(/\r\n?/g, '\n'));
 	if (patch.icon !== undefined) set('icon', patch.icon);
 	if (patch.folderId !== undefined) set('folder_id', patch.folderId);
 	if (patch.content !== undefined) {
 		set('content', JSON.stringify(patch.content));
 		set('body_text', plainText(patch.content));
 	}
-	if (patch.pinned !== undefined)
+	if (patch.pinned !== undefined) {
+		const pinned = row.pinned_at !== null;
 		set('pinned_at', patch.pinned ? ((row.pinned_at as string | null) ?? new Date().toISOString()) : null);
+		if (!patch.pinned) set('pin_order', null);
+		else if (!pinned)
+			sets.push('pin_order = (SELECT coalesce(min(pin_order), 1) - 1 FROM notes WHERE pinned_at IS NOT NULL)');
+	}
 
 	const previous = String(row.updated_at);
 	let updatedAt = previous;
@@ -245,5 +250,21 @@ export function listRecent(limit = 8): NoteCard[] {
 }
 
 export function listPinned(): NoteCard[] {
-	return cards('pinned_at IS NOT NULL', [], 'pinned_at DESC, id DESC');
+	return cards('pinned_at IS NOT NULL', [], 'pin_order, pinned_at DESC, id DESC');
+}
+
+export function reorderPinned(ids: Id[]): void {
+	const db = getDb();
+	db.exec('BEGIN');
+	try {
+		const current = db.prepare('SELECT id FROM notes WHERE pinned_at IS NOT NULL').all().map((r) => Number(r.id));
+		if (ids.length !== current.length || new Set(ids).size !== ids.length || !ids.every((id) => current.includes(id)))
+			throw new ConflictError('stale');
+		const renumber = db.prepare('UPDATE notes SET pin_order = ? WHERE id = ?');
+		ids.forEach((id, i) => renumber.run(i + 1, id));
+		db.exec('COMMIT');
+	} catch (e) {
+		db.exec('ROLLBACK');
+		throw e;
+	}
 }

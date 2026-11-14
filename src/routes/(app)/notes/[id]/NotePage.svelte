@@ -11,6 +11,7 @@
 	import NoteProperties from '#lib/notes/NoteProperties.svelte';
 	import SaveStatus from '#lib/notes/SaveStatus.svelte';
 	import { toast } from '#lib/shell/toast.ts';
+	import { titleLine } from '#lib/title.ts';
 	import Icon from '#lib/ui/Icon.svelte';
 	import type { Crumb, Id, JSONContent, Note, NotePatch, TreeFolder } from '#lib/types.ts';
 	import type { PageProps } from './$types';
@@ -102,7 +103,7 @@
 
 <svelte:window onpagehide={pagehide} />
 
-<svelte:head><title>{note.title.trim() || COPY.untitled} · Notes Archive</title></svelte:head>
+<svelte:head><title>{titleLine(note.title)} · Notes Archive</title></svelte:head>
 
 <article class="page" data-note-page>
 	<div class="topbar">

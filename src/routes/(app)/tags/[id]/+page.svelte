@@ -1,10 +1,18 @@
 <script lang="ts">
+	import { goto, invalidateAll } from '$app/navigation';
+	import { setContext } from 'svelte';
 	import { COPY } from '#lib/copy.ts';
 	import NoteGrid from '#lib/notes/NoteGrid.svelte';
 	import Eyebrow from '#lib/ui/Eyebrow.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// reloading this page once its last note is gone would 404, so leave for Home instead
+	setContext('card-deleted', async (note: { id: number }) => {
+		if (data.notes.length === 1 && data.notes[0].id === note.id) await goto('/', { invalidateAll: true });
+		else await invalidateAll();
+	});
 </script>
 
 <svelte:head><title>{data.tag.name} · Notes Archive</title></svelte:head>

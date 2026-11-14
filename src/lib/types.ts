@@ -11,6 +11,17 @@ export interface JSONContent {
 
 export type TextColor = 'stone' | 'clay' | 'ochre' | 'moss' | 'sea' | 'plum';
 
+export const TREE_SORTS = ['mixed', 'name', 'edited', 'created'] as const;
+export type TreeSort = (typeof TREE_SORTS)[number];
+
+export function isTreeSort(value: unknown): value is TreeSort {
+	return TREE_SORTS.includes(value as TreeSort);
+}
+
+export interface Settings {
+	treeSort: TreeSort;
+}
+
 export interface TagRef {
 	id: Id;
 	name: string;

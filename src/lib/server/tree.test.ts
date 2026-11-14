@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { closeDb } from './db.ts';
+import { getDb } from './db.ts';
 import { getTree, listFolderTiles } from './folders.ts';
 import { seedArchive, useTestDb } from './testing.ts';
 
@@ -7,7 +8,7 @@ beforeEach(useTestDb);
 afterEach(closeDb);
 
 describe('tree', () => {
-	it('nests folders, sorts folders by name and notes by last edited, keeps root notes', () => {
+	it('Scenario: Default sort keeps folders by name and notes by last edited: nests folders, keeps root notes', () => {
 		const { folders, notes } = seedArchive({
 			folders: [{ name: 'Zebra' }, { name: 'Ärger' }, { name: 'apfel' }, { name: 'Japan', parent: 0 }, { name: 'Island', parent: 0 }],
 			notes: [
@@ -35,6 +36,67 @@ describe('tree', () => {
 			{ id: notes[5], title: '', icon: null },
 			{ id: notes[4], title: 'Loose old', icon: null }
 		]);
+	});
+
+	const sortSeed = () =>
+		seedArchive({
+			folders: [
+				{ name: 'B', createdAt: '2026-10-01T00:00:00.000Z' },
+				{ name: 'a2', createdAt: '2026-10-03T00:00:00.000Z' },
+				{ name: 'a10', createdAt: '2026-10-02T00:00:00.000Z' },
+				{ name: 'Sub z', parent: 0, createdAt: '2026-10-05T00:00:00.000Z' },
+				{ name: 'Sub a', parent: 0, createdAt: '2026-10-04T00:00:00.000Z' }
+			],
+			notes: [
+				{ title: 'Zeta', folder: 0, createdAt: '2026-09-01T00:00:00.000Z', updatedAt: '2026-10-10T00:00:00.000Z' },
+				{ title: '', folder: 0, createdAt: '2026-09-02T00:00:00.000Z', updatedAt: '2026-09-02T00:00:00.000Z' },
+				{ title: 'Alpha', folder: 0, createdAt: '2026-09-03T00:00:00.000Z', updatedAt: '2026-09-01T00:00:00.000Z' },
+				{ title: 'n10', createdAt: '2026-08-01T00:00:00.000Z', updatedAt: '2026-08-03T00:00:00.000Z' },
+				{ title: 'n2', createdAt: '2026-08-02T00:00:00.000Z', updatedAt: '2026-08-02T00:00:00.000Z' }
+			]
+		});
+
+	it('Scenario: Each mode orders folders and notes', () => {
+		sortSeed();
+		const names = (t: ReturnType<typeof getTree>) => t.folders.map((f) => f.name);
+		const titles = (l: { title: string }[]) => l.map((n) => n.title);
+
+		expect(names(getTree('mixed'))).toEqual(['a2', 'a10', 'B']);
+
+		const byName = getTree('name');
+		expect(names(byName)).toEqual(['a2', 'a10', 'B']);
+		expect(titles(byName.rootNotes)).toEqual(['n2', 'n10']);
+		expect(titles(byName.folders[2].notes)).toEqual(['Alpha', '', 'Zeta']);
+		expect(byName.folders[2].children.map((f) => f.name)).toEqual(['Sub a', 'Sub z']);
+
+		const edited = getTree('edited');
+		expect(names(edited)).toEqual(['B', 'a2', 'a10']);
+		expect(edited.folders[0].children.map((f) => f.name)).toEqual(['Sub z', 'Sub a']);
+		expect(titles(edited.folders[0].notes)).toEqual(['Zeta', '', 'Alpha']);
+		expect(titles(edited.rootNotes)).toEqual(['n10', 'n2']);
+
+		const created = getTree('created');
+		expect(names(created)).toEqual(['a2', 'a10', 'B']);
+		expect(created.folders[2].children.map((f) => f.name)).toEqual(['Sub z', 'Sub a']);
+		expect(titles(created.folders[2].notes)).toEqual(['Alpha', '', 'Zeta']);
+		expect(titles(created.rootNotes)).toEqual(['n2', 'n10']);
+	});
+
+	it('Scenario: An edited note lifts its folder', () => {
+		const { folders, notes } = seedArchive({
+			folders: [
+				{ name: 'Old', createdAt: '2026-01-01T00:00:00.000Z' },
+				{ name: 'Mid', parent: 0, createdAt: '2026-01-01T00:00:00.000Z' },
+				{ name: 'Deep', parent: 1, createdAt: '2026-01-01T00:00:00.000Z' },
+				{ name: 'Other', createdAt: '2026-06-01T00:00:00.000Z' }
+			],
+			notes: [{ title: 'deep note', folder: 2, createdAt: '2026-01-02T00:00:00.000Z' }]
+		});
+		expect(getTree('edited').folders.map((f) => f.name)).toEqual(['Other', 'Old']);
+		getDb().prepare('UPDATE notes SET updated_at = ? WHERE id = ?').run('2026-11-01T00:00:00.000Z', notes[0]);
+		const tree = getTree('edited');
+		expect(tree.folders.map((f) => f.id)).toEqual([folders[0], folders[3]]);
+		expect(tree.folders[0].children[0].children[0].notes).toHaveLength(1);
 	});
 
 	it('is empty without data', () => {

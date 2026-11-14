@@ -2,6 +2,7 @@
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { COPY } from '#lib/copy.ts';
+	import { titleLine } from '#lib/title.ts';
 	import type { Id, Note, NotePatch } from '#lib/types.ts';
 	import Dialog from '#lib/ui/Dialog.svelte';
 	import FolderPicker from '#lib/ui/FolderPicker.svelte';
@@ -46,7 +47,7 @@
 	}}
 	oncancel={() => (moving = false)}
 />
-<Dialog open={deleting} title="Delete note" message={COPY.deleteNote(note.title.trim() || COPY.untitled)} confirmLabel="Delete" danger onconfirm={remove} oncancel={() => (deleting = false)} />
+<Dialog open={deleting} title="Delete note" message={COPY.deleteNote(titleLine(note.title))} confirmLabel="Delete" danger onconfirm={remove} oncancel={() => (deleting = false)} />
 
 <style>
 	.more {

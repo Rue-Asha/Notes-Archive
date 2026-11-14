@@ -52,7 +52,7 @@ Folders SHALL nest without a depth limit and SHALL be created at the root or ins
 - **proof:** unit
 
 ### Requirement: Folder page
-A folder page SHALL show a breadcrumb, a cover photo header (when set) with the folder name and counts, the sub-folders as cover tiles, then the folder's notes as cards sorted by last edited, with "New note" (creates the note in this folder) and "New folder" actions; an empty folder SHALL show "Nothing here yet" with both actions.
+A folder page SHALL show a breadcrumb, a cover photo header (when set) with the folder name and counts, the sub-folders as cover tiles, then the folder's notes as cards sorted by last edited, with "New note" (creates the note in this folder) and "New folder" (creates a sub-folder) actions; an empty folder SHALL show "Nothing here yet" with both actions. A folder's note count SHALL mean every note in the folder and all its sub-folders, in the header, in folder tiles and in the delete dialog alike; the header's folder count SHALL mean all descendant folders.
 
 #### Scenario: Folder page shows sub-folders and notes by last edited
 - **WHEN** folder "Reisen" holds sub-folders "Japan" and "Island" and three notes edited at different times
@@ -65,9 +65,14 @@ A folder page SHALL show a breadcrumb, a cover photo header (when set) with the 
 - **proof:** e2e
 
 #### Scenario: Folder page shows breadcrumb, cover header and counts
-- **WHEN** folder "Kyoto" inside "Reisen/Japan" with a cover, one sub-folder and four notes opens
-- **THEN** the breadcrumb reads Reisen › Japan › Kyoto with links, the header shows the cover image, the name "Kyoto" and "1 folder · 4 notes"
+- **WHEN** folder "Kyoto" inside "Reisen/Japan" with a cover, one sub-folder holding two notes and four notes of its own opens
+- **THEN** the breadcrumb reads Reisen › Japan › Kyoto with links, the header shows the cover image, the name "Kyoto" and "1 folder · 6 notes"
 - **proof:** e2e
+
+#### Scenario: Header and parent tile count the same
+- **WHEN** a folder with notes in itself and in a nested sub-folder is opened and its parent's page lists it as a tile
+- **THEN** the header's note count equals the tile's note count
+- **proof:** unit
 
 #### Scenario: Empty folder offers New note and New folder
 - **WHEN** an empty folder opens

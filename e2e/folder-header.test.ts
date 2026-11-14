@@ -5,7 +5,10 @@ test('Scenario: Folder page shows breadcrumb, cover header and counts', async ({
 	await reset(request);
 	const { folders } = await seed(request, {
 		folders: [{ name: 'Reisen' }, { name: 'Japan', parent: 0 }, { name: 'Kyoto', parent: 1, cover: true }, { name: 'Gion', parent: 2 }],
-		notes: [1, 2, 3, 4].map((n) => ({ title: `Kyoto ${n}`, folder: 2 }))
+		notes: [
+			...[1, 2, 3, 4].map((n) => ({ title: `Kyoto ${n}`, folder: 2 })),
+			...[1, 2].map((n) => ({ title: `Gion ${n}`, folder: 3 }))
+		]
 	});
 	await calm(page);
 	await open(page, `/folders/${folders[2]}`);
@@ -21,7 +24,7 @@ test('Scenario: Folder page shows breadcrumb, cover header and counts', async ({
 	await expect(header.getByRole('img').or(header.getByRole('presentation'))).toHaveCount(1);
 	await expect(header.getByRole('presentation')).toHaveAttribute('src', /^\/images\/\d+$/);
 	await expect(header.getByRole('heading', { level: 1 })).toHaveText('Kyoto');
-	await expect(header.getByText('1 folder · 4 notes', { exact: true })).toBeVisible();
+	await expect(header.getByText('1 folder · 6 notes', { exact: true })).toBeVisible();
 	expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 

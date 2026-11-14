@@ -43,6 +43,10 @@ The production server (`node build`) reads these environment variables:
 
 `GET /healthz` answers `ok` (200) while the database responds, 503 otherwise.
 
+## Upgrading to 0.2.0
+
+Copy `data/notes-archive.db` on the host before the first start of 0.2.0: migration 0005 runs on the real database.
+
 ## Release
 
 Bump `version` in `package.json`, merge to `main`, then push the tag `vX.Y.Z` that matches it. The release workflow

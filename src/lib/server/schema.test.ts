@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { closeDb, getDb } from './db.ts';
+import { closeDb, getDb, resetDb } from './db.ts';
+import { ConflictError } from '#lib/errors.ts';
+import { TREE_SORTS, isTreeSort } from '#lib/types.ts';
 import { useTestDb } from './testing.ts';
 
 const NOW = '2026-11-02T10:00:00.000Z';
@@ -116,5 +118,43 @@ describe('schema 0002_core', () => {
 
 		expect(count('note_tags')).toBe(0);
 		expect(count('tags')).toBe(1);
+	});
+});
+
+describe('schema 0005_pin_order_settings', () => {
+	it('adds a nullable pin_order column, its index and the settings table', () => {
+		const cols = getDb().prepare('PRAGMA table_info(notes)').all();
+		const pin = cols.find((c) => c.name === 'pin_order');
+
+		expect(pin).toMatchObject({ type: 'INTEGER', notnull: 0 });
+		expect(names('table')).toContain('settings');
+		expect(names('index')).toContain('notes_pin_order');
+		expect(note(null)).toBeGreaterThan(0);
+		expect(getDb().prepare('SELECT pin_order FROM notes').get()?.pin_order).toBeNull();
+	});
+
+	it('empties the settings table with the other tables on reset', () => {
+		getDb().prepare("INSERT INTO settings (key, value) VALUES ('tree_sort', 'name')").run();
+
+		resetDb();
+
+		expect(count('settings')).toBe(0);
+	});
+});
+
+describe('shared types', () => {
+	it('knows the four tree sort modes', () => {
+		expect(TREE_SORTS).toEqual(['mixed', 'name', 'edited', 'created']);
+		expect(isTreeSort('name')).toBe(true);
+		expect(isTreeSort('size')).toBe(false);
+		expect(isTreeSort(undefined)).toBe(false);
+	});
+
+	it('ConflictError is an Error named for the 409 mapping', () => {
+		const e = new ConflictError('stale');
+
+		expect(e).toBeInstanceOf(Error);
+		expect(e.name).toBe('ConflictError');
+		expect(e.message).toBe('stale');
 	});
 });

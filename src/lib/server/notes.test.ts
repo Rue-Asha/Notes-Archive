@@ -87,6 +87,14 @@ describe('createNote and getNote', () => {
 });
 
 describe('updateNote', () => {
+	it('Scenario: A multi-line title round-trips', () => {
+		const id = createNote({});
+		updateNote(id, { title: 'Reise\nPlan' });
+		expect(getNote(id)?.title).toBe('Reise\nPlan');
+		updateNote(id, { title: 'Reise\r\nPlan\rEnde' });
+		expect(getNote(id)?.title).toBe('Reise\nPlan\nEnde');
+	});
+
 	it('Scenario: Server update derives the body text and bumps the edit time', async () => {
 		const id = createNote({});
 		const before = getNote(id)!.updatedAt;
@@ -386,6 +394,13 @@ describe('deleteNote', () => {
 });
 
 describe('discardIfEmpty', () => {
+	it('Scenario: A line-break-only title is still untitled', () => {
+		const id = createNote({});
+		updateNote(id, { title: '\n \n' });
+		expect(discardIfEmpty(id)).toBe(true);
+		expect(getNote(id)).toBeNull();
+	});
+
 	it('Scenario: Server discards only empty notes', () => {
 		const { notes } = seedArchive({
 			notes: [{}, { title: 'Titel' }, { icon: '🌿' }, { pinnedAt: '2026-10-01T00:00:00.000Z' }]

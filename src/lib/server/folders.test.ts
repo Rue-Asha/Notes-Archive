@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { NotFoundError, ValidationError } from '#lib/errors.ts';
 import { closeDb, getDb } from './db.ts';
-import { breadcrumb, createFolder, deleteFolder, folderCounts, getFolder, moveFolder, renameFolder } from './folders.ts';
+import { breadcrumb, createFolder, deleteFolder, folderCounts, getFolder, listFolderTiles, moveFolder, renameFolder } from './folders.ts';
 import { seedArchive, useTestDb } from './testing.ts';
+import { load as folderPageLoad } from '../../routes/(app)/folders/[id]/+page.server.ts';
 
 beforeEach(useTestDb);
 afterEach(closeDb);
@@ -131,5 +132,23 @@ describe('folder delete', () => {
 		const id = createFolder({ name: 'Root' });
 		expect(deleteFolder(id)).toEqual({ parentId: null });
 		expect(() => deleteFolder(id)).toThrow(NotFoundError);
+	});
+});
+
+describe('folder page counts', () => {
+	it('Scenario: Header and parent tile count the same', () => {
+		const { folders } = seedArchive({
+			folders: [{ name: 'Reisen' }, { name: 'Japan', parent: 0 }, { name: 'Kyoto', parent: 1 }],
+			notes: [
+				{ title: 'A', folder: 1 },
+				{ title: 'B', folder: 1 },
+				{ title: 'C', folder: 2 },
+				{ title: 'D', folder: 2 }
+			]
+		});
+		const header = (folderPageLoad as unknown as (e: unknown) => { counts: { folders: number; notes: number } })({ params: { id: String(folders[1]) } });
+		const tile = listFolderTiles(folders[0]).find((t) => t.id === folders[1]);
+		expect(header.counts).toEqual({ folders: 1, notes: 4 });
+		expect(header.counts.notes).toBe(tile?.noteCount);
 	});
 });

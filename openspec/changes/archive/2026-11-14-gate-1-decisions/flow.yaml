@@ -1,0 +1,6 @@
+track: feature
+triage: 'feature — server/data side of the gate-1 decisions (manual pin order, folder counts, stored tree sort, multi-line titles, tag-page redirect); planned before flow, adopted. Appetite: one evening.'
+base: main
+adopted: true
+gate1: '2026-11-14 (adopted; Rue approved all three gate-1-decisions plans in advance)'
+gate2: '2026-11-14 (Rue: ship with minor version bump and release tag)'
