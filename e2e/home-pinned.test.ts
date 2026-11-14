@@ -14,6 +14,21 @@ test('Scenario: Pinned notes appear on Home most recently pinned first', async (
 	await expect(pinned.getByRole('heading', { level: 3 })).toHaveText(['Neu', 'Alt', 'Mitte']);
 });
 
+test('Scenario: A newly pinned note goes to the top of a manual order', async ({ page, request }) => {
+	await reset(request);
+	const { notes } = await seed(request, { notes: [{ title: 'Alt' }, { title: 'Neu' }, { title: 'Mitte' }, { title: 'Lose' }] });
+	for (const id of [notes[0], notes[1], notes[2]]) {
+		expect((await request.patch(`/api/notes/${id}`, { data: { pinned: true } })).ok()).toBe(true);
+	}
+	expect((await request.put('/api/pinned', { data: { ids: [notes[0], notes[2], notes[1]] } })).ok()).toBe(true);
+	expect((await request.patch(`/api/notes/${notes[3]}`, { data: { pinned: true } })).ok()).toBe(true);
+	await calm(page);
+	await open(page, '/');
+
+	const pinned = page.getByRole('region', { name: 'Pinned' });
+	await expect(pinned.getByRole('heading', { level: 3 })).toHaveText(['Lose', 'Alt', 'Mitte', 'Neu']);
+});
+
 test('Scenario: Pinned tile is hidden without pinned notes', async ({ page, request }) => {
 	await reset(request);
 	await seed(request, { notes: [{ title: 'Lose' }] });

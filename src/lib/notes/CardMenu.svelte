@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { invalidate, invalidateAll } from '$app/navigation';
+	import { getContext } from 'svelte';
 	import { page } from '$app/state';
 	import { COPY } from '#lib/copy.ts';
+	import { titleLine } from '#lib/title.ts';
 	import type { Id, NoteCard } from '#lib/types.ts';
 	import Dialog from '#lib/ui/Dialog.svelte';
 	import FolderPicker from '#lib/ui/FolderPicker.svelte';
@@ -9,7 +11,10 @@
 	import Menu, { type MenuItem } from '#lib/ui/Menu.svelte';
 	import { deleteNoteRequest, patchNote } from './api.ts';
 
-	let { note }: { note: NoteCard } = $props();
+	let { note, ondeleted }: { note: NoteCard; ondeleted?: (note: NoteCard) => Promise<void> | void } = $props();
+
+	// NoteGrid and NoteCard sit between the tag page and this menu, so the page hands its callback down by context
+	const inherited = getContext<((note: NoteCard) => Promise<void> | void) | undefined>('card-deleted');
 
 	let open = $state(false);
 	let moving = $state(false);
@@ -27,6 +32,14 @@
 		await Promise.all([invalidateAll(), invalidate('app:tree')]);
 	}
 
+	async function removed() {
+		await deleteNoteRequest(note.id);
+		const hook = ondeleted ?? inherited;
+		if (!hook) return change(Promise.resolve());
+		await hook(note);
+		await invalidate('app:tree');
+	}
+
 	function move(folderId: Id | null) {
 		moving = false;
 		void change(patchNote(note.id, { folderId }));
@@ -34,7 +47,7 @@
 
 	function remove() {
 		deleting = false;
-		void change(deleteNoteRequest(note.id));
+		void removed();
 	}
 </script>
 
@@ -43,7 +56,7 @@
 </button>
 <Menu {open} {anchor} label="Note actions" {items} onclose={() => (open = false)} />
 <FolderPicker open={moving} tree={page.data.tree} current={note.folderId} onpick={move} oncancel={() => (moving = false)} />
-<Dialog open={deleting} title="Delete note" message={COPY.deleteNote(note.title.trim() || COPY.untitled)} confirmLabel="Delete" danger onconfirm={remove} oncancel={() => (deleting = false)} />
+<Dialog open={deleting} title="Delete note" message={COPY.deleteNote(titleLine(note.title))} confirmLabel="Delete" danger onconfirm={remove} oncancel={() => (deleting = false)} />
 
 <style>
 	/* sits above the card's stretched link; the negative margin keeps the touch target from growing the row */

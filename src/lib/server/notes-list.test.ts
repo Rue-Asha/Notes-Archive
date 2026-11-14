@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { closeDb } from './db.ts';
-import { listNotes, listPinned, listRecent, updateNote } from './notes.ts';
+import { closeDb, getDb } from './db.ts';
+import { ConflictError } from '#lib/errors.ts';
+import { getNote, listNotes, listPinned, listRecent, reorderPinned, updateNote } from './notes.ts';
 import { seedArchive, useTestDb } from './testing.ts';
 
 beforeEach(useTestDb);
@@ -108,20 +109,64 @@ describe('listRecent', () => {
 });
 
 describe('listPinned', () => {
-	it('Scenario: Server orders pinned notes by pin time', () => {
-		const { notes } = seedArchive({
-			notes: [
-				{ title: 'a', pinnedAt: at(1) },
-				{ title: 'b', pinnedAt: at(3) },
-				{ title: 'c', pinnedAt: at(2) },
-				{ title: 'd' }
-			]
-		});
+	it('Scenario: Server orders pinned notes by pin order', () => {
+		const { notes } = seedArchive({ notes: [{ title: 'a' }, { title: 'b' }, { title: 'c' }, { title: 'd' }] });
+		for (const i of [0, 2, 1]) updateNote(notes[i], { pinned: true });
+		// stamps that contradict the pin order: only the stored order can give b, c, a
+		const stamp = getDb().prepare('UPDATE notes SET pinned_at = ? WHERE id = ?');
+		[at(3), at(1), at(2)].forEach((day, i) => stamp.run(day, notes[i]));
 		expect(titles(listPinned())).toEqual(['b', 'c', 'a']);
 		expect(listRecent().find((n) => n.title === 'b')!.pinned).toBe(true);
 		expect(listRecent().find((n) => n.title === 'd')!.pinned).toBe(false);
 
 		updateNote(notes[2], { pinned: false });
 		expect(titles(listPinned())).toEqual(['b', 'a']);
+	});
+});
+
+describe('pinned order', () => {
+	const pinAll = (ids: number[]) => ids.forEach((id) => updateNote(id, { pinned: true }));
+	const abc = () => {
+		const { notes } = seedArchive({ notes: [{ title: 'a' }, { title: 'b' }, { title: 'c' }, { title: 'd' }] });
+		pinAll([notes[0], notes[1], notes[2]]);
+		return notes;
+	};
+
+	it('Scenario: Reorder sets the pinned order', () => {
+		const [a, b, c] = abc();
+		expect(titles(listPinned())).toEqual(['c', 'b', 'a']);
+		reorderPinned([a, c, b]);
+		expect(titles(listPinned())).toEqual(['a', 'c', 'b']);
+	});
+
+	it('Scenario: A new pin goes to the top of a custom order', () => {
+		const [a, b, c, d] = abc();
+		reorderPinned([a, c, b]);
+		updateNote(d, { pinned: true });
+		expect(titles(listPinned())).toEqual(['d', 'a', 'c', 'b']);
+	});
+
+	it('Scenario: Re-pinning does not keep the old position', () => {
+		const [a, b, c] = abc();
+		reorderPinned([a, c, b]);
+		updateNote(b, { pinned: false });
+		updateNote(b, { pinned: true });
+		expect(titles(listPinned())).toEqual(['b', 'a', 'c']);
+	});
+
+	it('Scenario: A stale reorder is refused', () => {
+		const [a, b, c, d] = abc();
+		const before = listPinned().map((n) => n.id);
+		expect(() => reorderPinned([a, b])).toThrow(ConflictError);
+		expect(() => reorderPinned([a, b, c, d])).toThrow(ConflictError);
+		expect(() => reorderPinned([a, a, b])).toThrow(ConflictError);
+		expect(listPinned().map((n) => n.id)).toEqual(before);
+	});
+
+	it('Scenario: Reordering does not change updatedAt', () => {
+		const [a, b, c] = abc();
+		const stamps = [a, b, c].map((id) => getNote(id)!.updatedAt);
+		reorderPinned([b, a, c]);
+		expect([a, b, c].map((id) => getNote(id)!.updatedAt)).toEqual(stamps);
 	});
 });

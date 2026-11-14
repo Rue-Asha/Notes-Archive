@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { closeDb, getDb, loadMigrations, migrate, openDb } from './db.ts';
+import { listPinned } from './notes.ts';
 
 let dir: string;
 
@@ -110,4 +111,46 @@ describe('db', () => {
 		expect(names).toEqual([...names].sort());
 		expect(names[0]).toBe('0001_images.sql');
 	});
+	it('Scenario: Migration keeps the existing order', () => {
+		const path = join(dir, 'pins.db');
+		const old = openDb(path);
+		migrate(old, loadMigrations().filter((m) => m.name < '0005'));
+		const add = (title: string, pinnedAt: string | null) =>
+			old
+				.prepare('INSERT INTO notes (title, pinned_at, created_at, updated_at) VALUES (?, ?, ?, ?)')
+				.run(title, pinnedAt, 'now', 'now');
+		add('old', '2026-11-01T10:00:00.000Z');
+		add('tie a', '2026-11-03T10:00:00.000Z');
+		add('tie b', '2026-11-03T10:00:00.000Z');
+		add('loose', null);
+		add('new', '2026-11-05T10:00:00.000Z');
+		old.close();
+		process.env.DATABASE_PATH = path;
+
+		const db = getDb();
+		const order = listPinned().map((c) => c.title);
+
+		expect(order).toEqual(['new', 'tie b', 'tie a', 'old']);
+		expect(db.prepare('SELECT title, pin_order FROM notes ORDER BY pin_order, id').all()).toEqual([
+			{ title: 'loose', pin_order: null },
+			{ title: 'new', pin_order: 1 },
+			{ title: 'tie b', pin_order: 2 },
+			{ title: 'tie a', pin_order: 3 },
+			{ title: 'old', pin_order: 4 }
+		]);
+	});
+
+	it('0005 adds the settings table and the pin order index', () => {
+		const db = openDb(join(dir, 'settings.db'));
+
+		migrate(db);
+
+		expect(tables(db)).toContain('settings');
+		db.prepare("INSERT INTO settings (key, value) VALUES ('tree_sort', 'name')").run();
+		expect(() => db.prepare("INSERT INTO settings (key, value) VALUES ('tree_sort', 'x')").run()).toThrow(/UNIQUE|PRIMARY/);
+		expect(() => db.prepare("INSERT INTO settings (key, value) VALUES ('k', NULL)").run()).toThrow(/NOT NULL/);
+		expect(db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'notes_pin_order'").get()).toBeDefined();
+		db.close();
+	});
+
 });

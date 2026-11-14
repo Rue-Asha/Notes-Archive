@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { breadcrumb, getFolder, listFolderTiles } from '#lib/server/folders.ts';
+import { breadcrumb, folderCounts, getFolder, listFolderTiles } from '#lib/server/folders.ts';
 import { listNotes } from '#lib/server/notes.ts';
 import type { PageServerLoad } from './$types';
 
@@ -8,5 +8,5 @@ export const load: PageServerLoad = ({ params }) => {
 	if (!folder) error(404, 'Folder not found');
 	const tiles = listFolderTiles(folder.id);
 	const notes = listNotes({ folderId: folder.id });
-	return { folder, breadcrumb: breadcrumb(folder.id), tiles, notes, counts: { folders: tiles.length, notes: notes.length } };
+	return { folder, breadcrumb: breadcrumb(folder.id), tiles, notes, counts: folderCounts(folder.id) };
 };

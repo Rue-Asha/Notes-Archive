@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { COPY } from '#lib/copy.ts';
+	import { titleLine } from '#lib/title.ts';
 	import type { NoteRef, TreeFolder } from '#lib/types.ts';
 	import Icon from '#lib/ui/Icon.svelte';
 	import { indentLevel } from './tree.ts';
@@ -20,7 +21,7 @@
 	let { item, level, expanded = false, current, onnavigate, ontoggle, onmenu, renaming = false, onrename, oncancel }: Props = $props();
 
 	const folder = $derived('children' in item ? item : null);
-	const name = $derived('children' in item ? item.name : item.title.trim() || COPY.untitled);
+	const name = $derived('children' in item ? item.name : titleLine(item.title));
 	const branch = $derived(!!folder && (folder.children.length > 0 || folder.notes.length > 0));
 	const icon = $derived('icon' in item ? item.icon : null);
 

@@ -3,6 +3,7 @@
 	import { MediaQuery } from 'svelte/reactivity';
 	import { afterNavigate, goto, invalidate } from '$app/navigation';
 	import { COPY } from '#lib/copy.ts';
+	import { titleLine } from '#lib/title.ts';
 	import { fadeSlide, hideOnOutro } from '#lib/motion.ts';
 	import { newFolder, newNote } from '#lib/notes/api.ts';
 	import { relativeTime } from '#lib/notes/time.ts';
@@ -182,7 +183,7 @@
 							<a class="row" role="option" aria-selected={i === active} href="/notes/{hit.note.id}" onclick={() => (leaving = true)} onpointermove={() => (active = i)}>
 								<span class="emoji" aria-hidden="true">{hit.note.icon ?? ''}</span>
 								<span class="text">
-									<span class="title">{hit.note.title.trim() || COPY.untitled}</span>
+									<span class="title">{titleLine(hit.note.title)}</span>
 									<span class="snippet"><Highlight parts={hit.parts} /></span>
 								</span>
 							</a>
@@ -197,7 +198,7 @@
 					{#each recent as note, i (note.id)}
 						<a class="row" role="option" aria-selected={i === active} href="/notes/{note.id}" onclick={() => (leaving = true)} onpointermove={() => (active = i)}>
 							<span class="emoji" aria-hidden="true">{note.icon ?? ''}</span>
-							<span class="title">{note.title.trim() || COPY.untitled}</span>
+							<span class="title">{titleLine(note.title)}</span>
 							<span class="path tnum">{relativeTime(note.updatedAt)}</span>
 						</a>
 					{/each}

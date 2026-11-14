@@ -65,3 +65,15 @@ test('Scenario: Choosing a tree item closes the drawer', async ({ page, request 
 	await page.waitForURL(`**/notes/${notes[0]}`);
 	await expect(drawer).toBeHidden();
 });
+
+test('Scenario: A multi-line title shows on one line in the tree', async ({ page, request }, info) => {
+	await reset(request);
+	await seed(request, { notes: [{ title: 'Reise\n\nPlan' }] });
+	await calm(page);
+	await open(page, '/');
+	const tree = await treeScope(page, info);
+
+	const link = tree.getByRole('link', { name: 'Reise Plan', exact: true });
+	await expect(link).toBeVisible();
+	await expect(link).toHaveAttribute('title', 'Reise Plan');
+});

@@ -121,6 +121,15 @@ describe('snippet parts', () => {
 	});
 });
 
+describe('multi-line titles', () => {
+	it('Scenario: Words on every title line are found', () => {
+		seedArchive({ notes: [{ title: 'Kirschblüte\nÜbersicht' }] });
+		const [hit] = searchNotes({ q: 'uber' });
+		expect(hit).toBeDefined();
+		expect(hit.parts.find((p) => p.hit)).toEqual({ text: 'Übersicht', hit: true });
+	});
+});
+
 describe('search follows edits', () => {
 	it('Scenario: Search reflects edits on save', () => {
 		const { notes } = seedArchive({ notes: [{ body: 'Apfel' }] });
