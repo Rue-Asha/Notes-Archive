@@ -1,5 +1,4 @@
-import type { Handle, ServerInit } from '@sveltejs/kit/hooks';
-import { lookAttrs } from '#lib/styles/look.ts';
+import type { ServerInit } from '@sveltejs/kit/hooks';
 import { getDb } from '#lib/server/db.ts';
 import { purgeOrphans } from '#lib/server/notes.ts';
 
@@ -8,6 +7,3 @@ export const init: ServerInit = () => {
 	getDb();
 	purgeOrphans();
 };
-
-export const handle: Handle = ({ event, resolve }) =>
-	resolve(event, { transformPageChunk: ({ html }) => html.replace('%look%', lookAttrs()) });

@@ -1,11 +1,18 @@
 import { expect, test, type Page } from '@playwright/test';
-import { calm, counts, open, reset, seed, storedNote, watchSaves } from './helpers.ts';
+import { calm, counts, open, reset, seed, storedNote, treeScope, watchSaves } from './helpers.ts';
 
 const props = (page: Page) => page.getByRole('group', { name: 'Properties' });
 // a tag chip is its label plus a "Remove <label>" button
 const chips = (page: Page) => props(page).getByRole('button', { name: /^Remove / });
 
+// the phone folds the properties into one line
+async function expand(page: Page) {
+	const summary = props(page).getByRole('button', { name: /^Properties/ });
+	if (await summary.count()) await summary.click();
+}
+
 async function expectChips(page: Page, names: string[]) {
+	await expand(page);
 	await expect(chips(page)).toHaveCount(names.length);
 	for (const [i, name] of names.entries()) await expect(chips(page).nth(i)).toHaveAccessibleName(`Remove ${name}`);
 }
@@ -17,6 +24,7 @@ test('Scenario: Add tags with Enter and comma', async ({ page, request }) => {
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
 
+	await expand(page);
 	const input = props(page).getByRole('combobox', { name: 'Add a tag' });
 	await input.fill('Reise');
 	await input.press('Enter');
@@ -38,6 +46,7 @@ test('Scenario: Autocomplete suggests existing tags ignoring case', async ({ pag
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[1]}`);
 
+	await expand(page);
 	const input = props(page).getByRole('combobox', { name: 'Add a tag' });
 	await input.fill('ÜB');
 	const suggestion = props(page).getByRole('option', { name: 'Übung' });
@@ -59,6 +68,7 @@ test('Scenario: Backspace on an empty input removes the last chip', async ({ pag
 	await open(page, `/notes/${notes[0]}`);
 
 	await expectChips(page, ['Reise', 'Japan']);
+	await expand(page);
 	const input = props(page).getByRole('combobox', { name: 'Add a tag' });
 	await input.click();
 	await input.press('Backspace');
@@ -77,13 +87,16 @@ test('Scenario: Typing a new name creates a tag', async ({ page, request }, info
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
 
+	await expand(page);
 	const input = props(page).getByRole('combobox', { name: 'Add a tag' });
 	await input.fill('Gartenbau');
 	await input.press('Enter');
 	await expectChips(page, ['Gartenbau']);
 
-	if (info.project.name === 'phone') await page.getByRole('navigation', { name: 'Bottom bar' }).getByRole('button', { name: 'Folders' }).click();
-	const scope = info.project.name === 'phone' ? page.getByRole('dialog', { name: 'Folders' }) : page.getByRole('navigation', { name: 'Sidebar' });
+	if (info.project.name === 'phone') {
+		await input.blur();
+	}
+	const scope = await treeScope(page, info);
 	const link = scope.getByRole('link', { name: /Gartenbau/ });
 	await expect(link).toBeVisible();
 	await expect(link.getByText('1', { exact: true })).toBeVisible();
@@ -95,6 +108,7 @@ test('Scenario: Whitespace-only and duplicate tags are ignored in the input', as
 	await calm(page);
 	await open(page, `/notes/${notes[0]}`);
 
+	await expand(page);
 	const input = props(page).getByRole('combobox', { name: 'Add a tag' });
 	await input.fill('   ');
 	await input.press('Enter');

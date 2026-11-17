@@ -1,6 +1,7 @@
 import { Extension, type AnyExtension, type Editor } from '@tiptap/core';
 import { DragHandle } from '@tiptap/extension-drag-handle';
 import { NodeSelection, Plugin } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { mount, unmount } from 'svelte';
 import BlockMenu from './BlockMenu.svelte';
 import type { EditorContext } from './context.ts';
@@ -51,6 +52,15 @@ export function handleExtensions(ctx: EditorContext): AnyExtension[] {
 			addProseMirrorPlugins() {
 				return [
 					new Plugin({
+						// the strip belongs to the cursor's block only, so every other paragraph keeps the card's full width
+						props: {
+							decorations: ({ doc, selection }) => {
+								const { $from } = selection;
+								if ($from.depth < 1) return null;
+								const at = $from.before(1);
+								return DecorationSet.create(doc, [Decoration.node(at, at + doc.child($from.index(0)).nodeSize, { class: 'has-handle' })]);
+							}
+						},
 						view: (view) => {
 							const refresh = () => {
 								const { selection } = view.state;
@@ -67,7 +77,6 @@ export function handleExtensions(ctx: EditorContext): AnyExtension[] {
 								host.style.insetInlineStart = `${view.dom.getBoundingClientRect().right - 38}px`;
 								host.style.visibility = 'visible';
 							};
-							// a strip of its own at the line ends, so the handle never sits on text a tap could be meant for
 							view.dom.classList.add('touch-handle');
 							const stop = watchViewport(refresh);
 							view.dom.addEventListener('focus', refresh);

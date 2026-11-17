@@ -77,3 +77,43 @@ export async function clientNav(page: Page, path: string): Promise<void> {
 	}, path);
 	await page.waitForURL((url) => url.pathname + url.search === path);
 }
+
+// Posture helpers: the pointer posture (1280, desktop project) has the Sidebar, the touch posture (390, phone project) the Bottom bar.
+export const isDesktop = (info: { project: { name: string } }): boolean => info.project.name === 'desktop';
+
+export const sidebar = (page: Page): Locator => page.getByRole('navigation', { name: 'Sidebar' });
+
+export const bottomBar = (page: Page): Locator => page.getByRole('navigation', { name: 'Bottom bar' });
+
+// Where the folder list and the tags live: the sidebar on desktop, the Folders page (`/folders`, reached from the Bottom bar) on phone.
+// The editor must not have focus: the bar is inert while it does.
+export async function treeScope(page: Page, info: { project: { name: string } }): Promise<Locator> {
+	if (isDesktop(info)) return sidebar(page);
+	if (new URL(page.url()).pathname !== '/folders') {
+		await bottomBar(page).getByRole('link', { name: 'Folders' }).click();
+		await page.waitForURL((url) => url.pathname === '/folders');
+		await page.locator('html[data-hydrated]').waitFor({ state: 'attached' });
+	}
+	return page.getByRole('main');
+}
+
+// A folder's link by its name; the Folders page rows add their note count to the accessible name.
+export const folderLink = (scope: Locator, name: string): Locator =>
+	scope.getByRole('link', { name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s+\\d+ notes?)?$`) });
+
+// Opens the folder's menu: the sidebar tree's "<name> menu" on desktop, the folder page's "Folder menu" on phone (Rename, Move to… and Delete only).
+export async function openFolderMenu(page: Page, info: { project: { name: string } }, id: Id, name: string): Promise<void> {
+	if (isDesktop(info)) return sidebar(page).getByRole('button', { name: `${name} menu` }).click();
+	await open(page, `/folders/${id}`);
+	await page.getByRole('main').getByRole('button', { name: 'Folder menu' }).click();
+}
+
+export async function setSort(request: APIRequestContext, treeSort: 'mixed' | 'name' | 'edited' | 'created'): Promise<void> {
+	const res = await request.patch('/api/settings', { data: { treeSort } });
+	if (!res.ok()) throw new Error(`setSort failed: ${res.status()}`);
+}
+
+// Visible names of the tree's folder rows, top to bottom (rows are links to /folders/<id>).
+export async function folderOrder(scope: Locator): Promise<string[]> {
+	return (await scope.locator('a[href^="/folders/"]').allInnerTexts()).map((text) => text.trim());
+}

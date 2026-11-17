@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { calm, counts, open, photo, reset, seed } from './helpers.ts';
 
-const cover = (page: import('@playwright/test').Page) => page.getByRole('main').getByRole('img').or(page.getByRole('main').getByRole('presentation'));
+const cover = (page: import('@playwright/test').Page) => page.getByRole('main').locator('[data-cover] img');
 
 async function bare(request: Parameters<typeof reset>[0]) {
 	await reset(request);
@@ -20,26 +20,23 @@ test('Scenario: Upload and replace a folder cover', async ({ page, request }) =>
 	const first = await cover(page).getAttribute('src');
 	expect(first).toMatch(/^\/images\/\d+$/);
 
-	await main.getByLabel('Change cover').setInputFiles(photo('lake-greek.jpg'));
+	await main.locator('input[type=file]').setInputFiles(photo('lake-greek.jpg'));
 	await expect(cover(page)).not.toHaveAttribute('src', first!);
 	await expect(cover(page)).toHaveAttribute('src', /^\/images\/\d+$/);
 	expect((await counts(request)).images).toBe(1);
 });
 
-test('Scenario: Removing the cover brings back the typographic tile', async ({ page, request }) => {
+test('Scenario: Removing the cover brings back Add cover', async ({ page, request }) => {
 	await reset(request);
 	const { folders } = await seed(request, { folders: [{ name: 'Reisen' }, { name: 'Japan', parent: 0, cover: true }] });
 	await calm(page);
 	await open(page, `/folders/${folders[1]}`);
 	await expect(cover(page)).toHaveCount(1);
 
-	await page.getByRole('main').getByRole('button', { name: 'Remove cover' }).click();
+	await page.getByRole('main').getByRole('button', { name: 'Change cover', exact: true }).click();
+	await page.getByRole('menuitem', { name: 'Remove cover' }).click();
 	await expect(cover(page)).toHaveCount(0);
-
-	await open(page, `/folders/${folders[0]}`);
-	const tile = page.getByRole('region', { name: 'Folders' }).getByRole('link', { name: /Japan/ });
-	await expect(tile).toBeVisible();
-	await expect(tile.getByRole('img').or(tile.getByRole('presentation'))).toHaveCount(0);
+	await expect(page.getByRole('main').getByRole('button', { name: 'Add cover' })).toBeVisible();
 });
 
 test('Scenario: Wrong cover file is refused with a toast', async ({ page, request }) => {
@@ -48,7 +45,7 @@ test('Scenario: Wrong cover file is refused with a toast', async ({ page, reques
 	await calm(page);
 	await open(page, `/folders/${folders[1]}`);
 	const kept = await cover(page).getAttribute('src');
-	const input = page.getByRole('main').getByLabel('Change cover');
+	const input = page.getByRole('main').locator('input[type=file]');
 
 	await input.setInputFiles({ name: 'a.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4') });
 	await expect(page.getByRole('status').filter({ hasText: "That file isn't an image" })).toBeVisible();

@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import { page } from '$app/state';
 	import { COPY } from '#lib/copy.ts';
+	import type { Reorder } from '#lib/home/pinned.ts';
 	import { titleLine } from '#lib/title.ts';
 	import type { Id, NoteCard } from '#lib/types.ts';
 	import Dialog from '#lib/ui/Dialog.svelte';
@@ -11,7 +12,7 @@
 	import Menu, { type MenuItem } from '#lib/ui/Menu.svelte';
 	import { deleteNoteRequest, patchNote } from './api.ts';
 
-	let { note, ondeleted }: { note: NoteCard; ondeleted?: (note: NoteCard) => Promise<void> | void } = $props();
+	let { note, ondeleted, reorder }: { note: NoteCard; ondeleted?: (note: NoteCard) => Promise<void> | void; reorder?: Reorder | null } = $props();
 
 	// NoteGrid and NoteCard sit between the tag page and this menu, so the page hands its callback down by context
 	const inherited = getContext<((note: NoteCard) => Promise<void> | void) | undefined>('card-deleted');
@@ -22,8 +23,14 @@
 	let anchor = $state<HTMLButtonElement | null>(null);
 
 	const items = $derived<MenuItem[]>([
-		{ label: note.pinned ? 'Unpin' : 'Pin', icon: 'pin', onselect: () => void change(patchNote(note.id, { pinned: !note.pinned })) },
-		{ label: 'Move to…', icon: 'move', onselect: () => (moving = true) },
+		...(reorder
+			? [
+					{ label: COPY.moveUp, icon: 'arrow-up', disabled: !reorder.canUp, onselect: () => reorder.up() },
+					{ label: COPY.moveDown, icon: 'arrow-down', disabled: !reorder.canDown, onselect: () => reorder.down() }
+				]
+			: []),
+		{ label: note.pinned ? 'Unpin' : 'Pin', icon: 'pin', separator: !!reorder, onselect: () => void change(patchNote(note.id, { pinned: !note.pinned })) },
+		{ label: 'Move to…', icon: 'folder', onselect: () => (moving = true) },
 		{ label: 'Delete', icon: 'trash', danger: true, onselect: () => (deleting = true) }
 	]);
 
@@ -51,33 +58,41 @@
 	}
 </script>
 
-<button type="button" class="more" aria-label="Note actions" aria-haspopup="menu" aria-expanded={open} bind:this={anchor} onclick={() => (open = !open)}>
+<button type="button" class="more" aria-label="Note actions" data-press="round" aria-haspopup="menu" aria-expanded={open} bind:this={anchor} onclick={() => (open = !open)}>
 	<Icon name="more" size={18} />
 </button>
 <Menu {open} {anchor} label="Note actions" {items} onclose={() => (open = false)} />
 <FolderPicker open={moving} tree={page.data.tree} current={note.folderId} onpick={move} oncancel={() => (moving = false)} />
-<Dialog open={deleting} title="Delete note" message={COPY.deleteNote(titleLine(note.title))} confirmLabel="Delete" danger onconfirm={remove} oncancel={() => (deleting = false)} />
+<Dialog open={deleting} title={COPY.deleteAsk(titleLine(note.title))} message={COPY.cantUndo} confirmLabel={COPY.deleteNoteLabel} danger onconfirm={remove} oncancel={() => (deleting = false)} />
 
 <style>
-	/* sits above the card's stretched link; the negative margin keeps the touch target from growing the row */
+	/* sits above the entry's stretched link */
 	.more {
 		position: relative;
 		z-index: 1;
-		display: inline-grid;
+		display: grid;
 		place-items: center;
-		inline-size: 36px;
-		block-size: 36px;
-		margin: -5px -8px -5px 0;
+		inline-size: max(var(--control-height-s), var(--target));
+		block-size: max(var(--control-height-s), var(--target));
 		padding: 0;
 		border: 0;
-		border-radius: var(--r-pill);
+		border-radius: var(--radius-round);
 		background: transparent;
-		color: var(--ink-2);
+		color: var(--ink-muted);
 	}
 
-	.more:hover,
 	.more[aria-expanded='true'] {
-		background: var(--row-hover);
-		color: var(--ink);
+		background: var(--surface-inverse);
+		color: var(--ink-on-inverse);
+	}
+
+	@media (hover: hover) {
+		.more:hover {
+			background: var(--surface-tint-strong);
+		}
+
+		.more[aria-expanded='true']:hover {
+			background: var(--surface-inverse-hover);
+		}
 	}
 </style>

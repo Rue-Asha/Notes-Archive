@@ -60,6 +60,6 @@ Name: Notes Archive. The interface language is English (including all current co
 
 ## Accessibility & Inclusion
 
-Target: WCAG 2.2 AA, set for every app in the shared design fingerprint (Design-System).
+Target: WCAG 2.2 AA only, set for every app in the shared design fingerprint (Design-System).
 
-Keyboard operation for every action (menus, dialogs, pickers, tree, palette), named landmarks and controls, focus returned after overlays close, reduced-motion preference respected, text that wraps instead of overflowing (long titles, tag names, unbroken words), no horizontal page scroll at any width. No formal standard (such as WCAG level) has been set by the owner; this is undecided.
+Keyboard operation for every action (menus, dialogs, pickers, tree, palette), named landmarks and controls, focus returned after overlays close, reduced-motion preference respected, text that wraps instead of overflowing (long titles, tag names, unbroken words), no horizontal page scroll at any width.

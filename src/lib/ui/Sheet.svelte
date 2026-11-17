@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { tick, type Snippet } from 'svelte';
-	import type { TransitionConfig } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
 	import { beforeNavigate, goto, pushState } from '$app/navigation';
-	import { fadeSlide, hideOnOutro, reducedMotion } from '#lib/motion.ts';
 	import { portal, trapTab } from './overlay.ts';
 
 	type Side = 'left' | 'bottom' | 'full';
@@ -17,13 +14,26 @@
 	let pushed = false;
 	let followed = false;
 
+	// the page behind stays where it was: locked while the sheet is open (the style rule below), and put back on close
+	// in case a focus or the history entry moved it
+	let scrollY = 0;
+	// a sheet that mounts closed (the palette mounts it when the viewport turns phone-sized) has nothing to put back
+	let shown = false;
+
 	$effect(() => {
 		if (open) {
+			shown = true;
 			opener = document.activeElement as HTMLElement | null;
+			scrollY = window.scrollY;
 			pushed = true;
 			pushState('', {});
-			tick().then(() => sheet?.querySelector<HTMLElement>('[autofocus], a[href], button, input')?.focus() ?? sheet?.focus());
-		} else {
+			tick().then(() => {
+				const first = sheet?.querySelector<HTMLElement>('[autofocus], a[href], button, input') ?? sheet;
+				first?.focus({ preventScroll: true });
+				if (window.scrollY !== scrollY) window.scrollTo(0, scrollY);
+			});
+		} else if (shown) {
+			shown = false;
 			// closed without a popstate: a followed link closes the sheet first and navigates in the same click
 			if (pushed) {
 				followed = true;
@@ -31,8 +41,9 @@
 				setTimeout(() => (followed = false), 1000);
 			}
 			pushed = false;
-			opener?.focus();
+			opener?.focus({ preventScroll: true });
 			opener = null;
+			if (!followed && window.scrollY !== scrollY) window.scrollTo(0, scrollY);
 		}
 	});
 
@@ -64,43 +75,34 @@
 			dismiss();
 		} else trapTab(event, sheet!);
 	}
-
-	function slide(_node: Element): TransitionConfig {
-		if (reducedMotion()) return { duration: 0 };
-		return {
-			duration: 280,
-			easing: cubicOut,
-			css: (t, u) => {
-				if (side === 'left') return `transform: translateX(${(-u * 100).toFixed(2)}%)`;
-				if (side === 'bottom') return `transform: translateY(${(u * 100).toFixed(2)}%)`;
-				return `transform: translateY(${(u * 24).toFixed(2)}px); opacity: ${t}`;
-			}
-		};
-	}
 </script>
 
 <svelte:window onpopstate={popped} />
 
 {#if open}
-	<div class="layer" use:portal>
-		<div class="scrim" role="presentation" transition:fadeSlide={{ y: 0 }} onpointerdown={dismiss}></div>
-		<div class="sheet glass strong {side}" role="dialog" aria-modal="true" aria-label={label} tabindex="-1" bind:this={sheet} onkeydown={keys} transition:slide use:hideOnOutro>
+	<div class="layer" data-sheet-layer use:portal>
+		<div class="scrim" role="presentation" onpointerdown={dismiss}></div>
+		<div class="sheet {side}" role="dialog" aria-modal="true" aria-label={label} tabindex="-1" bind:this={sheet} onkeydown={keys}>
 			{@render children()}
 		</div>
 	</div>
 {/if}
 
 <style>
+	:global(html:has([data-sheet-layer])) {
+		overflow: hidden;
+	}
+
 	.layer {
 		position: fixed;
 		inset: 0;
-		z-index: 80;
+		z-index: var(--z-sheet);
 	}
 
 	.scrim {
 		position: absolute;
 		inset: 0;
-		background: color-mix(in srgb, var(--ink) 28%, transparent);
+		background: var(--surface-tint-strong);
 	}
 
 	.sheet {
@@ -108,7 +110,11 @@
 		display: flex;
 		flex-direction: column;
 		overflow: auto;
-		background: color-mix(in srgb, var(--glass-fallback) 92%, transparent);
+		background: var(--surface-glass-strong);
+		-webkit-backdrop-filter: var(--glass-filter);
+		backdrop-filter: var(--glass-filter);
+		box-shadow: var(--elevation-card);
+		color: var(--ink);
 	}
 
 	.left {
@@ -116,8 +122,8 @@
 		inset-inline-start: 0;
 		inline-size: min(86vw, 340px);
 		padding-block-start: env(safe-area-inset-top);
-		border-start-end-radius: var(--r-xl);
-		border-end-end-radius: var(--r-xl);
+		border-start-end-radius: var(--radius-card);
+		border-end-end-radius: var(--radius-card);
 	}
 
 	.bottom {
@@ -125,8 +131,8 @@
 		inset-block-end: 0;
 		max-block-size: 85dvh;
 		padding-block-end: env(safe-area-inset-bottom);
-		border-start-start-radius: var(--r-xl);
-		border-start-end-radius: var(--r-xl);
+		border-start-start-radius: var(--radius-card);
+		border-start-end-radius: var(--radius-card);
 	}
 
 	.full {

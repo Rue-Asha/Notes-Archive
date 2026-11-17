@@ -1,24 +1,27 @@
 <script lang="ts">
 	import type { NoteCard } from '#lib/types.ts';
 	import Card from './NoteCard.svelte';
+	import { arrive, depart, reflow } from '#lib/ui/motion.ts';
 
-	let { notes }: { notes: NoteCard[] } = $props();
+	let { notes, home = false, tagged = false }: { notes: NoteCard[]; home?: boolean; tagged?: boolean } = $props();
 </script>
 
-<div class="grid" data-note-grid>
-	{#each notes as note, index (note.id)}<Card {note} {index} />{/each}
-</div>
+<ul class="entries" class:home={home || tagged} data-note-grid>
+	{#each notes as note (note.id)}<li animate:reflow in:arrive|global out:depart><Card {note} {home} {tagged} /></li>{/each}
+</ul>
 
 <style>
-	.grid {
+	.entries {
 		display: grid;
-		gap: var(--s-4);
-		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: var(--space-2);
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
 	}
 
-	@media (min-width: 768px) {
-		.grid {
-			gap: var(--s-5);
-		}
+	.home {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	li {
+		min-inline-size: 0;
 	}
 </style>

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { closeDb } from './db.ts';
 import { updateNote } from './notes.ts';
+import { hitDisplay } from '#lib/search/query.ts';
 import { searchNotes, toMatchQuery } from './search.ts';
 import { seedArchive, useTestDb } from './testing.ts';
 
@@ -118,6 +119,33 @@ describe('snippet parts', () => {
 		const [hit] = searchNotes({ q: 'strasse' });
 		expect(hit.parts.find((p) => p.hit)).toEqual({ text: 'Straße', hit: true });
 		expect(body).toContain(joined(hit).replace(/^…|…$/g, ''));
+	});
+});
+
+describe('snippet source', () => {
+	it('Regression: a title-only match keeps the body as the snippet', () => {
+		seedArchive({ notes: [{ title: 'Gartenplan', body: 'Beete umgraben' }, { title: 'Einkauf', body: 'Samen für den Gartenplan' }] });
+		const hits = searchNotes({ q: 'gartenplan' });
+		const byTitle = hits.find((h) => h.note.title === 'Gartenplan')!;
+		const byBody = hits.find((h) => h.note.title === 'Einkauf')!;
+		expect(byTitle.inBody).toBe(false);
+		expect(byBody.inBody).toBe(true);
+		expect(byBody.parts.find((p) => p.hit)).toEqual({ text: 'Gartenplan', hit: true });
+		// what the card and the palette row show: the title marked, the body as the plain snippet
+		const shown = hitDisplay(byTitle, byTitle.note.title);
+		expect(shown.title).toEqual([{ text: 'Gartenplan', hit: true }]);
+		expect(shown.snippet).toBeNull();
+		expect(byTitle.note.snippet).toBe('Beete umgraben');
+	});
+
+	it('Regression: a tag-only match marks the tag in the snippet, as the tag is spelled', () => {
+		seedArchive({ notes: [{ title: 'Japan', body: 'Reiseplan', tags: ['Kirschblüte', 'Straßenfest'] }] });
+		for (const [q, word] of [['kirsch', 'Kirschblüte'], ['strasse', 'Straßenfest']]) {
+			const [hit] = searchNotes({ q });
+			expect(hit.inBody).toBe(false);
+			expect(hit.parts.find((p) => p.hit)).toEqual({ text: word, hit: true });
+			expect(hitDisplay(hit, hit.note.title).snippet?.some((p) => p.hit && p.text === word)).toBe(true);
+		}
 	});
 });
 

@@ -1,24 +1,24 @@
-<script lang="ts">
-	import type { Id, Tree, TreeFolder } from '#lib/types.ts';
-	import FolderPicker from '#lib/ui/FolderPicker.svelte';
-	import Icon from '#lib/ui/Icon.svelte';
+<script lang="ts" module>
+	// a deep path keeps its first and last folder; the full path stays in the button's name
+	export const shortPath = (path: string[]): string => (path.length > 3 ? [path[0], '…', path.at(-1)].join(' / ') : path.join(' / '));
+</script>
 
-	let { folderId, tree, onchange }: { folderId: Id | null; tree: Tree; onchange(folderId: Id | null): void } = $props();
+<script lang="ts">
+	import Icon from '#lib/shell/tree/Icon.svelte';
+	import type { Id, Tree } from '#lib/types.ts';
+	import FolderPicker from '#lib/ui/FolderPicker.svelte';
+
+	let { folderId, path, tree, onchange }: { folderId: Id | null; path: string[]; tree: Tree; onchange(folderId: Id | null): void } = $props();
 
 	let open = $state(false);
 
-	function nameOf(folders: TreeFolder[], id: Id): string | undefined {
-		for (const f of folders) {
-			const hit = f.id === id ? f.name : nameOf(f.children, id);
-			if (hit !== undefined) return hit;
-		}
-	}
-
-	const name = $derived(folderId === null ? 'Root' : (nameOf(tree.folders, folderId) ?? 'Root'));
+	const full = $derived(path.length ? path.join(' / ') : 'Root');
 </script>
 
-<button type="button" class="prop glass" aria-label="Folder: {name}" aria-haspopup="dialog" data-folder-field onclick={() => (open = true)}>
-	<Icon name="folder" size={16} /><span class="name">{name}</span>
+<button type="button" class="seg pick" aria-label="Folder: {full}" title={full} aria-haspopup="dialog" data-folder-field data-press onclick={() => (open = true)}>
+	<Icon name="folder" size={18} />
+	<span class="seg-text"><span class="seg-label">Folder</span><span class="seg-value path">{path.length ? shortPath(path) : 'Root'}</span></span>
+	<Icon name="chevronDown" size={14} />
 </button>
 <FolderPicker
 	{open}
@@ -32,10 +32,12 @@
 />
 
 <style>
-	.name {
-		max-inline-size: 22ch;
+	.path {
+		display: -webkit-box;
 		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		overflow-wrap: anywhere;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
 	}
 </style>

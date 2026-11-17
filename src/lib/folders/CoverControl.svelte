@@ -1,18 +1,29 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import Button from '#lib/components/button/Button.svelte';
 	import { COPY } from '#lib/copy.ts';
 	import { toast } from '#lib/shell/toast.ts';
+	import Icon from '#lib/shell/tree/Icon.svelte';
 	import type { Id } from '#lib/types.ts';
-	import Icon from '#lib/ui/Icon.svelte';
+	import Menu from '#lib/ui/Menu.svelte';
 
 	const MAX_BYTES = 16 * 1024 * 1024;
 
 	let { folderId, hasCover }: { folderId: Id; hasCover: boolean } = $props();
 
+	let input = $state<HTMLInputElement>();
+	let anchor = $state<HTMLElement | null>(null);
+	let open = $state(false);
+
+	const items = $derived([
+		{ label: 'Change cover', icon: 'image', onselect: () => input?.click() },
+		{ label: 'Remove cover', icon: 'trash', danger: true, onselect: remove }
+	]);
+
 	async function choose(event: Event & { currentTarget: HTMLInputElement }) {
-		const input = event.currentTarget;
-		const file = input.files?.[0];
-		input.value = '';
+		const field = event.currentTarget;
+		const file = field.files?.[0];
+		field.value = '';
 		if (!file) return;
 		if (!file.type.startsWith('image/')) return toast(COPY.notAnImage, 'error');
 		if (file.size > MAX_BYTES) return toast(COPY.imageTooLarge, 'error');
@@ -28,68 +39,19 @@
 	}
 </script>
 
-<div class="control" class:on-cover={hasCover}>
-	<label class="chip glass" class:icon={hasCover}>
-		<input type="file" accept="image/*" aria-label={hasCover ? 'Change cover' : 'Add cover'} onchange={choose} />
-		<Icon name="image" />
-		{#if !hasCover}<span>Add cover</span>{/if}
-	</label>
+<input bind:this={input} type="file" accept="image/*" hidden aria-label={hasCover ? 'Change cover' : 'Add cover'} onchange={choose} />
+<span class="host" bind:this={anchor}>
 	{#if hasCover}
-		<button type="button" class="chip glass icon" aria-label="Remove cover" onclick={remove}><Icon name="trash" /></button>
+		<Button variant="glass" size="s" aria-haspopup="menu" aria-expanded={open} onclick={() => (open = !open)}><Icon name="image" size={16} /><span>Change cover</span></Button>
+	{:else}
+		<Button variant="glass" size="s" onclick={() => input?.click()}><Icon name="image" size={16} /><span>Add cover</span></Button>
 	{/if}
-</div>
+</span>
+<Menu {open} {anchor} label="Cover" {items} onclose={() => (open = false)} />
 
 <style>
-	.control {
-		display: flex;
-		gap: var(--s-2);
-	}
-
-	.on-cover {
-		position: absolute;
-		inset-block-start: var(--s-4);
-		inset-inline-end: var(--s-4);
-	}
-
-	.chip {
-		position: relative;
+	.host {
 		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--s-2);
-		block-size: var(--control);
-		padding: 0 var(--s-4);
-		border: 0;
-		border-radius: var(--r-pill);
-		color: var(--ink);
-		cursor: pointer;
-		font: inherit;
-		font-size: var(--t-small);
-		font-weight: 600;
-		transition: transform var(--d-fast) var(--ease-out);
-	}
-
-	.icon {
-		inline-size: var(--control);
-		padding: 0;
-	}
-
-	.chip:active {
-		transform: scale(0.96);
-	}
-
-	.chip:focus-within,
-	.chip:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 2px;
-	}
-
-	input {
-		position: absolute;
-		inset: 0;
-		inline-size: 100%;
-		block-size: 100%;
-		opacity: 0;
-		cursor: pointer;
+		min-inline-size: 0;
 	}
 </style>

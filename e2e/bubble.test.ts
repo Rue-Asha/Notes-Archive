@@ -121,3 +121,14 @@ test('On touch the toolbar stays below a selection on the last visible line', as
 	const selection = await page.evaluate(() => getSelection()!.getRangeAt(0).getBoundingClientRect().bottom);
 	expect((await toolbar(page).boundingBox())!.y).toBeGreaterThanOrEqual(selection);
 });
+
+test('Regression: the bubble for a word at a line start stays on the card', async ({ page, request }) => {
+	await openNote(page, request, doc(paragraph('Absatz drei. Wir sind früh am Bahnhof angekommen.')));
+	await editor(page).getByText('Absatz drei').dblclick({ position: { x: 5, y: 8 } });
+	await expect(toolbar(page)).toBeVisible();
+
+	const card = (await page.locator('[data-note-column]').boundingBox())!;
+	await expect.poll(async () => (await toolbar(page).boundingBox())!.x).toBeGreaterThanOrEqual(card.x);
+	const bar = (await toolbar(page).boundingBox())!;
+	expect(bar.x + bar.width).toBeLessThanOrEqual(card.x + card.width);
+});

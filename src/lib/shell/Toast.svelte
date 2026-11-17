@@ -1,55 +1,111 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { fadeSlide, hideOnOutro } from '#lib/motion.ts';
-	import { attach, flush, toasts } from './toast.ts';
+	import Icon from '#lib/ui/Icon.svelte';
+	import { attach, dismiss, flush, park, toasts } from './toast.ts';
 
 	onMount(attach);
 	afterNavigate(flush);
 </script>
 
-<div class="toasts">
+<svelte:window onpagehide={park} onpageshow={flush} />
+
+<div class="toasts" role="status" aria-live="polite" data-surface="inverse">
 	{#each $toasts as item (item.id)}
-		<p class="toast glass strong" class:error={item.tone === 'error'} role="status" transition:fadeSlide use:hideOnOutro>{item.message}</p>
+		<div class="toast" class:error={item.tone === 'error'}>
+			{#if item.tone === 'error'}<span class="mark" aria-hidden="true"><Icon name="alert" size={18} /></span>{/if}
+			<p class="message">{item.message}</p>
+			<button type="button" class="dismiss" aria-label="Dismiss" data-press="round" onclick={() => dismiss(item.id)}>
+				<Icon name="close" size={16} />
+			</button>
+		</div>
 	{/each}
 </div>
 
 <style>
+	/* one step above the sort popover, which shares --z-toast and sits later in the document */
 	.toasts {
 		position: fixed;
-		inset-inline: 0;
-		inset-block-end: var(--s-7);
-		z-index: 60;
+		z-index: calc(var(--z-toast) + 1);
+		inset-inline: var(--space-4);
+		inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
 		display: grid;
 		justify-items: center;
-		gap: var(--s-2);
-		padding-inline: var(--s-4);
+		gap: var(--space-2);
 		pointer-events: none;
 	}
 
 	.toast {
-		margin: 0;
-		min-block-size: var(--control);
 		display: flex;
 		align-items: center;
-		padding: 0 var(--s-6);
-		border-radius: var(--r-pill);
-		font-size: var(--t-body);
-		font-weight: 500;
+		gap: var(--space-2);
+		inline-size: min(100%, calc(var(--measure) * 0.75));
+		min-block-size: max(var(--control-height), var(--target));
+		padding: var(--space-1-5) var(--space-1-5) var(--space-1-5) var(--space-4);
+		border-radius: var(--radius-panel);
+		background: var(--surface-inverse);
+		box-shadow: var(--elevation-menu);
+		color: var(--ink-on-inverse);
+		pointer-events: auto;
+		animation: enter var(--motion-glide) var(--ease-out);
 	}
 
-	.strong {
-		background: color-mix(in srgb, var(--glass-fallback) 92%, transparent);
+	.mark {
+		display: inline-flex;
+		flex: none;
+		color: var(--danger-on-inverse);
 	}
 
-	.error {
-		color: var(--danger);
+	.message {
+		flex: 1;
+		min-inline-size: 0;
+		padding-block: var(--space-2);
+		font-size: var(--type-body-s-size);
+		line-height: var(--type-body-s-line);
+		overflow-wrap: anywhere;
+	}
+
+	.dismiss {
+		display: grid;
+		place-items: center;
+		flex: none;
+		inline-size: max(var(--control-height-xs), var(--target));
+		min-block-size: max(var(--control-height-xs), var(--target));
+		border: 0;
+		border-radius: var(--radius-round);
+		background: transparent;
+		color: var(--ink-on-inverse);
+	}
+
+	@media (hover: hover) {
+		.dismiss:hover {
+			background: var(--surface-inverse-tint-strong);
+		}
 	}
 
 	/* above the bottom bar */
 	@media (max-width: 1023px) {
 		.toasts {
-			inset-block-end: calc(80px + env(safe-area-inset-bottom) + var(--s-4));
+			inset-block-end: calc(80px + env(safe-area-inset-bottom) + var(--space-4));
+		}
+	}
+
+	@keyframes enter {
+		from {
+			opacity: 0;
+			transform: translateY(var(--settle-rise));
+		}
+	}
+
+	@keyframes fade {
+		from {
+			opacity: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.toast {
+			animation-name: fade;
 		}
 	}
 </style>

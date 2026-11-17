@@ -48,3 +48,13 @@ motion) so transitions can't make them flaky; navigation tests use `clientNav`. 
 - **New e2e test over seeded names** → scope link/text locators to a section (tree, tags, cards), never a loose `/Reise/` regexp. (weil: real tree rows from the shell units made loose regexps in tags-section.test.ts match twice) [2026-11-03 · build-notes-archive]
 - **Editor code importing a Tiptap extension** → add it to package.json, not only via starter-kit. (weil: core.ts imported @tiptap/extension-code, reachable only transitively) [2026-11-03 · build-notes-archive]
 - **e2e on phone that clicks a shell control while the editor has focus** → expect the bottom bar to be inert there; make the test desktop-only or blur first. (weil: palette-editor passed in its worktree and failed on phone after the bottom bar went inert) [2026-11-03 · build-notes-archive]
+- **Screen class names in app code** → avoid `.stage` and `.stage-photo`. (weil: they collide with vendored layout.css `.stage::after` veil and wash out the shots) [2026-11-17 · redesign]
+- **Screenshots/targeted e2e by a builder** → Playwright MCP has no Chrome here: shoot with the repo's playwright chromium, and run `npm run build` first with `NOTES_ARCHIVE_TEST=1` on the dev server. (weil: webServer serves the existing `node build`, so a 'fails without the fix' check ran against a stale build) [2026-11-17 · redesign]
+- **Scroll-position regression over the sticky dock** → tap coordinates (`touchscreen.tap`), never `locator.click()`. (weil: click scrolls the page itself, measuring Playwright not the app) [2026-11-17 · redesign]
+
+## Design fingerprint
+
+- `DESIGN.md`, `DESIGN-reference.md`, `src/lib/styles/fingerprint/` and `scripts/fingerprint/` are vendored from Design-System and never edited here. `check-drift` in `proof` fails on any edit.
+- Fingerprint changes go to `Design-System/requests.md`, not into this repo.
+- Primitives are copied in with `Design-System/scripts/sync.sh <app-path> --primitive <name>`; the app owns them afterwards.
+- Styling uses fingerprint tokens only; `check-slop` enforces it and lists banned patterns in `scripts/fingerprint/banned.md`.

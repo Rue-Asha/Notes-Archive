@@ -22,3 +22,8 @@ export function ancestorsOf(tree: Tree, target: Target): Id[] {
 	};
 	return walk(tree.folders, []) ?? [];
 }
+
+// every note in the folder and all its sub-folders, the rule the folder page and its rows share
+export function noteTotal(folder: TreeFolder): number {
+	return folder.notes.length + folder.children.reduce((sum, child) => sum + noteTotal(child), 0);
+}

@@ -1,166 +1,225 @@
-# Graph Report - gate-1-decisions  (2026-11-14)
+# Graph Report - Notes-Archive  (2026-11-17)
 
 ## Corpus Check
-- 347 files · ~163,717 words
+- 484 files · ~294,785 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 7 file(s) not represented in the graph (top: .woff2 3, (none) 2, .css 2)
+- Unclassified: 17 file(s) not represented in the graph (top: .css 7, .woff2 6, (none) 1)
 
 ## Summary
-- 2007 nodes · 4823 edges · 122 communities (111 shown, 11 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 195 edges (avg confidence: 0.87)
+- 3410 nodes · 7087 edges · 180 communities (174 shown, 6 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 287 edges (avg confidence: 0.89)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8c7be38d`
+- Built from commit: `5bff89cd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- Uploads and Preview Server
-- Folder Tree Types
-- UI Primitives and Motion
+- FolderHeader.svelte
+- REMOVED Requirements
+- shell/SideTree.svelte
 - Design Tokens and Look
-- notes/autosave.test.ts
+- NotePatch
 - #lib
 - App Shell Layout
 - E2E Helpers and Tests
-- TreeRow.svelte
+- types.ts
 - vitest
-- E2E Reset and Seed
+- Requirement: Command palette
 - Notes Archive: functional contract
-- Autosave and Preview E2E
+- search.ts
 - Media Upload Blocks
-- Note Page and Autosave
-- Test-Only Routes
-- db.ts
-- Media E2E Tests
-- getDb
+- CardMenu.svelte
+- Frame.svelte
+- wire/tree/SideTree.svelte
+- net.ts
+- notes.ts
 - Folders Data Layer
 - Tiptap Editor Extensions
 - Full-Text Search Index
 - Block Menu Operations
 - Command Palette
-- Gate Workflow
-- editor/preview.ts
-- table.test.ts
+- hifi/search/+page.svelte
+- notes.test.ts
+- block-menu.test.ts
 - SQL Migrations
 - Core Design Decisions
-- FolderPicker.svelte
-- Mockup Photos and Credits
-- TagInput.svelte
+- FocusTree.svelte
+- Requirement: Folder tree
+- Requirement: Folder page layout
 - CI Workflow
 - Plain Text Extraction
-- Primitives Mockup and Cover
-- (app)/search/+page.svelte
-- synthetic-photo.mjs
-- Harness Spec (Change)
-- Bubble Toolbar
+- hifi/home/Entry.svelte
+- TagInput.svelte
+- uploads.test.ts
+- a11y-seed.ts
+- motion.ts
 - Verification and Scope
-- Shell and Tags Specs
-- bubble-link.test.ts
+- wire/note/+page.svelte
+- reset
 - @tiptap/core
 - Emoji Picker and Note Icon
 - Look Research
-- @sveltejs/kit
+- svelte
 - Editor Spec (Change)
-- toast.ts
+- uploads.test.ts
 - Harness Spec
-- Journey E2E
+- Inline images
 - Scope and Research Risks
 - Notes Spec (Change)
 - Design System Spec
-- Code Block and Core
+- design-system spec (build-notes-archive)
 - Tags Data Layer
-- npm Scripts
-- svelte
-- Motion Spec (Change)
-- primitives/+page.svelte
+- hifi/editor/SlashMenu.svelte
+- NoteProperties.svelte
+- hifi/tree/SideTree.svelte
+- @playwright/test
 - Project Overview and Media
-- Change proposal: gate-1-decisions
-- schema.test.ts
+- Product
+- hifi/overlays/+page.svelte
 - Shell and Search Specs (Change)
-- Motion Spec
+- vitest
 - Link Preview Extension
-- scripts
-- Release Steps
-- 3. Entities
-- autosave.ts
-- Tags Spec (Change)
+- sidebar.ts
+- ui/Menu.svelte
+- redesign/fixtures.ts
+- hifi/home/Desk.svelte
+- hifi/note/Icon.svelte
 - Link Preview Spec (Change)
-- 4. Routes
-- Interior Living Photo
+- Requirement: Home desk
+- wire/search/+page.svelte
 - Release Permissions
-- transitions.test.ts
+- hifi/folder/FolderBody.svelte
 - OpenSpec Config
-- Motion Test Fakes
-- Note cards (snippet, tag chips, relativeTime, card menu)
-- settings-api.test.ts
-- Release Artifact Download
-- bubble.test.ts
+- TagInput.svelte
+- Notes Archive: functional contract
+- Banned patterns
+- wire/tree/SideTree.svelte
+- folders spec (build-notes-archive)
 - Bubble Link E2E
-- steps
+- block-menu.test.ts
 - Table E2E
-- Toggle E2E
-- Release Trigger
-- Preview fetch on the server
+- Folder cover
+- updateNote
+- Requirement: Folder page
 - Emoji Search
 - Release Deploy Inputs
 - Release Tag Check
 - Sidebar Collapse E2E
 - Midcentury House Photo
-- Interior Rio Photo
-- Release Publish Job
+- e2e/autosave.test.ts
+- folder-page.test.ts
 - Solitude House Photo
 - Greek Lake Photo
 - Pinned order design (pin_order column, PUT /api/pinned, whole-list reorder)
 - App Type Declarations
-- uploads.test.ts
-- emoji.ts
-- palette-results.test.ts
-- tag-page.test.ts
-- toggle.test.ts
+- hifi/editor/+page.svelte
+- 2026-11-17-redesign/tasks.md
+- shell/SortMenu.svelte
+- icon/+page.svelte
+- open
 - release.yml
-- Folder counts design (folderCounts as single source)
-- @tiptap/pm
+- Design fingerprint: reference
+- pinned-reorder.test.ts
 - with
 - check-tag
-- Notes Archive
-- sidebar-collapse.test.ts
+- Design System: Design fingerprint
+- Requirement: Things the user makes move
 - house-midcentury.jpg (mockup photo fixture)
 - Interior Rio (mockup photo: ocean-view living room at dusk)
 - publish
-- Multi-line titles design (CRLF to LF, titleLine helper, FTS unicode61)
+- settings-api.test.ts
 - house-solitude.jpg (mockup fixture photo)
 - Greek mountain lake (possibly Lake Doxa, Peloponnese)
 - app.d.ts
 - SvelteKit 3 #lib imports (no svelte.config.js)
-- palette.test.ts
-- playwright.config.ts
-- title.ts
+- wire/editor/Blocks.svelte
+- wire/folder/FolderBody.svelte
+- check-slop.mjs
+- NoteTitle.svelte
+- hifi/note/+page.svelte
+- autosave.ts
+- api.ts
+- hifi/note/Properties.svelte
+- wire/note/Properties.svelte
+- toast.svelte.ts
+- schema.test.ts
+- hifi/note/NoteCard.svelte
+- MockData
+- Requirement: Note page
+- Scope: redesign
+- time.ts
+- Requirement: Editor on the fingerprint
+- editor/preview.ts
+- search-states.test.ts
+- listPinned
+- 2026-11-17-redesign/design.md
+- 2026-11-17-redesign/proposal.md
+- Folder counts design (folderCounts as single source)
+- Requirement: Creating a note
+- Requirement: Note cards
+- Requirement: Focus tree
+- Requirement: Tag page layout
+- open
+- 2026-11-17-redesign/flow.yaml
+- MODIFIED Requirements
+- Requirement: Title editing
+- Requirement: Wide layouts
+- core.ts
+- Notes Archive
+- MockData
+- verification.md
+- 2026-11-17-redesign/verification.md
+- titleKeys.test.ts
+- sidebar-collapse.test.ts
+- Requirement: Deleting a note
+- REMOVED Requirements
+- Requirement: Folders page
+- table.test.ts
+- Requirement: Phone bar
+- Requirement: Tags list
+- Requirement: Tree expansion and keyboard
+- Multi-line titles design (CRLF to LF, titleLine helper, FTS unicode61)
+- Requirement: Tree sort picker
+- Note cards
+- updateNote
+- emoji.ts
+- Managing folders in the tree
+- bubble-link.test.ts
+- Requirement: Dialogs and menus
+- Requirement: Tree follows the open note
+- Requirement: Tree rail
+- ADDED Requirements
+- Autosave
+- wire/overlays/+page.svelte
+- Pinned.svelte
+- wire/editor/SlashMenu.svelte
+- toggle.test.ts
 
 ## God Nodes (most connected - your core abstractions)
-1. `getDb()` - 90 edges
-2. `reset()` - 80 edges
-3. `seed()` - 77 edges
-4. `open()` - 77 edges
-5. `calm()` - 73 edges
-6. `@playwright/test` - 69 edges
-7. `vitest` - 57 edges
-8. `editor()` - 47 edges
-9. `svelte` - 42 edges
-10. `storedNote()` - 39 edges
+1. `reset()` - 100 edges
+2. `seed()` - 98 edges
+3. `open()` - 96 edges
+4. `getDb()` - 91 edges
+5. `calm()` - 87 edges
+6. `@playwright/test` - 84 edges
+7. `svelte` - 62 edges
+8. `vitest` - 58 edges
+9. `editor()` - 54 edges
+10. `watchSaves()` - 45 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Harness` --references--> `watchSaves()`  [INFERRED]
-  AGENTS.md → e2e/helpers.ts
-- `Harness` --references--> `request()`  [INFERRED]
-  AGENTS.md → src/lib/notes/autosave.ts
-- `Autosave (600 ms debounce, flush on blur, last write wins)` --semantically_similar_to--> `Save state (idle, pending, saving, saved, error, deleted)`  [INFERRED] [semantically similar]
-  PRODUCT.md → docs/functional-contract.md
-- `Two postures: pointer+keyboard and touch+soft keyboard` --semantically_similar_to--> `Persistent navigation shell (Sidebar and Bottom bar landmarks)`  [INFERRED] [semantically similar]
-  PRODUCT.md → docs/functional-contract.md
-- `Harness` --references--> `clientNav()`  [INFERRED]
-  AGENTS.md → e2e/helpers.ts
+- `Scenario: Empty new note is discarded on leaving` --references--> `counts()`  [INFERRED]
+  openspec/changes/archive/2026-11-17-redesign/specs/notes/spec.md → e2e/helpers.ts
+- `Scenario: Server discards only empty notes` --references--> `discardIfEmpty()`  [INFERRED]
+  openspec/changes/archive/2026-11-17-redesign/specs/notes/spec.md → src/lib/server/notes.ts
+- `Scenario: Snippet skips a leading image` --references--> `listNotes()`  [INFERRED]
+  openspec/changes/archive/2026-11-17-redesign/specs/notes/spec.md → src/lib/server/notes.ts
+- `Scenario: Edited time reads relative` --references--> `relativeTime()`  [INFERRED]
+  openspec/changes/archive/2026-11-17-redesign/specs/notes/spec.md → src/lib/notes/time.ts
+- `Scenario: Server delete removes tag links, uploads and the index row` --references--> `deleteNote()`  [INFERRED]
+  openspec/changes/archive/2026-11-17-redesign/specs/notes/spec.md → src/lib/server/notes.ts
 
 ## Import Cycles
 - 2-file cycle: `src/lib/server/notes.ts -> src/lib/server/search.ts -> src/lib/server/notes.ts`
@@ -181,83 +240,83 @@
 - **Upload lifecycle (WebP storage, ownership, grace-period purge)** — openspec_changes_archive_2026_11_03_build_notes_archive_specs_media_spec_inline_images, openspec_changes_archive_2026_11_03_build_notes_archive_specs_media_spec_inline_files, openspec_changes_archive_2026_11_03_build_notes_archive_specs_notes_spec_removed_uploads_are_kept_for_a_grace_period, openspec_changes_archive_2026_11_03_build_notes_archive_specs_folders_spec_folder_cover, openspec_changes_archive_2026_11_03_build_notes_archive_specs_link_preview_spec_readpreview [INFERRED 0.85]
 - **Upload lifecycle (WebP/file storage, ownership, grace-period purge, cascade delete)** — openspec_specs_media_spec_inline_images, openspec_specs_media_spec_inline_files, openspec_specs_notes_spec_upload_grace_period, openspec_specs_folders_spec_folder_cover, openspec_specs_link_preview_spec_preview_fetch, openspec_specs_notes_spec_deleting_note, openspec_specs_folders_spec_deleting_folder [INFERRED 0.85]
 
-## Communities (122 total, 11 thin omitted)
+## Communities (180 total, 6 thin omitted)
 
-### Community 0 - "Uploads and Preview Server"
-Cohesion: 0.08
-Nodes (36): folders, MockFolder, MockNote, MockTreeFolder, notes, photo(), pinned, recent (+28 more)
+### Community 0 - "FolderHeader.svelte"
+Cohesion: 0.06
+Nodes (39): createFolder(), renameFolder(), addFolder(), anchor, cut, deleting, { folder, crumbs, counts, empty, onadded }, hasCover (+31 more)
 
-### Community 1 - "Folder Tree Types"
-Cohesion: 0.12
-Nodes (9): reisen(), Window, calm(), open(), reset(), storedNote(), Window, openEmptyNote() (+1 more)
+### Community 1 - "REMOVED Requirements"
+Cohesion: 0.04
+Nodes (45): ADDED Requirements, REMOVED Requirements, Requirement: Accessibility floor, Requirement: App icon, Requirement: Chrome cursor, Requirement: English copy, Requirement: Fonts, Requirement: Frosted glass material (+37 more)
 
-### Community 2 - "UI Primitives and Motion"
-Cohesion: 0.07
-Nodes (43): Light warm tokens, tokens.css, Look, LOOK, ACCENT_TOKENS, AccentName, accents, AccentToken (+35 more)
+### Community 2 - "shell/SideTree.svelte"
+Cohesion: 0.10
+Nodes (15): RAIL_SCRIPT, readCollapsed(), STORAGE_KEY, Store, writeCollapsed(), folded, home, search (+7 more)
 
 ### Community 3 - "Design Tokens and Look"
 Cohesion: 0.05
 Nodes (54): dependencies, lowlight@^3.3.0, sharp@^0.35.5, @tiptap/core@3.32.2, @tiptap/extension-bubble-menu@3.32.2, @tiptap/extension-code@3.32.2, @tiptap/extension-code-block-lowlight@3.32.2, @tiptap/extension-details@3.32.2 (+46 more)
 
-### Community 4 - "notes/autosave.test.ts"
-Cohesion: 0.18
+### Community 4 - "NotePatch"
+Cohesion: 0.27
 Nodes (8): AutosaveOptions, createAutosave(), change(), flush(), request(), stop(), setup(), NotePatch
 
 ### Community 5 - "#lib"
-Cohesion: 0.06
-Nodes (38): COPY, count(), choose(), { folderId, hasCover }, remove(), counts, { folder, inside, onclose }, Props (+30 more)
+Cohesion: 0.08
+Nodes (20): COPY, count(), escape(), inSource(), { crumbs }, current, head, list (+12 more)
 
 ### Community 6 - "App Shell Layout"
-Cohesion: 0.08
-Nodes (34): openNote(), dropPdf(), openEmptyNote(), PDF, openThree(), paragraph(), editor(), watchSaves() (+26 more)
+Cohesion: 0.07
+Nodes (40): openNote(), openDoc(), dropPdf(), openEmptyNote(), PDF, openThree(), paragraph(), calm() (+32 more)
 
 ### Community 7 - "E2E Helpers and Tests"
-Cohesion: 0.14
-Nodes (23): BADGES, FileCard, fileKind(), KIND_NAMES, begin(), Candidate, failureMessage(), fileProblem() (+15 more)
+Cohesion: 0.15
+Nodes (22): BADGES, FileCard, fileKind(), KIND_NAMES, begin(), Candidate, failureMessage(), fileProblem() (+14 more)
 
-### Community 8 - "TreeRow.svelte"
-Cohesion: 0.12
-Nodes (12): ancestorsOf(), indentLevel(), MAX_INDENT, Target, tree, branch, folder, icon (+4 more)
+### Community 8 - "types.ts"
+Cohesion: 0.06
+Nodes (36): ancestorsOf(), indentLevel(), MAX_INDENT, Target, tree, labels, { state, onretry }, folders (+28 more)
 
 ### Community 9 - "vitest"
-Cohesion: 0.15
-Nodes (16): vitest, closeDb(), archive(), png(), seedArchive(), SeedInput, SeedResult, testImage() (+8 more)
+Cohesion: 0.07
+Nodes (20): lock, lockPath, problems, root, OLD_FILES, sources(), hash, root (+12 more)
 
-### Community 10 - "E2E Reset and Seed"
-Cohesion: 0.20
-Nodes (14): sharp, UploadError, convert(), FORMATS, getImage(), removeFolderCover(), setFolderCover(), storeImage() (+6 more)
+### Community 10 - "Requirement: Command palette"
+Cohesion: 0.06
+Nodes (35): ADDED Requirements, MODIFIED Requirements, Requirement: Command palette, Requirement: Palette on the fingerprint, Requirement: Search page states, Scenario: A failed search clears the hits and says so, Scenario: A title-only hit highlights its title, Scenario: Arrow keys and Enter open a result (+27 more)
 
 ### Community 11 - "Notes Archive: functional contract"
-Cohesion: 0.14
-Nodes (15): 10. Route coverage check, 11. Graph notes, 12. Open questions for Rue, 1. Purpose and context, 2. Jobs-to-be-done, 5.1 Core editing behaviour (kept), 5.2 Editor chrome (redesignable; every action must remain), 5. Editor behaviour (TipTap / ProseMirror) (+7 more)
+Cohesion: 0.06
+Nodes (33): 10. Route coverage check, 11. Graph notes, 12. Open questions for Rue, 1. Purpose and context, 2. Jobs-to-be-done, 3. Entities, 4.1 `/` Home, 4.2 `/folders/[id]` Folder page (+25 more)
 
-### Community 12 - "Autosave and Preview E2E"
-Cohesion: 0.15
-Nodes (10): { crumbs }, { tiles }, { folder }, tint, TINTS, { pinned, recent, tiles }, { notes }, FolderTile (+2 more)
+### Community 12 - "search.ts"
+Cohesion: 0.18
+Nodes (16): filterSlash(), cards(), listRecent(), filters(), searchNotes(), snippetParts(), terms(), ids() (+8 more)
 
 ### Community 13 - "Media Upload Blocks"
-Cohesion: 0.13
-Nodes (18): dataTables(), resetDb(), FAKE_PAGES, fakeImage(), requireTestFlag(), testFlag(), StoredNote, POST() (+10 more)
+Cohesion: 0.11
+Nodes (25): @sveltejs/kit, resetDb(), FAKE_PAGES, fakeImage(), requireTestFlag(), testFlag(), SeedInput, SeedResult (+17 more)
 
-### Community 14 - "Note Page and Autosave"
-Cohesion: 0.20
-Nodes (12): docFromText(), ATOMS, children(), hasAtom(), inlineText(), isEmptyDoc(), isInline(), isNode() (+4 more)
+### Community 14 - "CardMenu.svelte"
+Cohesion: 0.11
+Nodes (22): deleteNoteRequest(), patchNote(), anchor, change(), deleting, inherited, items, move() (+14 more)
 
-### Community 15 - "Test-Only Routes"
-Cohesion: 0.12
-Nodes (19): { folderId, tree, onchange }, name, nameOf(), open, { note, tree, tags, onchange }, { parts }, folders, Props (+11 more)
+### Community 15 - "Frame.svelte"
+Cohesion: 0.08
+Nodes (33): MockFolder, data, { folders, tags, sort, worst, menuOpen = false }, total, uid, data, tree, data (+25 more)
 
-### Community 16 - "db.ts"
+### Community 16 - "wire/tree/SideTree.svelte"
+Cohesion: 0.07
+Nodes (39): MockTag, data, folded, hifi, { nav, children, posture, view, current, rail = false, tags, look, tag = false }, Props, screen, Section (+31 more)
+
+### Community 17 - "net.ts"
+Cohesion: 0.07
+Nodes (42): FetchError, fakeRemote, parse(), DEFAULT_TIMEOUT_MS, ipv4Blocked(), isBlockedAddress(), parseIPv4(), parseIPv6() (+34 more)
+
+### Community 18 - "notes.ts"
 Cohesion: 0.09
-Nodes (15): hash, root, staging, { version }, { version }, entry, dir, dir (+7 more)
-
-### Community 17 - "Media E2E Tests"
-Cohesion: 0.14
-Nodes (12): fakeRemote, SafeFetchOptions, charsetOf(), decode(), htmlPage(), MAX_PAGE_BYTES, Remote, safeRemote (+4 more)
-
-### Community 18 - "getDb"
-Cohesion: 0.09
-Nodes (37): handle(), init(), ValidationError, getDb(), count(), assertFolder(), createNote(), deleteNote() (+29 more)
+Nodes (40): init(), getDb(), count(), assertFolder(), createNote(), deleteNote(), discardIfEmpty(), getNote() (+32 more)
 
 ### Community 19 - "Folders Data Layer"
 Cohesion: 0.11
@@ -269,27 +328,27 @@ Nodes (25): name, runs-on, steps, runner, jobs, ci, name, on (+17 more)
 
 ### Community 21 - "Full-Text Search Index"
 Cohesion: 0.17
-Nodes (25): NotFoundError, breadcrumb(), byName(), cleanName(), collator, createFolder(), deleteFolder(), folderCounts() (+17 more)
+Nodes (25): Context, Scenario: Server folder delete removes descendants, notes and uploads, NotFoundError, breadcrumb(), byName(), cleanName(), collator, createFolder() (+17 more)
 
 ### Community 22 - "Block Menu Operations"
-Cohesion: 0.11
-Nodes (20): Link preview, ATOMS, beaconDiscard(), discardNote(), isBlankDoc(), isEmptyNote(), url(), Crumb (+12 more)
+Cohesion: 0.09
+Nodes (25): Link preview, ATOMS, beaconDiscard(), discardNote(), isBlankDoc(), isEmptyNote(), url(), Note (+17 more)
 
 ### Community 23 - "Command Palette"
-Cohesion: 0.10
-Nodes (25): actions, active, answered, choose(), editorOf(), hits, input, keys() (+17 more)
+Cohesion: 0.06
+Nodes (39): { open = $bindable(false), title, kicker, label, mode = 'sheet', alert = false, closeLabel = 'Close', onclose, children, actions }, Props, uid, actions, active, answered, choose(), editorOf() (+31 more)
 
-### Community 24 - "Gate Workflow"
-Cohesion: 0.12
-Nodes (20): FetchError, parse(), DEFAULT_TIMEOUT_MS, ipv4Blocked(), isBlockedAddress(), parseIPv4(), parseIPv6(), quad() (+12 more)
+### Community 24 - "hifi/search/+page.svelte"
+Cohesion: 0.05
+Nodes (42): data, hits, miss, query, states, actionCount, actions, notes (+34 more)
 
-### Community 25 - "editor/preview.ts"
-Cohesion: 0.42
-Nodes (5): LinkPreview, cardFor(), previewExtensions(), domainOf(), standaloneUrl()
+### Community 25 - "notes.test.ts"
+Cohesion: 0.22
+Nodes (12): ATOMS, children(), hasAtom(), inlineText(), isEmptyDoc(), isInline(), isNode(), lines() (+4 more)
 
-### Community 26 - "table.test.ts"
-Cohesion: 0.29
-Nodes (4): nodes(), ofType(), cell(), table()
+### Community 26 - "block-menu.test.ts"
+Cohesion: 0.53
+Nodes (5): handle(), menu(), openMenu(), openThree(), paragraph()
 
 ### Community 27 - "SQL Migrations"
 Cohesion: 0.12
@@ -299,89 +358,107 @@ Nodes (21): images, files, files_note, folders, folders_parent, images_folder_co
 Cohesion: 0.13
 Nodes (8): Design: build-notes-archive, COPY strings (src/lib/copy.ts), E2E conventions, E2E helpers (e2e/helpers.ts: reset, seed, watchSaves, clientNav), plainText hand-written JSON walker (plaintext.ts), Schema migration 0002_core.sql (folders, notes, tags, files, notes_fts), softKeyboard state (keyboard.svelte.ts), Tiptap v3 editor spike (MIT, no official slash menu)
 
-### Community 29 - "FolderPicker.svelte"
+### Community 29 - "FocusTree.svelte"
 Cohesion: 0.07
-Nodes (36): fadeSlide(), hideOnOutro(), noteName(), pop(), reducedMotion(), reveal(), rise(), stagger() (+28 more)
+Nodes (27): all, deleting, empty, expanded(), inside, manual, menu, menuOpen (+19 more)
 
-### Community 30 - "Mockup Photos and Credits"
-Cohesion: 0.10
-Nodes (12): ago(), reisen(), bare(), photo(), seed(), twelve(), folderWith(), Probe (+4 more)
+### Community 30 - "Requirement: Folder tree"
+Cohesion: 0.11
+Nodes (17): ADDED Requirements, MODIFIED Requirements, Requirement: Folder tree, Requirement: Tree sort preference, Scenario: An edited note lifts its folder, Scenario: An unknown mode is refused, Scenario: Current item is highlighted in the tree, Scenario: Deep nesting caps the indent (+9 more)
 
-### Community 31 - "TagInput.svelte"
-Cohesion: 0.18
-Nodes (14): input(), active, addTag(), clean(), confirm(), input, oninput(), onkeydown() (+6 more)
+### Community 31 - "Requirement: Folder page layout"
+Cohesion: 0.06
+Nodes (34): ADDED Requirements, MODIFIED Requirements, Requirement: Deleting a folder, Requirement: Folder cover, Requirement: Folder page, Requirement: Folder page layout, Requirement: Phone drill-down, Scenario: Back goes up a level (+26 more)
 
 ### Community 32 - "CI Workflow"
 Cohesion: 0.08
-Nodes (20): Box, fit(), placeFloating(), visibleViewport(), anchor, command, items, key() (+12 more)
+Nodes (23): Split off, Box, fit(), placeFloating(), visibleViewport(), watchViewport(), anchor, command (+15 more)
 
 ### Community 33 - "Plain Text Extraction"
-Cohesion: 0.17
-Nodes (14): editor, { noteId, content, onchange, onblur }, Props, root, version, clean(), emptyDoc(), isRaw() (+6 more)
+Cohesion: 0.13
+Nodes (15): editor, { noteId, content, onchange, onblur }, Props, root, version, clean(), emptyDoc(), isRaw() (+7 more)
 
-### Community 34 - "Primitives Mockup and Cover"
-Cohesion: 0.15
-Nodes (11): anchor, { icon, onchange }, open, close(), keys(), { open, anchor, onpick, onclose }, pick(), picker (+3 more)
+### Community 34 - "hifi/home/Entry.svelte"
+Cohesion: 0.14
+Nodes (11): menu, MenuItem, {
+		name,
+		items,
+		radio = false,
+		icon,
+		onselect
+	}, { card, pinned = false, reorder = null, open = false, dragging = false, ontoggle, ongrip, onclose }, Item, items, more, name (+3 more)
 
-### Community 35 - "(app)/search/+page.svelte"
-Cohesion: 0.19
-Nodes (14): parseQuery(), searchHref(), parse(), SearchQuery, current(), { data }, field, filtered() (+6 more)
+### Community 35 - "TagInput.svelte"
+Cohesion: 0.12
+Nodes (23): { query, clamp = false }, escape(), hitDisplay(), markWords(), parseQuery(), searchHref(), parse(), key() (+15 more)
 
-### Community 36 - "synthetic-photo.mjs"
+### Community 36 - "uploads.test.ts"
 Cohesion: 0.12
 Nodes (17): Mockup photo credits (CC0 Wikimedia Commons), Synthetic photo generation (scripts/synthetic-photo.mjs, gradient + grain), lake-moraine.jpg (mockup photo fixture), Landscape-orientation high-detail photo sample for media mockups, Snow-streaked rocky peaks above Moraine Lake (Valley of the Ten Peaks), stone-clay.jpg (synthetic mockup image), Warm clay gradient with grain (dark brown to warm clay with a peach bloom lower left), stone-sand.jpg (synthetic mockup image) (+9 more)
 
-### Community 37 - "Harness Spec (Change)"
-Cohesion: 0.20
-Nodes (13): filterSlash(), filters(), searchNotes(), snippetParts(), terms(), ids(), toMatchQuery(), withCards() (+5 more)
+### Community 37 - "a11y-seed.ts"
+Cohesion: 0.16
+Nodes (13): Box, MOVEMENT, cell(), ICONS, longNote, Pages, paragraph(), screens() (+5 more)
 
-### Community 38 - "Bubble Toolbar"
-Cohesion: 0.23
-Nodes (7): counts(), actions(), input(), palette(), chips(), expectChips(), props()
+### Community 38 - "motion.ts"
+Cohesion: 0.11
+Nodes (27): { folders, label = COPY.folders, renaming = null, onrename, oncancel }, Props, Row, { notes, label = 'Notes' }, { pinned, recent }, { notes, home = false, tagged = false }, { folders, notes = [], depth = 0, current, expanded, toggle, onmenu, renaming, onrename, oncancel, trail = [], tabbable }, motion (+19 more)
 
 ### Community 39 - "Verification and Scope"
 Cohesion: 0.11
 Nodes (18): uses, with, concurrency, cancel-in-progress, group, jobs, ci, security-baseline (+10 more)
 
-### Community 40 - "Shell and Tags Specs"
-Cohesion: 0.15
-Nodes (12): codeBlock(), lowlight, ColorSpan, Commands, coreExtensions(), isTextColor(), TEXT_COLORS, TextColor (+4 more)
+### Community 40 - "wire/note/+page.svelte"
+Cohesion: 0.13
+Nodes (17): LONG_TITLE, NoteView, Status, TWELVE_LINES, gone, held, long, Props (+9 more)
 
-### Community 41 - "bubble-link.test.ts"
-Cohesion: 0.60
-Nodes (4): field(), nodes(), setup(), toolbar()
+### Community 41 - "reset"
+Cohesion: 0.07
+Nodes (24): reisen(), Window, chrome, seedDesk(), back(), main(), reisen(), ago() (+16 more)
 
 ### Community 42 - "@tiptap/core"
-Cohesion: 0.13
-Nodes (24): @tiptap/core, blockExtensions(), blockSlashItems, ScrollView, bubbleExtensions(), Callout, Commands, @tiptap/core (+16 more)
+Cohesion: 0.11
+Nodes (28): @tiptap/pm@3.32.2, @tiptap/core, @tiptap/pm, blockExtensions(), blockSlashItems, ScrollView, bubbleExtensions(), Callout (+20 more)
 
 ### Community 43 - "Emoji Picker and Note Icon"
-Cohesion: 0.13
-Nodes (17): harness spec (build-notes-archive), calm, Database and migrations, E2E projects and isolation, Harness declaration, Health route, GET /healthz, NOTES_ARCHIVE_TEST flag (+9 more)
+Cohesion: 0.14
+Nodes (16): harness spec (build-notes-archive), calm, Database and migrations, E2E projects and isolation, Harness declaration, Health route, GET /healthz, NOTES_ARCHIVE_TEST flag (+8 more)
 
 ### Community 44 - "Look Research"
 Cohesion: 0.12
 Nodes (8): apply(), editor, linking, marks, palette, shown, version, withScheme()
 
-### Community 45 - "@sveltejs/kit"
-Cohesion: 0.20
-Nodes (12): @sveltejs/kit, cards(), listNotes(), listPinned(), listRecent(), snippet(), getTag(), call() (+4 more)
+### Community 45 - "svelte"
+Cohesion: 0.07
+Nodes (24): svelte, Props, { title, body, heading = 'h2', action }, describedby, {
+		label,
+		value = $bindable(''),
+		hint,
+		error,
+		variant = 'pill',
+		type = 'text',
+		prefix,
+		suffix,
+		hideLabel = false,
+		id = uid,
+		...rest
+	}, Props, uid, ariaCurrent (+16 more)
 
 ### Community 46 - "Editor Spec (Change)"
 Cohesion: 0.16
 Nodes (16): Gate 2 manual checks, Open decision: palette on phone while editor focused, Real-device checks (motion, editor menus, bottom bar, live link preview), Proposal: build-notes-archive, New capabilities (harness, design-system, shell, motion, home, notes, editor, media, link-preview, folders, tags, search), Done criteria, Proposal non-goals, Non-goals (no dark mode, trash, sync, auth, import) (+8 more)
 
-### Community 47 - "toast.ts"
-Cohesion: 0.15
-Nodes (16): attach, createToaster(), attach(), dismiss(), flush(), toast(), write(), dismiss (+8 more)
+### Community 47 - "uploads.test.ts"
+Cohesion: 0.13
+Nodes (23): Scenario: Server replaces covers and stores them as WebP, sharp, UploadError, getFile(), storeFile(), convert(), FORMATS, getImage() (+15 more)
 
 ### Community 48 - "Harness Spec"
-Cohesion: 0.21
-Nodes (13): Markdown shortcuts and keys (Cmd/Ctrl+B/I/E/K, undo/redo), Command palette (Cmd/Ctrl+K, glass, full-screen on phone), Search page (/search?q, folder and tag filters, searchNotes), search Specification, Desktop sidebar (glass, collapsible icon rail), Folder tree (sidebar and drawer, capped indent), Phone bottom bar and drawer, shell Specification (+5 more)
+Cohesion: 0.23
+Nodes (12): Command palette (Cmd/Ctrl+K, glass, full-screen on phone), Search page (/search?q, folder and tag filters, searchNotes), search Specification, Desktop sidebar (glass, collapsible icon rail), Folder tree (sidebar and drawer, capped indent), Phone bottom bar and drawer, shell Specification, Sidebar Tags section (+4 more)
 
-### Community 49 - "Journey E2E"
+### Community 49 - "Inline images"
 Cohesion: 0.15
-Nodes (15): Content storage and derived text, plainText walker, ProseMirror JSON content, media spec (build-notes-archive), fileCard node, /files/<id>, image node, POST /api/notes/<id>/images (+7 more)
+Nodes (18): link-preview spec (build-notes-archive), POST /api/preview, FetchError, linkPreview node, parsePreview, Preview cards in the editor, Preview fetch on the server, readPreview (+10 more)
 
 ### Community 50 - "Scope and Research Risks"
 Cohesion: 0.18
@@ -395,119 +472,123 @@ Nodes (26): Block actions / Block menu (move, turn into, delete; touch reorderin
 Cohesion: 0.24
 Nodes (13): Look pick: bronze accent, clear glass, glass cards, Look revision 1 (Rue, 2026-11-02), Look research — revision 1, Accent options bronze / moss / slate, Atmosphere gradient (greige ground, peach light, taupe floor), Card styles glass / paper / outline, Gap analysis: mockups vs recipe, Glass strengths soft / clear / frosted (+5 more)
 
-### Community 53 - "Code Block and Core"
+### Community 53 - "design-system spec (build-notes-archive)"
 Cohesion: 0.19
 Nodes (14): design-system spec (build-notes-archive), Dark CTA pill with round arrow, Tracked uppercase eyebrow, Figtree UI font, Fonts, Look switches, LOOK (src/lib/styles/look.ts), Mockup checkpoint (+6 more)
 
 ### Community 54 - "Tags Data Layer"
-Cohesion: 0.18
-Nodes (14): Text-colour palette (stone, clay, ochre, moss, sea, plum), editor spec (build-notes-archive), Block handle and block menu, Bubble toolbar, Callout block, Code block with syntax highlighting, Editor on real devices, Extra blocks (+6 more)
+Cohesion: 0.15
+Nodes (16): Light warm tokens, Text-colour palette (stone, clay, ochre, moss, sea, plum), tokens.css, editor spec (build-notes-archive), Block handle and block menu, Bubble toolbar, Callout block, Code block with syntax highlighting (+8 more)
 
-### Community 55 - "npm Scripts"
-Cohesion: 0.11
-Nodes (21): deleteNoteRequest(), patchNote(), anchor, change(), deleting, inherited, items, move() (+13 more)
+### Community 55 - "hifi/editor/SlashMenu.svelte"
+Cohesion: 0.17
+Nodes (10): current, currentGroup, flat, Group, groups, numbered, Props, { query = '', active = 0, emptyResult = false } (+2 more)
 
-### Community 56 - "svelte"
+### Community 56 - "NoteProperties.svelte"
+Cohesion: 0.10
+Nodes (18): { folderId, path, tree, onchange }, full, open, shortPath(), chosen, count, day, { note, path, tree, tags, icon, onchange } (+10 more)
+
+### Community 57 - "hifi/tree/SideTree.svelte"
+Cohesion: 0.06
+Nodes (32): Buttons, Cards, rows, toasts, Components, Fields, Menu, Phone dock, scrolled bar, detail actions, Primitives, Screen skeleton (+24 more)
+
+### Community 58 - "@playwright/test"
 Cohesion: 0.08
-Nodes (20): svelte, { href, onapply, onremove, oncancel }, Props, value, day, edited, { noteId, title, createdAt, updatedAt, autofocus = false, ontitle, onblur, onenter, icon, children }, Props (+12 more)
-
-### Community 57 - "Motion Spec (Change)"
-Cohesion: 0.29
-Nodes (11): attributes(), decode(), NAMED, PagePreview, parsePreview(), privateHost(), readPreview(), text() (+3 more)
-
-### Community 58 - "primitives/+page.svelte"
-Cohesion: 0.09
-Nodes (18): close(), enabled(), keys(), menu, MenuItem, { open, anchor, label, items, onclose }, Props, select() (+10 more)
+Nodes (9): input(), palette(), path(), screens(), slugs, widths, db, port (+1 more)
 
 ### Community 59 - "Project Overview and Media"
-Cohesion: 0.21
-Nodes (12): Database and migrations (SQLite WAL, schema_migrations), E2E projects and isolation (phone/desktop, .e2e/$PORT.db), Health route (/healthz 200 ok / 503), Package tarball (dist/notes-archive-<version>.tgz + .sha256), Proof commands (npm run proof / proof:full), harness Specification, Test-only routes and helpers (/__test/reset, seed, counts, note; e2e/helpers.ts), Full-text search (SQLite FTS5, prefix, diacritic/case-insensitive, ß=ss) (+4 more)
+Cohesion: 0.17
+Nodes (14): Content storage as ProseMirror JSON with derived plain text (plainText), Database and migrations (SQLite WAL, schema_migrations), E2E projects and isolation (phone/desktop, .e2e/$PORT.db), Health route (/healthz 200 ok / 503), Package tarball (dist/notes-archive-<version>.tgz + .sha256), Proof commands (npm run proof / proof:full), harness Specification, Test-only routes and helpers (/__test/reset, seed, counts, note; e2e/helpers.ts) (+6 more)
 
-### Community 60 - "Change proposal: gate-1-decisions"
+### Community 60 - "Product"
 Cohesion: 0.21
 Nodes (14): Gate-1 decisions (8 answers by Rue), Route /tags/[id] Tag page, Design: gate-1-decisions, CardMenu.svelte ondeleted callback, Migration 0005_pin_order_settings.sql, Change proposal: gate-1-decisions, gate-1-decisions done criteria, Delta spec: notes (Pinning, Multi-line titles) (+6 more)
 
-### Community 61 - "schema.test.ts"
-Cohesion: 0.22
-Nodes (10): ConflictError, reorderPinned(), count(), folder(), image(), insert(), names(), note() (+2 more)
+### Community 61 - "hifi/overlays/+page.svelte"
+Cohesion: 0.10
+Nodes (19): all, checking, currentId, data, emoji, entryMenu, Flat, flatten() (+11 more)
 
 ### Community 62 - "Shell and Search Specs (Change)"
 Cohesion: 0.18
 Nodes (11): Creative Archive (sibling app), Fake remote with canned pages (garden.example, plain.example, pdf.example, blocked.example), Risks / trade-offs (R1–R8, uploads, ß tags), safeFetch SSRF guard, Research: build-notes-archive (explore), Creative Archive inventory, Dialogue decisions (archive = library, folders + tags, Notion mechanics), Scope: build-notes-archive (+3 more)
 
-### Community 63 - "Motion Spec"
-Cohesion: 0.15
-Nodes (13): Folder cover, removeFolderCover, setFolderCover, home spec (build-notes-archive), Home bento, notes spec (build-notes-archive), createNote, Creating a note (+5 more)
+### Community 63 - "vitest"
+Cohesion: 0.17
+Nodes (12): vitest, docFromText(), closeDb(), Migration, archive(), png(), seedArchive(), testImage() (+4 more)
 
 ### Community 64 - "Link Preview Extension"
-Cohesion: 0.23
-Nodes (12): Self-hosted fonts requirement (Newsreader display, Figtree UI), .glass frosted material with --glass-fallback, Light warm tokens (tokens.css / tokens.ts), Look switches (data-accent, data-glass, data-card; LOOK in look.ts), Mockup pages (/__mockups, env-gated), design-system Specification, app.html document shell, Font preloads (Newsreader opsz normal/italic, Figtree wght woff2) (+4 more)
+Cohesion: 0.31
+Nodes (9): Self-hosted fonts requirement (Newsreader display, Figtree UI), .glass frosted material with --glass-fallback, Light warm tokens (tokens.css / tokens.ts), Look switches (data-accent, data-glass, data-card; LOOK in look.ts), Mockup pages (/__mockups, env-gated), design-system Specification, app.html document shell, Font preloads (Newsreader opsz normal/italic, Figtree wght woff2) (+1 more)
 
-### Community 65 - "scripts"
+### Community 65 - "sidebar.ts"
 Cohesion: 0.18
 Nodes (11): scripts, build, check, dev, package, prepare, preview, proof (+3 more)
 
-### Community 66 - "Release Steps"
+### Community 66 - "ui/Menu.svelte"
+Cohesion: 0.08
+Nodes (22): anchor, { icon, onchange }, open, body, { open, onpick, onclose }, Props, query, shown (+14 more)
+
+### Community 67 - "redesign/fixtures.ts"
 Cohesion: 0.16
-Nodes (11): collapsed, RAIL_SCRIPT, readCollapsed(), STORAGE_KEY, Store, toggle(), { tree, tags }, writeCollapsed() (+3 more)
+Nodes (17): blocks(), cards(), day(), mockData(), nest(), normalSet(), pad(), TreeSort (+9 more)
 
-### Community 67 - "3. Entities"
+### Community 68 - "hifi/home/Desk.svelte"
+Cohesion: 0.09
+Nodes (25): initial(), MONTHS, noteCount(), NOW, PINNED_CONFLICT, relTime(), SAVE_FAILED, withWorstTags() (+17 more)
+
+### Community 69 - "hifi/note/Icon.svelte"
 Cohesion: 0.20
-Nodes (10): 3. Entities, 9. Behavioural `data-*` allow-list, Folder, Note, Save state (client), Search hit, Tag, Uploads (images, files, link-preview images, folder covers) (+2 more)
-
-### Community 68 - "autosave.ts"
-Cohesion: 0.25
-Nodes (5): Autosave, DEBOUNCE_MS, DISCRETE, Saved, SaveState
-
-### Community 69 - "Tags Spec (Change)"
-Cohesion: 0.22
-Nodes (11): Style guards, motion spec (build-notes-archive), Card to note morph, Glass hover glow, Lists stagger in, Motion on real devices, Page transitions, View Transitions API (+3 more)
+Nodes (7): at, { first = false, last = false, turnInto = false, total = 12 }, Props, turn, Name, { name, size = 18 }, PATHS
 
 ### Community 70 - "Link Preview Spec (Change)"
 Cohesion: 0.12
 Nodes (15): Behavioural data-* allow-list, Accessibility and inclusion commitments, Accessibility & Inclusion, Autosave (600 ms debounce, flush on blur, last write wins), Brand Commitments, Capabilities and Constraints, Evidence on Hand, Operating Context (+7 more)
 
-### Community 71 - "4. Routes"
-Cohesion: 0.25
-Nodes (8): 4.1 `/` Home, 4.2 `/folders/[id]` Folder page, 4.3 `/notes/[id]` Note page, 4.4 `/search` Search page, 4.5 `/tags/[id]` Tag page, 4.6 Shared object: Note entry (Home, folder, tag, search), 4.7 Shared object: Folder entry (Home, folder page), 4. Routes
+### Community 71 - "Requirement: Home desk"
+Cohesion: 0.08
+Nodes (23): ADDED Requirements, REMOVED Requirements, Requirement: Home bento, Requirement: Home desk, Requirement: Pinned reorder, Requirement: Typographic hero, Scenario: A stale reorder reloads the list with a toast, Scenario: Drag a pinned note to a new place (+15 more)
 
-### Community 72 - "Interior Living Photo"
-Cohesion: 0.25
-Nodes (6): MONTHS, relativeTime(), now, SeedFolder, SeedNote, IsoDateTime
+### Community 72 - "wire/search/+page.svelte"
+Cohesion: 0.08
+Nodes (31): MockCard, data, hits, miss, query, states, actions, Props (+23 more)
 
 ### Community 73 - "Release Permissions"
 Cohesion: 0.29
 Nodes (8): Harness declaration (proof, proof-full, run, package, ship: ask), Notes Archive (project overview), Harness declaration requirement for CLAUDE.md, Link preview cards in the editor (linkPreview node), link-preview Specification, Inline files (file cards, /files/<id>, nosniff + CSP sandbox), Inline images (WebP via sharp, stored in SQLite, /images/<id>), media Specification
 
-### Community 74 - "transitions.test.ts"
-Cohesion: 0.33
-Nodes (4): Harness, clientNav(), homeToTag(), Spy
+### Community 74 - "hifi/folder/FolderBody.svelte"
+Cohesion: 0.07
+Nodes (27): compact, counts, cut, empty, { folder, worst, posture, opened = false }, FolderView, lead, more (+19 more)
 
 ### Community 75 - "OpenSpec Config"
 Cohesion: 0.20
 Nodes (9): base, gate0, gate1, gate2, learnings, look_pick, ship_note, ship_override (+1 more)
 
-### Community 76 - "Motion Test Fakes"
-Cohesion: 0.27
-Nodes (10): Frosted glass material, search spec (build-notes-archive), Command palette, Search page, searchNotes, shell spec (build-notes-archive), Desktop sidebar, Folder tree (+2 more)
+### Community 76 - "TagInput.svelte"
+Cohesion: 0.18
+Nodes (14): input(), active, addTag(), clean(), confirm(), input, oninput(), onkeydown() (+6 more)
 
-### Community 77 - "Note cards (snippet, tag chips, relativeTime, card menu)"
-Cohesion: 0.27
-Nodes (9): Content storage as ProseMirror JSON with derived plain text (plainText), Card to note morph (View Transition, note-<id>), Glass hover glow (opacity only), Lists stagger in (data-revealed), Page transitions (fade/slide; reduced motion ≤120 ms fade), Motion on real devices (manual), motion Specification, Autosave (debounced, flushed on leave, last write wins) (+1 more)
+### Community 77 - "Notes Archive: functional contract"
+Cohesion: 0.36
+Nodes (7): Card to note morph (View Transition, note-<id>), Glass hover glow (opacity only), Lists stagger in (data-revealed), Page transitions (fade/slide; reduced motion ≤120 ms fade), Motion on real devices (manual), motion Specification, Note cards (snippet, tag chips, relativeTime, card menu)
 
-### Community 78 - "settings-api.test.ts"
-Cohesion: 0.33
-Nodes (8): getTreeSort(), setTreeSort(), listTags(), isTreeSort(), TreeSort, GET(), PATCH(), load()
+### Community 78 - "Banned patterns"
+Cohesion: 0.07
+Nodes (26): accent-word-overuse, animated-blur, avatar-stack, Banned patterns, chunky-display, cream-paper, emoji-icons, explore-showreel-pair (+18 more)
 
-### Community 79 - "Release Artifact Download"
-Cohesion: 0.24
-Nodes (9): allowed, animatedProperties(), colourLiterals(), declarations(), files, namedColours, sourceFiles(), srcDir (+1 more)
+### Community 79 - "wire/tree/SideTree.svelte"
+Cohesion: 0.09
+Nodes (19): MockNoteRef, TreeView, sortLabels, TreeView, IconName, { name, size = 18 }, shapes, crumbs (+11 more)
+
+### Community 80 - "folders spec (build-notes-archive)"
+Cohesion: 0.25
+Nodes (9): folders spec (build-notes-archive), createFolder, deleteFolder, Deleting a folder, Folder page, folderCounts, Managing folders in the tree, moveFolder (+1 more)
 
 ### Community 81 - "Bubble Link E2E"
 Cohesion: 0.47
 Nodes (8): Folder tree with stored sort, GET/PATCH /api/settings endpoint, getTree (folders.ts), settings.ts (getTreeSort, setTreeSort), Delta spec: shell (Folder tree, Tree sort preference), Requirement: Folder tree, Requirement: Tree sort preference (mixed, name, edited, created), Task unit 4: Tree sort preference
 
-### Community 82 - "steps"
+### Community 82 - "block-menu.test.ts"
 Cohesion: 0.31
 Nodes (9): steps, GH_TOKEN, steps, env, id, name, run, uses (+1 more)
 
@@ -515,21 +596,21 @@ Nodes (9): steps, GH_TOKEN, steps, env, id, name, run, uses (+1 more)
 Cohesion: 0.25
 Nodes (8): Types contract (src/lib/types.ts), Tasks: build-notes-archive (23 units, 9 waves), Fail-first rule (Scenario tests red before code), Look walk per UI unit, Taste stop at task 4.6 (mockup approval), Unit 3: contract (types, schema, plain text, stubs, test routes), Unit 4: mockups, photos and look checkpoint, Parallel unit waves W1–W9 in worktrees
 
-### Community 84 - "Toggle E2E"
-Cohesion: 0.25
-Nodes (9): folders spec (build-notes-archive), createFolder, deleteFolder, Deleting a folder, Folder page, folderCounts, Managing folders in the tree, moveFolder (+1 more)
+### Community 84 - "Folder cover"
+Cohesion: 0.15
+Nodes (13): Folder cover, removeFolderCover, setFolderCover, home spec (build-notes-archive), Home bento, notes spec (build-notes-archive), createNote, Creating a note (+5 more)
 
-### Community 85 - "Release Trigger"
+### Community 85 - "updateNote"
 Cohesion: 0.25
 Nodes (9): Moving a note, Note page, Properties row (Folder, Tags, Pinned), Tags section, tags spec (build-notes-archive), listTags, setNoteTags, Tag input (+1 more)
 
-### Community 86 - "Preview fetch on the server"
-Cohesion: 0.33
-Nodes (9): link-preview spec (build-notes-archive), POST /api/preview, FetchError, linkPreview node, parsePreview, Preview cards in the editor, Preview fetch on the server, readPreview (+1 more)
+### Community 86 - "Requirement: Folder page"
+Cohesion: 0.20
+Nodes (9): MODIFIED Requirements, Requirement: Folder page, Scenario: Empty folder offers New note and New folder, Scenario: Folder page shows breadcrumb, cover header and counts, Scenario: Folder page shows sub-folders and notes by last edited, Scenario: Folder without a cover shows a typographic tile, Scenario: Header and parent tile count the same, Scenario: New folder from a folder page creates a sub-folder (+1 more)
 
 ### Community 87 - "Emoji Search"
-Cohesion: 0.46
-Nodes (6): Block handle and block menu (drag, Move up/down, Turn into, Delete; moveBlock), Bubble toolbar (marks, link, text colour), Extra blocks (Toggle, Callout, Code w/ highlighting, Table, Divider, Task list), Slash menu (block type picker), editor Specification, Quiet editor (no animation while typing)
+Cohesion: 0.39
+Nodes (7): Block handle and block menu (drag, Move up/down, Turn into, Delete; moveBlock), Bubble toolbar (marks, link, text colour), Extra blocks (Toggle, Callout, Code w/ highlighting, Table, Divider, Task list), Markdown shortcuts and keys (Cmd/Ctrl+B/I/E/K, undo/redo), Slash menu (block type picker), editor Specification, Quiet editor (no animation while typing)
 
 ### Community 88 - "Release Deploy Inputs"
 Cohesion: 0.25
@@ -547,9 +628,9 @@ Nodes (7): Layout rule (sidebar ≥1024, 720px note column, auto-fill grids), Mo
 Cohesion: 0.25
 Nodes (7): context, rules, design, proposal, specs, tasks, schema
 
-### Community 93 - "Release Publish Job"
-Cohesion: 0.53
-Nodes (5): handle(), menu(), openMenu(), openThree(), paragraph()
+### Community 93 - "folder-page.test.ts"
+Cohesion: 0.12
+Nodes (15): bare(), cover(), crumbs(), folderRows(), main(), noteRows(), counts(), photo() (+7 more)
 
 ### Community 94 - "Solitude House Photo"
 Cohesion: 0.29
@@ -567,25 +648,51 @@ Nodes (5): PUT /api/pinned endpoint, listPinned (notes.ts), reorderPinned (notes
 Cohesion: 0.29
 Nodes (6): $app/tsconfig, compilerOptions, strict, exclude, extends, include
 
-### Community 98 - "uploads.test.ts"
-Cohesion: 0.23
-Nodes (9): getFile(), storeFile(), MAX_UPLOAD_BYTES, getNote(), POST(), load(), GET(), INLINE (+1 more)
+### Community 98 - "hifi/editor/+page.svelte"
+Cohesion: 0.11
+Nodes (22): MockBlock, actions, { blocks, tableActions = false, openToggle = false, handleAt = null }, Props, toggles, marks, { mode = 'format' }, Props (+14 more)
 
-### Community 99 - "emoji.ts"
-Cohesion: 0.53
-Nodes (4): Emoji, EMOJI, rows, searchEmoji()
+### Community 99 - "2026-11-17-redesign/tasks.md"
+Cohesion: 0.09
+Nodes (21): 10. ⛔ Build preconditions (human stop, orchestrator), 11. Shell foundation: fingerprint switch, icon links, capture, sort menu, tag list, copy, 12. Desktop focus tree, rail and tags, 13. Phone bar, 14. Dialogs, menus, choosers and toasts, 15. Home desk and pinned reorder, 16. Folder page, Folders page and phone drill-down, 17. Note page (+13 more)
+
+### Community 100 - "shell/SortMenu.svelte"
+Cohesion: 0.07
+Nodes (29): dark, inert, Props, {
+		variant = 'secondary',
+		size = 'm',
+		icon = false,
+		arrow = false,
+		href,
+		type = 'button',
+		disabled = false,
+		loading = false,
+		loadingLabel = 'Working',
+		label,
+		children,
+		onclick,
+		...rest
+	}, anchor, choose(), { folderId, hasCover }, input (+21 more)
+
+### Community 101 - "icon/+page.svelte"
+Cohesion: 0.09
+Nodes (7): family, grounds, previous, small, Variant, variants, worst
+
+### Community 102 - "open"
+Cohesion: 0.11
+Nodes (6): openNote(), open(), input(), palette(), openFirstTag(), openTag()
 
 ### Community 103 - "release.yml"
 Cohesion: 0.33
 Nodes (5): jobs, name, on, push, tags
 
-### Community 104 - "Folder counts design (folderCounts as single source)"
-Cohesion: 0.50
-Nodes (4): folderCounts (folders.ts), Delta spec: folders (Folder page), Requirement: Folder page (descendant counts), Task unit 3: Folder counts
+### Community 104 - "Design fingerprint: reference"
+Cohesion: 0.09
+Nodes (21): Accent sets, Accessibility, App icons, Colour tokens, Composition tokens (`tokens.css`, "Composition (layout.css)"), Content palettes (not UI colour), Design fingerprint: reference, Elevation and glass (+13 more)
 
-### Community 105 - "@tiptap/pm"
-Cohesion: 0.50
-Nodes (4): @tiptap/pm@3.32.2, @tiptap/pm, Image, src()
+### Community 105 - "pinned-reorder.test.ts"
+Cohesion: 0.13
+Nodes (10): recent(), notes(), animationsDuringMove(), entry(), menuOf(), pinned(), pinnedABC(), titles() (+2 more)
 
 ### Community 106 - "with"
 Cohesion: 0.40
@@ -595,13 +702,13 @@ Nodes (5): with, app, host_vars_path, tag, variable
 Cohesion: 0.40
 Nodes (5): name, outputs, runs-on, check-tag, ci-run-id
 
-### Community 108 - "Notes Archive"
-Cohesion: 0.50
-Nodes (3): Learnings, Notes Archive, Specs
+### Community 108 - "Design System: Design fingerprint"
+Cohesion: 0.10
+Nodes (20): Accent: one per app, Accessibility, Colors, Components, Design System: Design fingerprint, Do:, Do's and Don'ts, Don't: (+12 more)
 
-### Community 109 - "sidebar-collapse.test.ts"
-Cohesion: 0.83
-Nodes (3): sidebar(), width(), widthIs()
+### Community 109 - "Requirement: Things the user makes move"
+Cohesion: 0.10
+Nodes (19): ADDED Requirements, MODIFIED Requirements, REMOVED Requirements, Requirement: Card to note morph, Requirement: Glass hover glow, Requirement: Lists stagger in, Requirement: Motion on real devices, Requirement: Page transitions (+11 more)
 
 ### Community 110 - "house-midcentury.jpg (mockup photo fixture)"
 Cohesion: 0.50
@@ -615,9 +722,9 @@ Nodes (4): Interior Rio (mockup photo: ocean-view living room at dusk), Ocean-vi
 Cohesion: 0.50
 Nodes (4): publish, name, needs, runs-on
 
-### Community 113 - "Multi-line titles design (CRLF to LF, titleLine helper, FTS unicode61)"
-Cohesion: 0.83
-Nodes (3): titleLine helper (src/lib/title.ts), Requirement: Multi-line titles, Task unit 5: Multi-line titles
+### Community 113 - "settings-api.test.ts"
+Cohesion: 0.14
+Nodes (20): Decisions, MODIFIED Requirements, Requirement: Tag pages, Scenario: Deleting one of several tagged notes stays, Scenario: Deleting the last tagged note goes Home, Scenario: Tag counts include only notes using them, Scenario: Tag page lists its notes by last edited, Scenario: Unknown tag id is a plain 404 (+12 more)
 
 ### Community 114 - "house-solitude.jpg (mockup fixture photo)"
 Cohesion: 0.67
@@ -627,6 +734,242 @@ Nodes (3): house-solitude.jpg (mockup fixture photo), Black timber-clad modern h
 Cohesion: 1.00
 Nodes (3): Greek mountain lake (possibly Lake Doxa, Peloponnese), Mountain lake valley viewed through conifers, lake-greek.jpg mockup photo
 
+### Community 118 - "wire/editor/Blocks.svelte"
+Cohesion: 0.12
+Nodes (12): { first = false, last = false, turnInto = false }, Props, turn, actions, { blocks, tableActions = false, openToggle = false }, Props, toggles, colours (+4 more)
+
+### Community 119 - "wire/folder/FolderBody.svelte"
+Cohesion: 0.13
+Nodes (14): counts, empty, { folder, worst, posture }, FolderView, more, parent, shortened, shown (+6 more)
+
+### Community 120 - "check-slop.mjs"
+Cohesion: 0.11
+Nodes (14): args, banned, bannedPath, baselineFlag, checkDecl(), explicitBanned, files, NAMED (+6 more)
+
+### Community 121 - "NoteTitle.svelte"
+Cohesion: 0.14
+Nodes (13): Props, { title, autofocus = false, inert = false, ontitle, onblur, onenter, children }, cut, field, focused, keydown(), lead, long (+5 more)
+
+### Community 122 - "hifi/note/+page.svelte"
+Cohesion: 0.14
+Nodes (15): LONG_TAG, LONG_TITLE, NoteView, Status, TWELVE_LINES, blocks, data, fresh (+7 more)
+
+### Community 123 - "autosave.ts"
+Cohesion: 0.18
+Nodes (7): DEBOUNCE_MS, DISCRETE, Saved, SeedFolder, SeedNote, IsoDateTime, TagRef
+
+### Community 124 - "api.ts"
+Cohesion: 0.19
+Nodes (9): CapturePage, currentFolderId(), findFolder(), folderOfNote(), newNote(), tree, hidden, path (+1 more)
+
+### Community 125 - "hifi/note/Properties.svelte"
+Cohesion: 0.15
+Nodes (15): createdOn(), day, editedAt(), shortPath(), stamp, tagCount(), chosen, folder (+7 more)
+
+### Community 126 - "wire/note/Properties.svelte"
+Cohesion: 0.18
+Nodes (12): createdOn(), day, editedAt(), stamp, tagCount(), chosen, folder, open (+4 more)
+
+### Community 127 - "toast.svelte.ts"
+Cohesion: 0.20
+Nodes (14): dismiss(), DURATION, pause(), resume(), start(), timers, Toast, toast() (+6 more)
+
+### Community 128 - "schema.test.ts"
+Cohesion: 0.10
+Nodes (21): Contracts, Gate-1 sign-off, Goals / Non-Goals, Migration, Risks / Trade-offs, 1. Migration and shared types, 2. Pinned order, 3. Folder counts (+13 more)
+
+### Community 129 - "hifi/note/NoteCard.svelte"
+Cohesion: 0.11
+Nodes (17): all, anchor, cut, gone, held, Item, items, keep (+9 more)
+
+### Community 130 - "MockData"
+Cohesion: 0.23
+Nodes (10): MockData, EMOJI, LANGUAGES, pick(), stressBlocks(), wideTable(), b, data (+2 more)
+
+### Community 131 - "Requirement: Note page"
+Cohesion: 0.17
+Nodes (12): Requirement: Note page, Scenario: Emoji picker is usable on phone, Scenario: Long folder path stays readable in the properties, Scenario: Many tags wrap without horizontal scroll, Scenario: Note page shows icon, title and body, Scenario: Note without tags shows no tag count, Scenario: Pick, change and remove the note icon, Scenario: Properties collapse into a summary on the phone (+4 more)
+
+### Community 132 - "Scope: redesign"
+Cohesion: 0.18
+Nodes (10): Codebase touchpoints, Decisions, Done when, Flows, In scope, Non-goals, Problem, Scope: redesign (+2 more)
+
+### Community 133 - "time.ts"
+Cohesion: 0.17
+Nodes (11): dayDate(), LONG_MONTHS, longDay(), MONTHS, relativeTime(), SHORT_WEEKDAYS, shortDate(), now (+3 more)
+
+### Community 134 - "Requirement: Editor on the fingerprint"
+Cohesion: 0.09
+Nodes (23): details(), ADDED Requirements, MODIFIED Requirements, Requirement: Editor on the fingerprint, Requirement: Extra blocks, Scenario: A level-3 heading reads as a ruled overline, Scenario: Callout shows an emoji and a tinted panel, Scenario: Code block highlights syntax and switches language (+15 more)
+
+### Community 135 - "editor/preview.ts"
+Cohesion: 0.36
+Nodes (6): LinkPreview, cardFor(), previewExtensions(), domainOf(), standaloneUrl(), LinkPreview
+
+### Community 136 - "search-states.test.ts"
+Cohesion: 0.60
+Nodes (5): cards(), field(), folder(), main(), tag()
+
+### Community 137 - "listPinned"
+Cohesion: 0.06
+Nodes (41): Appetite, Capabilities, Done criteria, Impact, Modified Capabilities, New Capabilities, Non-Goals, What Changes (+33 more)
+
+### Community 138 - "2026-11-17-redesign/design.md"
+Cohesion: 0.20
+Nodes (9): Context, Decisions, From scope (gate 3, Rue), Gate log, Goals / Non-Goals, Migration Plan, Open Questions, Planning decisions (planner, 2026-11-14; P1 and P5 confirmed by Rue at Gate 1, 2026-11-14) (+1 more)
+
+### Community 139 - "2026-11-17-redesign/proposal.md"
+Cohesion: 0.22
+Nodes (8): Appetite, Capabilities, Done criteria, Impact, New Capabilities, Non-Goals, What Changes, Why
+
+### Community 140 - "Folder counts design (folderCounts as single source)"
+Cohesion: 0.50
+Nodes (4): folderCounts (folders.ts), Delta spec: folders (Folder page), Requirement: Folder page (descendant counts), Task unit 3: Folder counts
+
+### Community 141 - "Requirement: Creating a note"
+Cohesion: 0.22
+Nodes (9): Requirement: Creating a note, Scenario: Empty new note is discarded on leaving, Scenario: New note from the shell lands in the current folder, Scenario: New note shows its placeholders, Scenario: New note without a current folder lands at the top level, Scenario: Note with only a title is kept, Scenario: Opening a new empty note focuses the title, Scenario: Server creates notes at the root or in a folder (+1 more)
+
+### Community 142 - "Requirement: Note cards"
+Cohesion: 0.22
+Nodes (9): Requirement: Note cards, Scenario: Card shows its first tag and +n, Scenario: Edited time reads relative, Scenario: Long tags never run into the time, Scenario: Note card shows its parts, Scenario: Note without text shows Empty note, Scenario: Search results are numbered rows with folder and date, Scenario: Snippet skips a leading image (+1 more)
+
+### Community 143 - "Requirement: Focus tree"
+Cohesion: 0.22
+Nodes (9): Requirement: Focus tree, Scenario: Deep path shortens the middle, Scenario: Deleting the focused folder moves the focus up, Scenario: Empty tree offers New folder, Scenario: Long names stay readable in the tree, Scenario: Opening a folder focuses the tree on it, Scenario: Path row links go up, Scenario: Top level has no path row (+1 more)
+
+### Community 144 - "Requirement: Tag page layout"
+Cohesion: 0.22
+Nodes (8): ADDED Requirements, Requirement: Tag page layout, Scenario: Deleting the last note on the restyled tag page goes Home, Scenario: Long tag name heading wraps, Scenario: Long tag pill wraps inside its entry, Scenario: One tagged note reads singular, Scenario: Tag page entries show folder, date and tags, Scenario: Tag page shows the tag heading and its notes
+
+### Community 145 - "open"
+Cohesion: 0.11
+Nodes (17): deleteFrom(), named(), bottomBar(), folderLink(), folderOrder(), isDesktop(), openFolderMenu(), setSort() (+9 more)
+
+### Community 146 - "2026-11-17-redesign/flow.yaml"
+Cohesion: 0.25
+Nodes (7): base, gate0, gate1, gate2, learnings, track, triage
+
+### Community 147 - "MODIFIED Requirements"
+Cohesion: 0.25
+Nodes (7): ADDED Requirements, MODIFIED Requirements, Requirement: Save status, Scenario: Failed saves show one toast and a retry status, Scenario: Save status is not a live region, Scenario: Save status shows Saving and Saved, Scenario: Saving stops after the note was deleted elsewhere
+
+### Community 148 - "Requirement: Title editing"
+Cohesion: 0.29
+Nodes (7): Requirement: Title editing, Scenario: ArrowDown on the last title line moves to the body, Scenario: Cmd or Ctrl+Enter moves to the body, Scenario: Enter in the title adds a line break, Scenario: Many short title lines stay in the column, Scenario: Pasted CRLF text keeps its line breaks, Scenario: Title is the page heading
+
+### Community 149 - "Requirement: Wide layouts"
+Cohesion: 0.29
+Nodes (7): MODIFIED Requirements, Requirement: Wide layouts, Scenario: Controls keep a 44 px target below the wide layout, Scenario: Home lists sit side by side on wide screens, Scenario: Mid-width shows the sidebar with stacked lists, Scenario: Note column is capped and centred on wide screens, Scenario: Note column widens at 1100 px and fills the content area at 1280
+
+### Community 150 - "core.ts"
+Cohesion: 0.17
+Nodes (12): Risks, codeBlock(), lowlight, ColorSpan, Commands, isTextColor(), SelectionSync, TEXT_COLORS (+4 more)
+
+### Community 151 - "Notes Archive"
+Cohesion: 0.40
+Nodes (4): Design fingerprint, Learnings, Notes Archive, Specs
+
+### Community 152 - "MockData"
+Cohesion: 0.10
+Nodes (16): MONTHS, NOW, relTime(), withWorstTags(), open, order, { pinned, recent, empty = false, menu = null }, pins (+8 more)
+
+### Community 153 - "verification.md"
+Cohesion: 0.29
+Nodes (6): Diffstat, Layer 1: proof:full (exit 0), Layer 2: coverage (40 scenarios, 0 gaps), Manual checklist, Review, Screenshots
+
+### Community 154 - "2026-11-17-redesign/verification.md"
+Cohesion: 0.29
+Nodes (6): Coverage, Diffstat, Layer 1: proof:full, Manual checklist, Review, Screenshots (not committed)
+
+### Community 155 - "titleKeys.test.ts"
+Cohesion: 0.52
+Nodes (4): lf(), onLastLine(), TitleKey, titleKey()
+
+### Community 156 - "sidebar-collapse.test.ts"
+Cohesion: 0.47
+Nodes (3): sidebar(), width(), widthIs()
+
+### Community 157 - "Requirement: Deleting a note"
+Cohesion: 0.33
+Nodes (6): Requirement: Deleting a note, Scenario: Cancelled note delete keeps everything, Scenario: Delete a note from its card, Scenario: Delete buttons stack on a phone, Scenario: Deleting the open note asks first and lands on its folder, Scenario: Server delete removes tag links, uploads and the index row
+
+### Community 158 - "REMOVED Requirements"
+Cohesion: 0.33
+Nodes (5): REMOVED Requirements, Requirement: Desktop sidebar, Requirement: Folder tree, Requirement: Phone bottom bar and drawer, Requirement: Tags section
+
+### Community 159 - "Requirement: Folders page"
+Cohesion: 0.33
+Nodes (6): Requirement: Folders page, Scenario: Desktop Folders page shows the tree at the top level, Scenario: Folders page lists top-level folders with counts, then tags, Scenario: Folders pill opens the Folders page, Scenario: New folder from the Folders page, Scenario: No folders shows No folders yet
+
+### Community 161 - "Requirement: Phone bar"
+Cohesion: 0.33
+Nodes (6): Requirement: Phone bar, Scenario: Bar fits 320 px with safe areas, Scenario: Bar hides while the editor has focus, Scenario: Bar stays out of the soft keyboard, Scenario: Current section is marked, Scenario: Phone bar shows three pills and New note
+
+### Community 162 - "Requirement: Tags list"
+Cohesion: 0.33
+Nodes (6): Requirement: Tags list, Scenario: Tag counts update without reload, Scenario: Tags follow the folders on the phone, Scenario: Tags section is absent without tags, Scenario: Tags sit below the tree with counts, Scenario: The open tag is the current row
+
+### Community 163 - "Requirement: Tree expansion and keyboard"
+Cohesion: 0.33
+Nodes (6): Requirement: Tree expansion and keyboard, Scenario: Arrow keys move through the tree, Scenario: Chevron expands without navigating, Scenario: Empty folder has no chevron, Scenario: Manual open state lasts until reload, Scenario: Tree focuses the open note folder and marks its row
+
+### Community 164 - "Multi-line titles design (CRLF to LF, titleLine helper, FTS unicode61)"
+Cohesion: 0.83
+Nodes (3): titleLine helper (src/lib/title.ts), Requirement: Multi-line titles, Task unit 5: Multi-line titles
+
+### Community 165 - "Requirement: Tree sort picker"
+Cohesion: 0.33
+Nodes (6): Requirement: Tree sort picker, Scenario: Choosing a mode re-sorts and persists, Scenario: Failed sort save reverts with a toast, Scenario: Sort leaves the other lists alone, Scenario: Sort picker marks the current mode, Scenario: Sort picker on the phone lives on the Folders page
+
+### Community 166 - "Note cards"
+Cohesion: 0.28
+Nodes (9): motion spec (build-notes-archive), Card to note morph, Lists stagger in, Motion on real devices, Page transitions, View Transitions API, listNotes, Note cards (+1 more)
+
+### Community 167 - "updateNote"
+Cohesion: 0.20
+Nodes (11): Content storage and derived text, plainText walker, ProseMirror JSON content, Autosave, updateNote, search spec (build-notes-archive), Command palette, Full-text search (+3 more)
+
+### Community 168 - "emoji.ts"
+Cohesion: 0.53
+Nodes (4): Emoji, EMOJI, rows, searchEmoji()
+
+### Community 169 - "Managing folders in the tree"
+Cohesion: 0.36
+Nodes (8): Frosted glass material, Style guards, Glass hover glow, shell spec (build-notes-archive), Desktop sidebar, Folder tree, Phone bottom bar and drawer, Wide layouts
+
+### Community 170 - "bubble-link.test.ts"
+Cohesion: 0.60
+Nodes (4): field(), nodes(), setup(), toolbar()
+
+### Community 171 - "Requirement: Dialogs and menus"
+Cohesion: 0.40
+Nodes (5): Requirement: Dialogs and menus, Scenario: Delete confirm shows counts once known, Scenario: Modal dialog traps focus and returns it, Scenario: Move to chooser starts with Root in tree order, Scenario: Outside click cancels a menu or dialog
+
+### Community 172 - "Requirement: Tree follows the open note"
+Cohesion: 0.40
+Nodes (5): Requirement: Tree follows the open note, Scenario: Deleting the open note keeps its folder focused, Scenario: Moving the open note moves the focus, Scenario: Opening a note from search focuses its folder, Scenario: Top-level note shows the top level
+
+### Community 173 - "Requirement: Tree rail"
+Cohesion: 0.40
+Nodes (5): Requirement: Tree rail, Scenario: One control folds the tree into a rail, Scenario: Rail controls keep accessible names, Scenario: Rail state survives a reload without a flash, Scenario: Storage unavailable falls back to expanded
+
+### Community 174 - "ADDED Requirements"
+Cohesion: 0.50
+Nodes (4): ADDED Requirements, Requirement: Toasts, Scenario: Toast is a polite status for about four seconds, Scenario: Toast survives a redirect
+
+### Community 176 - "wire/overlays/+page.svelte"
+Cohesion: 0.05
+Nodes (40): attach, createToaster(), attach(), dismiss(), flush(), park(), toast(), write() (+32 more)
+
+### Community 178 - "Pinned.svelte"
+Cohesion: 0.08
+Nodes (26): folderName(), announce, commit(), drag, grip(), moved(), { notes }, offset() (+18 more)
+
+### Community 182 - "wire/editor/SlashMenu.svelte"
+Cohesion: 0.40
+Nodes (4): items, Props, { query = '', active = 0, emptyResult = false }, shown
+
 ## Ambiguous Edges - Review These
 - `helpers.ts` → `Quiet editor`  [AMBIGUOUS]
   openspec/changes/archive/2026-11-03-build-notes-archive/specs/harness/spec.md · relation: conceptually_related_to
@@ -634,23 +977,23 @@ Nodes (3): Greek mountain lake (possibly Lake Doxa, Peloponnese), Mountain lake 
   fixtures/mockups/lake-greek.jpg · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **68 isolated node(s):** `$app/tsconfig`, `Midcentury Modern Single-Story House (flat roof, wood cladding, fieldstone walls)`, `Striped Lawn and Pine/Deciduous Tree Landscape at Dusk`, `Wide landscape-format photo (approx. 2:1, high resolution)`, `Black timber-clad modern house in a wooded garden` (+63 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 690 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **69 isolated node(s):** `$app/tsconfig`, `Midcentury Modern Single-Story House (flat roof, wood cladding, fieldstone walls)`, `Striped Lawn and Pine/Deciduous Tree Landscape at Dusk`, `Wide landscape-format photo (approx. 2:1, high resolution)`, `Black timber-clad modern house in a wooded garden` (+64 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1643 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `vitest` connect `vitest` to `UI Primitives and Motion`, `Design Tokens and Look`, `notes/autosave.test.ts`, `#lib`, `E2E Helpers and Tests`, `TreeRow.svelte`, `E2E Reset and Seed`, `Media Upload Blocks`, `Note Page and Autosave`, `Test-Only Routes`, `db.ts`, `Media E2E Tests`, `getDb`, `Folders Data Layer`, `Full-Text Search Index`, `Gate Workflow`, `editor/preview.ts`, `FolderPicker.svelte`, `TagInput.svelte`, `(app)/search/+page.svelte`, `Harness Spec (Change)`, `Shell and Tags Specs`, `@sveltejs/kit`, `toast.ts`, `schema.test.ts`, `Release Steps`, `Interior Living Photo`, `settings-api.test.ts`, `Release Artifact Download`, `uploads.test.ts`, `emoji.ts`, `title.ts`?**
-  _High betweenness centrality (0.110) - this node is a cross-community bridge._
+- **Why does `svelte` connect `svelte` to `hifi/note/NoteCard.svelte`, `shell/SideTree.svelte`, `Design Tokens and Look`, `MockData`, `#lib`, `time.ts`, `E2E Helpers and Tests`, `types.ts`, `CardMenu.svelte`, `wire/tree/SideTree.svelte`, `Block Menu Operations`, `Command Palette`, `FocusTree.svelte`, `CI Workflow`, `Plain Text Extraction`, `hifi/home/Entry.svelte`, `TagInput.svelte`, `motion.ts`, `wire/note/+page.svelte`, `@tiptap/core`, `Look Research`, `wire/overlays/+page.svelte`, `Pinned.svelte`, `NoteProperties.svelte`, `hifi/tree/SideTree.svelte`, `ui/Menu.svelte`, `hifi/home/Desk.svelte`, `hifi/folder/FolderBody.svelte`, `wire/tree/SideTree.svelte`, `shell/SortMenu.svelte`, `NoteTitle.svelte`, `autosave.ts`, `hifi/note/Properties.svelte`, `wire/note/Properties.svelte`?**
+  _High betweenness centrality (0.074) - this node is a cross-community bridge._
 - **What connects `$app/tsconfig`, `Midcentury Modern Single-Story House (flat roof, wood cladding, fieldstone walls)`, `Striped Lawn and Pine/Deciduous Tree Landscape at Dusk` to the rest of the system?**
-  _68 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Uploads and Preview Server` be split into smaller, more focused modules?**
-  _Cohesion score 0.07686932215234102 - nodes in this community are weakly interconnected._
-- **Why does `svelte` connect `svelte` to `CI Workflow`, `Plain Text Extraction`, `Uploads and Preview Server`, `Design Tokens and Look`, `autosave.ts`, `#lib`, `notes/autosave.test.ts`, `E2E Helpers and Tests`, `Release Steps`, `Primitives Mockup and Cover`, `@tiptap/core`, `UI Primitives and Motion`, `Look Research`, `toast.ts`, `Command Palette`, `npm Scripts`, `primitives/+page.svelte`, `FolderPicker.svelte`?**
-  _High betweenness centrality (0.063) - this node is a cross-community bridge._
-- **Should `Folder Tree Types` be split into smaller, more focused modules?**
-  _Cohesion score 0.12033898305084746 - nodes in this community are weakly interconnected._
+  _69 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `FolderHeader.svelte` be split into smaller, more focused modules?**
+  _Cohesion score 0.06285714285714286 - nodes in this community are weakly interconnected._
+- **Why does `Notes Archive: functional contract` connect `Notes Archive: functional contract` to `Notes Spec (Change)`?**
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Should `REMOVED Requirements` be split into smaller, more focused modules?**
+  _Cohesion score 0.043478260869565216 - nodes in this community are weakly interconnected._
 
 ### Low-confidence Hints
 _AMBIGUOUS edges — the extractor was unsure. Verify before acting on these._

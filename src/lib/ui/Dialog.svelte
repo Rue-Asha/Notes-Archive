@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { tick } from 'svelte';
-	import { fadeSlide, hideOnOutro } from '#lib/motion.ts';
-	import Button from './Button.svelte';
-	import { portal, trapTab } from './overlay.ts';
+	import Button from '#lib/components/button/Button.svelte';
+	import Sheet from '#lib/components/sheet/Sheet.svelte';
+	import Icon from '#lib/ui/Icon.svelte';
+	import { ms } from '#lib/ui/motion.ts';
 
+	// a confirmation as in the signed hi-fi: the title is the question, the message its consequence, the danger button
+	// names what goes ("Delete note") with a trash icon, and Cancel has the focus
 	type Props = {
 		open: boolean;
 		title: string;
@@ -16,85 +18,41 @@
 
 	let { open, title, message, confirmLabel, danger = false, onconfirm, oncancel }: Props = $props();
 
-	let dialog = $state<HTMLDivElement>();
-	let opener: HTMLElement | null = null;
-
+	// the question names the note or folder, so a closed dialog (one per card) keeps it out of the page; it stays while
+	// the dialog fades out
+	let asking = $state(false);
 	$effect(() => {
 		if (open) {
-			opener = document.activeElement as HTMLElement | null;
-			tick().then(() => dialog?.querySelector('button')?.focus());
-		} else if (opener) {
-			opener.focus();
-			opener = null;
+			asking = true;
+			return;
 		}
+		const timer = setTimeout(() => (asking = false), ms('--motion-glide'));
+		return () => clearTimeout(timer);
 	});
-
-	function keys(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			event.preventDefault();
-			oncancel();
-		} else trapTab(event, dialog!);
-	}
 </script>
 
-{#if open}
-	<div class="overlay" role="presentation" use:portal transition:fadeSlide={{ y: 0 }} onpointerdown={(e) => e.target === e.currentTarget && oncancel()}>
-		<div
-			class="dialog glass strong"
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="dialog-title"
-			aria-describedby="dialog-message"
-			tabindex="-1"
-			bind:this={dialog}
-			onkeydown={keys}
-			transition:fadeSlide={{ y: 14 }}
-			use:hideOnOutro
-		>
-			<h2 id="dialog-title">{title}</h2>
-			<p id="dialog-message">{message}</p>
-			<div class="actions">
-				<Button variant="secondary" arrow={false} onclick={oncancel}>Cancel</Button>
-				<Button variant={danger ? 'danger' : 'cta'} arrow={false} onclick={onconfirm}>{confirmLabel}</Button>
-			</div>
-		</div>
-	</div>
-{/if}
+<Sheet bind:open={() => open, (next) => !next && oncancel()} title={asking ? title : ''} mode="dialog" alert={danger}>
+	<p class="message">{message}</p>
+	{#snippet actions()}
+		<Button autofocus onclick={oncancel}>Cancel</Button>
+		<Button variant={danger ? 'danger' : 'primary'} onclick={onconfirm}>{#if danger}<Icon name="trash" size={16} />{/if}{confirmLabel}</Button>
+	{/snippet}
+</Sheet>
 
 <style>
-	.overlay {
-		position: fixed;
-		inset: 0;
-		z-index: 80;
-		display: grid;
-		place-items: center;
-		padding: var(--s-4);
-		background: color-mix(in srgb, var(--ink) 28%, transparent);
-	}
-
-	.dialog {
-		display: grid;
-		gap: var(--s-3);
-		inline-size: min(100%, 440px);
-		padding: var(--s-7);
-		border-radius: var(--r-xl);
-		background: color-mix(in srgb, var(--glass-fallback) 92%, transparent);
-	}
-
-	h2 {
-		font-size: var(--t-display-3);
-	}
-
-	p {
+	.message {
 		overflow-wrap: anywhere;
-		color: var(--ink-2);
+		hyphens: auto;
+		color: var(--ink-secondary);
+		font-size: var(--type-body-size);
+		line-height: var(--type-body-line);
 	}
 
-	.actions {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: flex-end;
-		gap: var(--s-3);
-		margin-block-start: var(--s-4);
+	/* phones: the choices stack full width, Cancel first, as in the hi-fi bottom sheet */
+	@media (max-width: 767px) {
+		:global(dialog[data-sheet]:has(.message) footer) {
+			flex-direction: column;
+			align-items: stretch;
+		}
 	}
 </style>

@@ -1,4 +1,6 @@
 import { Extension, type AnyExtension } from '@tiptap/core';
+import { Plugin } from '@tiptap/pm/state';
+import type { EditorView } from '@tiptap/pm/view';
 import Code from '@tiptap/extension-code';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { TextStyle } from '@tiptap/extension-text-style';
@@ -59,16 +61,36 @@ const ColorSpan = TextStyle.extend({
 	}
 });
 
+// Chrome queues selectionchange as a task, so a key pressed right after a click or End can reach the keymap while the
+// state still holds the old selection and Enter splits the first block; reading the DOM selection first keeps it in step
+const SelectionSync = Extension.create({
+	name: 'selectionSync',
+	priority: 1000,
+	addProseMirrorPlugins() {
+		return [
+			new Plugin({
+				props: {
+					handleKeyDown(view, event) {
+						if (!event.isComposing) (view as EditorView & { domObserver: { flush(): void } }).domObserver.flush();
+						return false;
+					}
+				}
+			})
+		];
+	}
+});
+
 export function coreExtensions(ctx: EditorContext): AnyExtension[] {
 	return [
 		// the stock code mark excludes every other mark, so Mod-b, Mod-i, Mod-e on one word would leave only code
-		StarterKit.configure({ codeBlock: false, code: false, link: { openOnClick: false, autolink: true } }),
+		StarterKit.configure({ codeBlock: false, code: false, link: { openOnClick: false, autolink: true }, dropcursor: { color: 'var(--accent)' } }),
 		Code.extend({ excludes: '' }),
 		codeBlock(ctx),
 		TaskList,
 		TaskItem.configure({ nested: true }),
 		Placeholder.configure({ placeholder: 'Write, or type / for blocks' }),
 		ColorSpan,
-		TextColor
+		TextColor,
+		SelectionSync
 	];
 }

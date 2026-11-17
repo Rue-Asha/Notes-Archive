@@ -1,118 +1,239 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
+	import Button from '#lib/components/button/Button.svelte';
 	import { COPY } from '#lib/copy.ts';
 	import { newFolder, newNote } from '#lib/notes/api.ts';
-	import type { Folder } from '#lib/types.ts';
-	import Button from '#lib/ui/Button.svelte';
-	import Eyebrow from '#lib/ui/Eyebrow.svelte';
-	import GlassPanel from '#lib/ui/GlassPanel.svelte';
+	import Icon from '#lib/shell/tree/Icon.svelte';
+	import RenameField from '#lib/shell/tree/RenameField.svelte';
+	import type { Crumb, Folder, Id, Tree } from '#lib/types.ts';
+	import FolderPicker from '#lib/ui/FolderPicker.svelte';
+	import Menu from '#lib/ui/Menu.svelte';
+	import { renameFolder } from './api.ts';
+	import Breadcrumb from './Breadcrumb.svelte';
 	import CoverControl from './CoverControl.svelte';
+	import DeleteFolder from './DeleteFolder.svelte';
 
-	let { folder, folders, notes }: { folder: Folder; folders: number; notes: number } = $props();
+	type Props = { folder: Folder; crumbs: Crumb[]; counts: { folders: number; notes: number }; empty: boolean; onadded(id: Id): void };
+
+	let { folder, crumbs, counts, empty, onadded }: Props = $props();
+
+	const parent = $derived(crumbs.length > 1 ? crumbs[crumbs.length - 2] : null);
+	const hasCover = $derived(folder.coverImageId !== null);
+	// the last word carries the accent
+	const cut = $derived(folder.name.trimEnd().lastIndexOf(' '));
+	const lead = $derived(cut > 0 ? folder.name.slice(0, cut + 1) : '');
+	const tail = $derived(cut > 0 ? folder.name.slice(cut + 1) : folder.name);
+
+	let renaming = $state(false);
+	let menuOpen = $state(false);
+	let moving = $state(false);
+	let deleting = $state(false);
+	let anchor = $state<HTMLElement | null>(null);
+
+	const items = $derived([
+		{ label: 'Rename', icon: 'file', onselect: () => (renaming = true) },
+		{ label: 'Move to…', icon: 'move', onselect: () => (moving = true) },
+		{ label: 'Delete', icon: 'trash', danger: true, onselect: () => (deleting = true) }
+	]);
 
 	async function addFolder() {
-		await newFolder(folder.id);
+		onadded(await newFolder(folder.id));
+		await invalidateAll();
+	}
+
+	async function rename(name: string) {
+		renaming = false;
+		await renameFolder(folder.id, name);
+	}
+
+	async function move(parentId: Id | null) {
+		moving = false;
+		await fetch(`/api/folders/${folder.id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ parentId }) });
 		await invalidateAll();
 	}
 </script>
 
-<header class="cover" class:plain={folder.coverImageId === null} data-cover-header>
-	{#if folder.coverImageId !== null}<img src="/images/{folder.coverImageId}" alt="" />{/if}
-	<GlassPanel as="div" strong class="title-panel">
-		<Eyebrow>Folder</Eyebrow>
-		<h1 class="display">{folder.name}</h1>
-		<p class="counts tnum" data-folder-counts>{COPY.folderCounts(folders, notes)}</p>
-	</GlassPanel>
-	<div class="side">
-		<CoverControl folderId={folder.id} hasCover={folder.coverImageId !== null} />
-		<GlassPanel as="div" class="actions">
-			<Button onclick={() => newNote(folder.id)}>{COPY.newNote}</Button>
-			<Button variant="secondary" onclick={addFolder}>{COPY.newFolder}</Button>
-		</GlassPanel>
-	</div>
-</header>
+<div class="head">
+	<nav class="back" aria-label="Back">
+		<Button variant="glass" size="s" href={parent ? `/folders/${parent.id}` : '/folders'} title={parent?.name ?? COPY.folders}>
+			<Icon name="chevronLeft" size={18} /><span>{parent?.name ?? COPY.folders}</span>
+		</Button>
+	</nav>
+
+	<header class="screen-head" class:covered={hasCover} data-folder-header>
+		{#if hasCover}
+			<figure class="cover" aria-hidden="true" data-cover><img src="/images/{folder.coverImageId}" alt="" /></figure>
+		{/if}
+		<div class="screen-lead">
+			<Breadcrumb {crumbs} />
+			{#if renaming}
+				<RenameField value={folder.name} onsubmit={rename} oncancel={() => (renaming = false)} />
+			{:else}
+				<h1 data-long={folder.name.length > 28 || undefined} lang="de" dir="auto">{lead}<em class="accent-word">{tail}</em></h1>
+			{/if}
+			<p class="lede" data-folder-counts>{COPY.folderCounts(counts.folders, counts.notes)}</p>
+			<div class="actions">
+				<CoverControl folderId={folder.id} {hasCover} />
+				{#if !empty}
+					<span class="primary-slot"><Button variant="primary" arrow onclick={() => newNote(folder.id)}>{COPY.newNote}</Button></span>
+					<Button variant="glass" size="s" onclick={addFolder}><Icon name="folderPlus" size={16} /><span>{COPY.newFolder}</span></Button>
+				{/if}
+				<span class="host" bind:this={anchor}>
+					<Button variant="glass" size="xs" icon label="Folder menu" aria-haspopup="menu" aria-expanded={menuOpen} onclick={() => (menuOpen = !menuOpen)}><Icon name="more" size={20} /></Button>
+				</span>
+			</div>
+		</div>
+	</header>
+</div>
+
+<Menu open={menuOpen} {anchor} label="Folder menu" {items} onclose={() => (menuOpen = false)} />
+<FolderPicker open={moving} tree={page.data.tree as Tree} current={folder.parentId} exclude={folder.id} onpick={move} oncancel={() => (moving = false)} />
+<DeleteFolder folder={deleting ? { id: folder.id, name: folder.name, parentId: folder.parentId, children: [], notes: [] } : null} inside onclose={() => (deleting = false)} />
 
 <style>
-	.cover {
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-		align-items: flex-start;
-		gap: var(--s-3);
-		min-block-size: 300px;
-		padding: var(--s-4);
-		overflow: hidden;
-		border-radius: var(--r-2xl);
-		isolation: isolate;
-		box-shadow: var(--shadow-card);
-	}
-
-	.plain {
-		min-block-size: 0;
-		background: var(--accent-soft);
-	}
-
-	@media (min-width: 768px) {
-		.cover {
-			display: grid;
-			grid-template-columns: minmax(0, auto) auto;
-			align-items: end;
-			justify-content: space-between;
-			min-block-size: 380px;
-			padding: var(--s-6);
-		}
-
-		.plain {
-			min-block-size: 0;
-		}
-	}
-
-	img {
-		position: absolute;
-		inset: 0;
-		z-index: -1;
-		inline-size: 100%;
-		block-size: 100%;
-		object-fit: cover;
-		object-position: 50% 28%;
-	}
-
-	:global(.title-panel) {
+	.head {
 		display: grid;
-		gap: var(--s-2);
+		grid-template-columns: minmax(0, 1fr);
+		min-inline-size: 0;
+		/* the cover runs out to the frame edge behind the title; the page sets how far */
+		--bleed-x: var(--gutter);
+		--bleed-t: var(--area-top);
+	}
+
+	/* above the cover, which bleeds up behind it */
+	.back {
+		position: relative;
+		z-index: var(--z-raised);
+		display: grid;
+		justify-items: start;
+		min-inline-size: 0;
+	}
+
+	.back :global(.btn) {
 		max-inline-size: 100%;
-		padding: var(--s-5) var(--s-6);
-		border-radius: var(--r-2xl);
+		min-block-size: max(var(--control-height-s), var(--target-touch));
 	}
 
-	:global(.title-panel h1) {
-		font-size: var(--t-display-2);
-		overflow-wrap: anywhere;
+	.back :global(.text) {
+		min-inline-size: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
-	.counts {
-		color: var(--ink-2);
-	}
-
-	.side {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: var(--s-3);
-	}
-
-	@media (min-width: 768px) {
-		.side {
-			align-items: flex-end;
+	@media (min-width: 1100px) {
+		.back {
+			display: none;
 		}
 	}
 
-	:global(.cover .actions) {
+	.screen-head {
+		padding-block: var(--space-4) 0;
+	}
+
+	.screen-lead {
+		grid-template-columns: minmax(0, 1fr);
+		max-inline-size: 48rem;
+	}
+
+	.screen-lead::before {
+		content: none;
+	}
+
+	h1 {
+		min-inline-size: 0;
+		overflow-wrap: anywhere;
+		hyphens: auto;
+	}
+
+	h1[data-long] {
+		max-inline-size: 16em;
+		font-size: var(--type-display-l-size);
+		line-height: var(--type-display-l-line);
+		letter-spacing: var(--type-display-l-tracking);
+	}
+
+	.actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--s-3);
-		padding: var(--s-3);
-		border-radius: var(--r-pill);
+		align-items: center;
+		gap: var(--space-2);
+		max-inline-size: 100%;
+		margin-block-start: var(--space-1);
+	}
+
+	.host {
+		display: inline-flex;
+	}
+
+	/* phone: the two labelled buttons share the row and give way before the menu button wraps alone */
+	@media (max-width: 479px) {
+		.actions {
+			flex-wrap: nowrap;
+		}
+
+		.actions :global(.btn.s) {
+			flex: 0 1 auto;
+			min-inline-size: 0;
+			padding-inline: var(--space-3);
+		}
+
+		.actions :global(.btn.xs) {
+			flex: none;
+		}
+	}
+
+	/* below 1100 px the dock's round button (or the sidebar) already makes a note in this folder */
+	.primary-slot {
+		display: contents;
+	}
+
+	@media (max-width: 1099px) {
+		.primary-slot {
+			display: none;
+		}
+	}
+
+	.covered {
+		position: relative;
+		isolation: isolate;
+	}
+
+	.cover {
+		position: absolute;
+		z-index: -1;
+		inset-block: calc(-1 * var(--bleed-t) - var(--space-14)) calc(-1 * var(--space-4));
+		inset-inline: calc(-1 * var(--bleed-x));
+		margin: 0;
+		overflow: hidden;
+		-webkit-mask-image: linear-gradient(var(--ink) calc(100% - var(--stage-fade)), transparent);
+		mask-image: linear-gradient(var(--ink) calc(100% - var(--stage-fade)), transparent);
+	}
+
+	.cover img {
+		inline-size: 100%;
+		block-size: 100%;
+		max-inline-size: none;
+		object-fit: cover;
+	}
+
+	/* the scrim holds at text strength under the title and counts and softens only behind the glass buttons */
+	.cover::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, var(--scrim-text) 0, var(--scrim-text) calc(100% - var(--stage-fade)), var(--scrim-soft) 100%);
+	}
+
+	@media (min-width: 1100px) {
+		.cover {
+			inset-block-start: calc(-1 * var(--bleed-t));
+			inset-inline-start: 0;
+		}
+
+		.cover::after {
+			background: linear-gradient(90deg, var(--scrim-text) 0, var(--scrim-text) 56%, var(--scrim-clear));
+		}
 	}
 </style>

@@ -25,15 +25,15 @@ test('Scenario: Callout shows an emoji and a tinted panel', async ({ page, reque
 	await expect(callout.getByRole('button', { name: 'Change emoji' })).toHaveText('📌');
 	await expect(callout).toContainText('Nicht vergessen');
 	const panel = await callout.evaluate((el) => getComputedStyle(el).backgroundColor);
-	const wash = await page.evaluate(() => {
+	const panelToken = await page.evaluate(() => {
 		const probe = document.createElement('div');
-		probe.style.backgroundColor = 'var(--accent-wash)';
+		probe.style.backgroundColor = 'var(--surface-sunken)';
 		document.body.append(probe);
 		const color = getComputedStyle(probe).backgroundColor;
 		probe.remove();
 		return color;
 	});
-	expect(panel).toBe(wash);
+	expect(panel).toBe(panelToken);
 
 	await saves.settled();
 	const node = (await storedNote(request, notes[0]))!.content.content![0];

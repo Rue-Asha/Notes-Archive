@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="geometricPrecision">
+	<circle cx="8" cy="8" r="8" fill="#2148E0"/>
+	<path d="M4.5 4.5H8.5V11.5H4.5Z" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+	<path d="M5.5 3V4M7.5 3V4" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+	<path d="M6 7.5H7M6 9.5H7" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+	<path d="M10 4H12V10L11 12L10 10Z" fill="#FFFFFF"/>
+</svg>

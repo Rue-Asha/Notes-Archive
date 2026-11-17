@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { flushSync, tick } from 'svelte';
 	import type { Editor } from '@tiptap/core';
-	import { fadeSlide } from '#lib/motion.ts';
 	import Icon, { type IconName } from '#lib/ui/Icon.svelte';
 	import { TEXT_COLORS } from './core.ts';
 	import LinkField from './LinkField.svelte';
@@ -78,39 +77,47 @@
 </script>
 
 {#if shown}
-	<div class="bar glass strong" role="toolbar" aria-label="Format" in:fadeSlide={{ y: 4 }}>
+	<div class="bar" class:wide={linking || palette} role="toolbar" aria-label="Format">
 		{#if linking}
 			<LinkField href={editor?.getAttributes('link').href ?? ''} onapply={apply} onremove={remove} oncancel={cancel} />
 		{:else if palette}
-			<div class="swatches" role="group" aria-label="Text colour">
+			<button type="button" class="tool" aria-label="Close colours" data-press="round" onmousedown={(e) => e.preventDefault()} onclick={() => (palette = false)}>
+				<span class="back"><Icon name="arrow-right" size={17} /></span>
+			</button>
+			<span class="group swatches" role="group" aria-label="Text colour">
+				<button type="button" class="text" data-press onmousedown={(e) => e.preventDefault()} onclick={() => color(null)}>
+					<span class="chip plain" aria-hidden="true"></span>Default
+				</button>
 				{#each TEXT_COLORS as name (name)}
-					<button type="button" class="swatch" aria-label={name} style:--swatch="var(--text-{name})" onmousedown={(e) => e.preventDefault()} onclick={() => color(name)}></button>
+					<button type="button" class="text" data-press onmousedown={(e) => e.preventDefault()} onclick={() => color(name)}>
+						<span class="chip" aria-hidden="true" style:--swatch="var(--text-{name})"></span>{name}
+					</button>
 				{/each}
-				<button type="button" class="default" onmousedown={(e) => e.preventDefault()} onclick={() => color(null)}>Default</button>
-				<button type="button" class="tool" aria-label="Close colours" onmousedown={(e) => e.preventDefault()} onclick={() => (palette = false)}>
-					<Icon name="close" size={17} />
-				</button>
-			</div>
+			</span>
 		{:else}
-			{#each marks as mark (mark.name)}
-				<button
-					type="button"
-					class="tool"
-					aria-label={mark.label}
-					aria-pressed={active(mark.name)}
-					onmousedown={(e) => e.preventDefault()}
-					onclick={() => editor && mark.toggle(editor)}
-				>
-					<Icon name={mark.icon} size={17} />
+			<span class="group">
+				{#each marks as mark (mark.name)}
+					<button
+						type="button"
+						class="tool"
+						aria-label={mark.label}
+						aria-pressed={active(mark.name)}
+						data-press="round"
+						onmousedown={(e) => e.preventDefault()}
+						onclick={() => editor && mark.toggle(editor)}
+					>
+						<Icon name={mark.icon} size={17} />
+					</button>
+				{/each}
+			</span>
+			<span class="group cell">
+				<button type="button" class="tool" aria-label="Link" aria-pressed={active('link')} data-press="round" onmousedown={(e) => e.preventDefault()} onclick={() => (linking = true)}>
+					<Icon name="link" size={17} />
 				</button>
-			{/each}
-			<button type="button" class="tool" aria-label="Link" aria-pressed={active('link')} onmousedown={(e) => e.preventDefault()} onclick={() => (linking = true)}>
-				<Icon name="link" size={17} />
-			</button>
-			<span class="rule"></span>
-			<button type="button" class="tool" aria-label="Text colour" onmousedown={(e) => e.preventDefault()} onclick={() => (palette = true)}>
-				<Icon name="palette" size={17} />
-			</button>
+				<button type="button" class="tool" aria-label="Text colour" data-press="round" onmousedown={(e) => e.preventDefault()} onclick={() => (palette = true)}>
+					<Icon name="palette" size={17} />
+				</button>
+			</span>
 		{/if}
 	</div>
 {/if}
@@ -118,73 +125,103 @@
 <style>
 	.bar {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 2px;
-		padding: var(--s-1) var(--s-2);
-		border-radius: var(--r-pill);
-		box-shadow: var(--glass-rim), var(--shadow-float);
-		font-size: var(--t-small);
-		line-height: 1;
+		gap: var(--space-1);
+		inline-size: fit-content;
+		max-inline-size: calc(100vw - 16px);
+		padding: var(--space-1);
+		border-radius: var(--radius-pill);
+		background: var(--surface-glass-strong);
+		-webkit-backdrop-filter: var(--glass-filter);
+		backdrop-filter: var(--glass-filter);
+		box-shadow: var(--elevation-card);
 	}
 
-	.strong {
-		background-color: color-mix(in srgb, var(--glass-fallback) 92%, transparent);
+	.bar.wide {
+		border-radius: var(--radius-bar-compact);
 	}
 
-	.tool {
-		display: inline-grid;
-		place-items: center;
-		min-inline-size: 36px;
-		block-size: 36px;
+	.group {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-0-5);
+		min-inline-size: 0;
+	}
+
+	.cell {
+		padding-inline-start: var(--space-1);
+		box-shadow: var(--rule-beside);
+	}
+
+	.tool,
+	.text {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		min-inline-size: max(var(--control-height-s), var(--target));
+		min-block-size: max(var(--control-height-s), var(--target));
 		padding: 0;
 		border: 0;
-		border-radius: var(--r-pill);
+		border-radius: var(--radius-round);
 		background: transparent;
 		color: var(--ink);
+		font-family: var(--font-ui);
+		font-size: var(--type-label-size);
+		font-weight: var(--type-label-weight);
 	}
 
-	.tool:hover {
-		background: var(--row-hover);
+	.text {
+		padding-inline: var(--space-3-5);
+		border-radius: var(--radius-pill);
 	}
 
 	.tool[aria-pressed='true'] {
-		background: var(--accent-wash);
-		color: var(--accent);
+		background: var(--surface-inverse);
+		color: var(--ink-on-inverse);
 	}
 
-	.rule {
-		inline-size: 1px;
-		block-size: 18px;
-		margin-inline: var(--s-1);
-		background: var(--line);
+	.back {
+		display: grid;
+		transform: scaleX(-1);
+	}
+
+	.chip {
+		flex: none;
+		inline-size: var(--space-3-5);
+		block-size: var(--space-3-5);
+		border-radius: var(--radius-round);
+		background: var(--swatch);
+		box-shadow: var(--ring-hairline);
+	}
+
+	.chip.plain {
+		background: var(--ink);
 	}
 
 	.swatches {
-		display: flex;
-		align-items: center;
-		gap: var(--s-2);
-		padding-inline: var(--s-2);
+		flex: 1;
+		justify-content: center;
 	}
 
-	.swatch {
-		inline-size: 24px;
-		block-size: 24px;
-		padding: 0;
-		border: 0;
-		border-radius: 50%;
-		background: var(--swatch);
+	@media (max-width: 480px) {
+		.bar {
+			justify-content: center;
+			border-radius: var(--radius-bar-compact);
+		}
+
+		.cell {
+			padding-inline-start: 0;
+			box-shadow: none;
+		}
 	}
 
-	.default {
-		padding: var(--s-1) var(--s-2);
-		border: 0;
-		border-radius: var(--r-pill);
-		background: transparent;
-		color: var(--ink);
-		font-size: var(--t-small);
-	}
-
-	.default:hover {
-		background: var(--row-hover);
+	@media (hover: hover) {
+		.tool:not([aria-pressed='true']):hover,
+		.text:hover {
+			background: var(--surface-tint);
+		}
 	}
 </style>

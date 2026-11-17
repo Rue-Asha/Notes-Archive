@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import type { Editor } from '@tiptap/core';
-	import { fadeSlide, hideOnOutro } from '#lib/motion.ts';
+	import Icon from '#lib/ui/Icon.svelte';
 	import { portal } from '#lib/ui/overlay.ts';
 	import { visibleViewport, watchViewport } from './floating.ts';
 
@@ -51,11 +51,11 @@
 		return watchViewport(place);
 	});
 
-	const actions: { label: string; run: (e: Editor) => void; can: (e: Editor) => boolean }[] = [
+	const actions: { label: string; danger?: boolean; run: (e: Editor) => void; can: (e: Editor) => boolean }[] = [
 		{ label: 'Add row below', run: (e) => void e.chain().focus().addRowAfter().run(), can: (e) => e.can().addRowAfter() },
 		{ label: 'Add column right', run: (e) => void e.chain().focus().addColumnAfter().run(), can: (e) => e.can().addColumnAfter() },
-		{ label: 'Delete row', run: (e) => void e.chain().focus().deleteRow().run(), can: (e) => e.can().deleteRow() },
-		{ label: 'Delete column', run: (e) => void e.chain().focus().deleteColumn().run(), can: (e) => e.can().deleteColumn() }
+		{ label: 'Delete row', danger: true, run: (e) => void e.chain().focus().deleteRow().run(), can: (e) => e.can().deleteRow() },
+		{ label: 'Delete column', danger: true, run: (e) => void e.chain().focus().deleteColumn().run(), can: (e) => e.can().deleteColumn() }
 	];
 
 	const enabled = (can: (e: Editor) => boolean) => {
@@ -65,10 +65,10 @@
 </script>
 
 {#if table}
-	<div class="bar glass strong" role="toolbar" aria-label="Table" bind:this={bar} use:portal transition:fadeSlide={{ y: 4 }} use:hideOnOutro>
+	<div class="bar" role="toolbar" aria-label="Table" bind:this={bar} use:portal>
 		{#each actions as action (action.label)}
-			<button type="button" disabled={!enabled(action.can)} onmousedown={(e) => e.preventDefault()} onclick={() => editor && action.run(editor)}>
-				{action.label}
+			<button type="button" class:danger={action.danger} data-press disabled={!enabled(action.can)} onmousedown={(e) => e.preventDefault()} onclick={() => editor && action.run(editor)}>
+				<Icon name={action.danger ? 'trash' : 'plus'} size={14} />{action.label}
 			</button>
 		{/each}
 	</div>
@@ -77,34 +77,47 @@
 <style>
 	.bar {
 		position: fixed;
-		z-index: 70;
+		z-index: var(--z-menu);
 		display: flex;
 		flex-wrap: wrap;
-		gap: 2px;
+		gap: var(--space-1);
 		max-inline-size: calc(100vw - 16px);
-		padding: var(--s-1);
-		border-radius: var(--r-lg);
-		box-shadow: var(--glass-rim), var(--shadow-float);
-		font-size: var(--t-small);
+		padding: var(--space-1);
+		border-radius: var(--radius-bar-compact);
+		background: var(--surface-glass-strong);
+		-webkit-backdrop-filter: var(--glass-filter);
+		backdrop-filter: var(--glass-filter);
+		box-shadow: var(--elevation-card);
 	}
 
 	button {
-		min-block-size: 36px;
-		padding: 0 var(--s-3);
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-block-size: max(var(--control-height-s), var(--target));
+		padding-inline: var(--space-3) var(--space-4);
 		border: 0;
-		border-radius: var(--r-pill);
+		border-radius: var(--radius-pill);
 		background: transparent;
 		color: var(--ink);
-		font: inherit;
+		font-family: var(--font-ui);
+		font-size: var(--type-label-size);
+		font-weight: var(--type-label-weight);
 		white-space: nowrap;
 	}
 
-	button:hover:not(:disabled) {
-		background: var(--row-hover);
+	button.danger {
+		color: var(--danger);
 	}
 
 	button:disabled {
-		color: var(--ink-2);
-		opacity: 0.5;
+		color: var(--ink-secondary);
+		opacity: var(--disabled-opacity);
+	}
+
+	@media (hover: hover) {
+		button:hover:not(:disabled) {
+			background: var(--surface-tint);
+		}
 	}
 </style>

@@ -10,6 +10,8 @@ export function bubbleExtensions(ctx: EditorContext): AnyExtension[] {
 	// the plugin measures before it sets these, and a block-wide host would be centred off to the left
 	Object.assign(host.style, { position: 'fixed', width: 'max-content', zIndex: '70' });
 	const toolbar = mount(BubbleToolbar, { target: host });
+	// a selection at a line start would centre the bar past the card's edge; the card is the room it shifts within
+	let card: Element | null = null;
 
 	return [
 		BubbleMenu.configure({
@@ -28,7 +30,7 @@ export function bubbleExtensions(ctx: EditorContext): AnyExtension[] {
 				offset: 8,
 				// below the selection even when the keyboard leaves no room: above would cover the line being edited
 				flip: !ctx.touch,
-				shift: { padding: 8 },
+				shift: () => ({ padding: 8, boundary: card ?? 'clippingAncestors' }),
 				onShow: () => toolbar.show(),
 				onHide: () => toolbar.hide()
 			}
@@ -37,6 +39,7 @@ export function bubbleExtensions(ctx: EditorContext): AnyExtension[] {
 			name: 'bubbleToolbar',
 			onCreate() {
 				toolbar.attach(this.editor);
+				card = this.editor.view.dom.closest('[data-note-column]');
 			},
 			addKeyboardShortcuts() {
 				return {

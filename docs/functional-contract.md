@@ -73,92 +73,115 @@ Two postures must both be served: pointer + keyboard, and touch + soft keyboard.
 
 ## 4. Routes
 
-User-facing routes under `src/routes` (excluding `/__test*` and `/__mockups*`): `/`, `/folders/[id]`, `/notes/[id]`, `/search`, `/tags/[id]`. All sit inside one app shell (section 7) which supplies the folder tree, the tag list, the command palette and toasts.
+User-facing routes under `src/routes` (excluding `/__test*` and `/__mockups*`): `/`, `/folders`, `/folders/[id]`, `/notes/[id]`, `/search`, `/tags/[id]`. All sit inside one app shell (section 7) which supplies the folder tree, the tag list, the command palette and toasts. `/folders` and Home use layout data only (plus Home's own pinned and recent lists).
 
 Non-page endpoints (no UI, listed so nothing is assumed missing): `/api/notes`, `/api/notes/[id]`, `/api/notes/[id]/discard`, `/api/notes/[id]/images`, `/api/notes/[id]/files`, `/api/folders`, `/api/folders/[id]`, `/api/folders/[id]/cover`, `/api/search`, `/api/preview`, `/images/[id]`, `/files/[id]`, `/healthz`.
 
 Unknown or malformed ids on `/notes/[id]`, `/folders/[id]`, `/tags/[id]` answer the framework's 404 ("Note not found" / "Folder not found" / "Tag not found"). There is no custom error page and none is planned (gate-1 decision 2). The one exception is the tag page redirect in 4.5, which applies only while that page is open.
 
-Document titles (behaviour, used in tabs/history): `/` "Notes Archive"; folder "<name> · Notes Archive"; note "<title or Untitled> · Notes Archive"; search "Search · Notes Archive"; tag "<name> · Notes Archive".
+Document titles (behaviour, used in tabs/history): `/` "Notes Archive"; `/folders` "Folders · Notes Archive"; folder "<name> · Notes Archive"; note "<title or Untitled> · Notes Archive"; search "Search · Notes Archive"; tag "<name> · Notes Archive".
 
 ### 4.1 `/` Home
 
-Serves: J1, J3, J6, J4.
+Serves: J1, J3, J6.
+
+Home is the desk. It carries no folders: top-level folders are reached through the tree (desktop), the "Folders" pill and `/folders` (phone).
 
 **Data shown**
-- Intro copy: "Notes — Folders — Tags" and the page heading "Every note, in its place".
-- Search entry point (reads "Search notes", shows the shortcut hint "⌘K").
-- Pinned notes (only when at least one is pinned), in the user's manual pin order (a new pin goes first), with a count.
-- Recently edited: the 8 most recently updated notes, newest first, as note entries (4.6).
-- Folders: top-level folders as folder entries (4.7): name, note count (including sub-folders), cover image when set.
-- Empty archive (no notes and no folders): welcome state "Write your first note".
+- Search entry point (reads "Search notes", shows the shortcut hint "⌘K" on pointer devices only).
+- "New note" beside the search entry (1024 px and wider; on the phone the bar's round "New note" does it).
+- Pinned notes (region "Pinned", only when at least one is pinned), in the user's manual pin order (a new pin goes first), with a count.
+- Recently edited (region "Recently edited"): the 8 most recently updated notes, newest first, as note entries (4.6), with a count. From 1100 px Pinned and Recently edited sit side by side; below that they stack.
+- Welcome state "Write your first note" with "New note" whenever there are no notes, whether or not folders exist. In that state there is no Pinned and no Recently edited region.
 
 **Actions**
-- Open the command palette (search entry point).
-- Reorder pinned notes: change the position of one pinned note in the list; the new order is saved immediately and kept across reloads and devices. It must work by keyboard and by touch (no drag-only interaction on touch). If the order was changed from another device meanwhile, the request is refused (409) and the list reloads in its current order. The interaction is designed in the redesign.
+- Open the command palette (search entry point), by click and keyboard.
+- Reorder pinned notes (only with two or more pins): drag a handle with a pointer, or "Move up" / "Move down" in the pinned entry's menu (disabled at the ends), which is the way on keyboard and touch. Each move is saved at once with `PUT /api/pinned` and kept across reloads and devices; after a keyboard move focus stays on the moved entry's menu button; under reduced motion a move does not animate. If the order was changed elsewhere meanwhile the request is refused (409): the list reloads in the server's order and the polite toast "Pinned order changed elsewhere — reloaded" shows. Any other failure reverts the order and shows the toast "Couldn't save — try again".
 - "New note": creates a root note, navigates to `/notes/<id>`, title field focused.
-- Open a note; open a folder.
-- Note entry menu actions (Pin/Unpin, Move to…, Delete); changes are reflected without reload (folder note counts update after a move; the Pinned section disappears when the last pin is removed).
+- Open a note.
+- Note entry menu actions (Pin/Unpin, Move to…, Delete); changes are reflected without reload (the Pinned region disappears when the last pin is removed).
 
 **States**
 | State | Applies | Behaviour |
 |---|---|---|
-| Empty (no notes, no folders) | yes | Welcome copy plus New note; no Pinned/Recently edited/Folders sections |
-| Notes but no folders | yes | Recently edited shown, Folders section omitted |
-| Folders but no notes | yes | Not the welcome state; Folders section shown, Recently edited omitted |
-| No pinned notes | yes | Pinned section absent entirely |
-| One pinned note | yes | no reorder possible; the reorder action is absent or inert |
+| Empty (no notes, with or without folders) | yes | Welcome copy plus New note; no Pinned/Recently edited regions |
+| Folders but no notes | yes | the welcome state, same as empty; Home never lists folders |
+| No pinned notes | yes | Pinned region absent entirely |
+| One pinned note | yes | no reorder possible: no drag handle, no Move up / Move down |
 | Loading | n/a | data is server-loaded before the page renders; navigation shows no partial page |
 | Error | no | no per-page error state (framework error if the server fails) |
-| Single item | yes | one note / one folder must read correctly (counts "1 note") |
-| Many items | yes | recent is capped at 8; folders and pinned are not capped (no pagination) |
-| Overlong text | yes | long titles, folder names, tag names, snippets |
+| Single item | yes | one note reads "1 note" |
+| Many items | yes | recent is capped at 8; pinned is not capped (no pagination) |
+| Overlong text | yes | long titles and snippets wrap or clamp inside their entries |
 
-**Keyboard and touch**: Cmd/Ctrl+K opens palette; every action reachable by Tab and Enter; notes, folders and their menus usable by touch; New note reachable without a keyboard.
+**Keyboard and touch**: Cmd/Ctrl+K opens palette; every action reachable by Tab and Enter; notes and their menus usable by touch; New note reachable without a keyboard (phone bar); pin reorder never drag-only.
 
 ### 4.2 `/folders/[id]` Folder page
 
-Serves: J4, J5, J10, J1.
+Serves: J4, J5, J10, J1. On the phone this is the drill-down: each folder level is its own page, one level per screen.
 
 **Data shown**
+- Back affordance (below 1100 px): a link named after the parent folder, or "Folders" for a top-level folder (leads to `/folders`). From 1100 px the breadcrumb carries this and the affordance is absent.
 - Breadcrumb from the top-level folder down to the current folder; ancestors are links, the current folder is plain and marked current.
-- Folder summary: folder name (the page heading), "N folder(s) · M note(s)" counting all descendant folders and all notes in the folder and its sub-folders (e.g. a folder with one sub-folder holding two notes and four notes of its own reads "1 folder · 6 notes"; an empty folder "0 folders · 0 notes"), cover image when set.
-- Sub-folders as folder entries (4.7: name, note count including descendants, cover when set), with a count.
-- The folder's direct notes as note entries (4.6), sorted by last edited, newest first, with the sort named "Last edited".
-- Empty folder: "Nothing here yet" with the two creation actions.
+- Folder summary: folder name (the page heading, wrapping when long), "N folder(s) · M note(s)" counting all descendant folders and all notes in the folder and its sub-folders (e.g. a folder with one sub-folder holding two notes and four notes of its own reads "1 folder · 6 notes"; an empty folder "0 folders · 0 notes"), cover image when set.
+- Sub-folders (region "Folders") as folder entries (4.7: name, note count including descendants).
+- The folder's direct notes (region "Notes") as note entries (4.6), sorted by last edited, newest first.
+- A section with nothing in it is omitted.
+- Empty folder: "Nothing here yet" in a card holding "New note" and "New folder"; the header's own New note and New folder are hidden then, so the card holds the only pair.
 
 **Actions**
-- "New note": creates a note inside this folder and opens it.
-- "New folder": creates a sub-folder named "Untitled folder" in this folder; it appears among this page's sub-folders and in the tree without reload.
-- Cover: "Add cover" (no cover yet) or "Change cover" (replace), plus "Remove cover" when a cover exists. Accepts one image file. Wrong type: toast "That file isn't an image". Over 16 MB: toast "That image is too large". Any other failure: toast "Couldn't upload — try again". On success the new cover is shown with the folder; removing it removes the cover everywhere the folder appears (including the parent folder's page and Home).
-- Open a sub-folder, a note or a breadcrumb link.
+- "New note": creates a note inside this folder and opens it. The header button shows from 1100 px only; below that the phone bar's round button and the sidebar create notes (both land in this folder, section 7).
+- "New folder": creates a sub-folder named "Untitled folder" in this folder, opened in inline rename; it appears among this page's sub-folders and in the tree without reload.
+- Folder menu: Rename (inline field; the name changes in heading, path and tree without reload), Move to… (chooser), Delete (confirm dialog of section 7).
+- Cover: "Add cover" (no cover yet) or "Change cover" (replace), plus "Remove cover" when a cover exists. Accepts one image file. Wrong type: toast "That file isn't an image". Over 16 MB: toast "That image is too large". Any other failure: toast "Couldn't upload — try again", the previous cover state stays. On success the new cover is shown with the folder; removing it removes the cover everywhere the folder appears.
+- Open a sub-folder, a note, a breadcrumb link or the back affordance; the browser's Back goes up a level.
 - Note entry menu: Pin/Unpin, Move to… (the note leaves this folder's list without reload when moved away), Delete (with confirm, the note leaves the list without reload).
 
 **States**
 | State | Applies | Behaviour |
 |---|---|---|
-| Empty (no sub-folders, no notes) | yes | "Nothing here yet" + New note + New folder |
+| Empty (no sub-folders, no notes) | yes | "Nothing here yet" + New note + New folder (card only) |
 | Only sub-folders / only notes | yes | the absent section is omitted |
 | No cover | yes | no cover image; "Add cover" action offered |
 | Loading | n/a | server-loaded |
 | Error | partial | cover upload errors are toasts; unknown id = 404 |
 | Single item | yes | "1 folder", "1 note" |
 | Many items | yes | no pagination |
-| Overlong text | yes | long folder name, breadcrumb with deep nesting (10+ levels), long sub-folder names |
+| Overlong text | yes | long folder name (120 characters, unbroken 60), back affordance and breadcrumb with deep nesting (12+ levels), long sub-folder names; nothing scrolls horizontally down to 320 px |
 
-**Keyboard and touch**: file chooser reachable by keyboard; all actions as buttons; breadcrumb is keyboard navigable.
+**Keyboard and touch**: file chooser reachable by keyboard; all actions as buttons; breadcrumb and back affordance are keyboard navigable.
+
+### 4.2a `/folders` Folders page
+
+Serves: J4, J5. Replaces the Folders drawer. Layout data only (the tree and tags the shell already loads); the page itself loads nothing.
+
+**Data shown**
+- Heading "All folders" with "N folder(s) · M note(s)" (top-level folders; M is the sum of their note counts including descendants), when at least one folder exists.
+- The top-level folders as folder entries (4.7), in the stored tree sort (section 7).
+- The tag list (section 7) after the folders; hidden on pointer postures (1024 px and wider), where the sidebar already shows it; absent when no tags exist.
+- Empty: "No folders yet" with "New folder".
+
+**Actions**
+- "New folder": creates a root folder named "Untitled folder", opened in inline rename; it appears at the top level of the list and in the tree without reload.
+- Sort picker (section 7).
+- Open a folder (its folder page, 4.2), open a tag.
+
+On desktop the page renders the same list, and the sidebar tree is at the top level with no path row. Title "Folders · Notes Archive". The phone bar's "Folders" pill leads here and is marked current on this page and on every folder page.
+
+**States**: empty ("No folders yet"), single folder ("1 folder"), many folders (no pagination), long names wrap; no loading or error state.
+
+**Keyboard and touch**: entries are links; actions are buttons.
 
 ### 4.3 `/notes/[id]` Note page
 
 Serves: J1, J2, J5, J8, J9, J3.
 
 **Data shown**
-- Path: Home link plus the note's ancestor folders as links (root note: Home only).
-- Save status: "Saving…" / "Saved"; on a failed save the status reads "Couldn't save — try again" and is itself an actionable retry.
-- Note icon (emoji) or an "Add icon" action when none.
-- Title field (label "Title", placeholder "Untitled"): plain text that may span several lines; a long or multi-line title stays fully readable without horizontal scroll and grows with its content. Enter inserts a line break (identical with a hardware and a soft keyboard); pasted line breaks are kept (interpreted from decision 4, confirmed by Rue on 2026-11-13 (gate 1 / task 2.5): this is the only behaviour that works on touch, where Shift+Enter is not reliably available). Moving from the title to the body is explicit: Cmd/Ctrl+Enter, or ArrowDown from the last line, puts the caret at the start of the body; on touch the person taps the body. Wherever a title is shown on one line (tab title, tree, command palette, confirm dialogs, folder chooser, note entries' single-line forms) each run of line breaks reads as one space.
-- Properties (a group named "Properties"): Folder (accessible name "Folder: <current folder name>", "Root" when none), Tags (the note's tags, each removable, plus a text input "Add a tag"), Pinned (an on/off control exposing its state).
-- Timestamps: "Edited <date>, <time> · Created <date>" (en-GB format, e.g. "12 Nov 2026, 14:05").
+- Path (navigation "Note path"): Home link plus the note's ancestor folders as links, the note's own folder marked as the current part (root note: Home only). A path deeper than the note's own folder plus one more (phone: the own folder alone) keeps those and holds the rest behind a "…" control named "Show all <n> parent folders".
+- Save status (top right, beside the note menu; not a live region): "Saving…" / "Saved"; on a failed save it reads "Couldn't save — try again" and is itself an actionable retry; for a note deleted elsewhere it reads "This note was deleted".
+- Note icon (emoji), the first stop of the properties bar: named "Change icon", or "Add icon" when none.
+- Title field (label "Title", placeholder "Untitled"; the page's only level-1 heading, its name is the title): plain text, the last word in the accent while the field has no focus, stepping down one type role for a long or many-line title; it may span several lines; a long or multi-line title stays fully readable without horizontal scroll and grows with its content. Enter inserts a line break (identical with a hardware and a soft keyboard); pasted line breaks are kept as LF (interpreted from decision 4, confirmed by Rue on 2026-11-13 (gate 1 / task 2.5): this is the only behaviour that works on touch, where Shift+Enter is not reliably available). Moving from the title to the body is explicit: Cmd/Ctrl+Enter, or ArrowDown on the last line (a wrapped last line is walked first: the key leaves only when it did not move the caret), puts the caret at the start of the body; on touch the person taps the body. Wherever a title is shown on one line (tab title, tree, command palette, confirm dialogs, folder chooser, note entries' single-line forms) each run of line breaks reads as one space.
+- Properties (a group named "Properties", a glass bar under the title): the icon, Folder (accessible name "Folder: <full path joined with \" / \">", "Root" when none; the visible value keeps the first and the last folder of a path deeper than three), Pinned (an on/off switch exposing its state), "Edited <date>, <time>" and "Created <date>" (en-GB format, e.g. "12 Nov 2026, 14:05"), and below the bar the Tags row (label "Tags <n>", the tags each removable, a text input "Add a tag"). One control folds and unfolds them and exposes `aria-expanded` ("Hide properties" when open). Wide screens and tablets open expanded; the phone opens folded to one summary line, the folder path and "<n> tags" ("1 tag"; no count for a note without tags), and tapping it unfolds.
 - Body: the editor (section 5).
 - Deleted notice: "This note was deleted" (an alert) when the server reports the note gone while the page is open; saving stops.
 
@@ -169,7 +192,7 @@ Serves: J1, J2, J5, J8, J9, J3.
 - Tags: type a name; matching existing tags are suggested (case- and diacritic-insensitive substring match, existing tags not already on the note, at most 8; arrow keys + Enter pick, Enter or comma confirms the typed text, comma also splits pasted "a, b, c"); Backspace in the empty input removes the last tag; each tag is removable on its own; Escape with text clears the text. Adding a new name creates the tag and it appears in the tag list (shell) with count 1 without reload.
 - Pinned: toggles pin immediately.
 - Note menu ("Note menu"): Search (opens palette; on touch it is the search entry that stays reachable while the editor has focus and the shell navigation is inert), Pin/Unpin, Move to… (same chooser as Folder), Delete.
-- Delete: confirm dialog "Delete “<title or Untitled>”? This can't be undone." with Cancel / Delete. On confirm: note removed; navigates to the parent folder page, or Home for a root note. Cancel keeps everything and the page stays.
+- Delete: confirm alert dialog (`alertdialog`) titled "Delete “<title or Untitled>”?" with the message "This can't be undone." and Cancel / "Delete note" (trash icon). On confirm: note removed; navigates to the parent folder page, or Home for a root note. Cancel keeps everything and the page stays.
 - Retry a failed save by activating the error status.
 
 **Save and leave behaviour**
@@ -191,19 +214,19 @@ Serves: J1, J2, J5, J8, J9, J3.
 | Note with unknown block types (old/new schema) | yes | shown as paragraphs of text, no page error |
 | Read-only | no | |
 
-**Keyboard and touch**: Title Enter -> line break, Cmd/Ctrl+Enter or ArrowDown from the last title line -> body start; Cmd/Ctrl+K with a text selection edits a link, without a selection opens the palette; Cmd/Ctrl+B/I/E marks; undo/redo (Cmd/Ctrl+Z, Shift+Z); Escape closes menus/choosers; Tab does not trap in the page but traps inside open dialogs. On touch, while the editor has focus no persistent navigation may cover the caret or sit above the soft keyboard: the shell's touch navigation is hidden and inert while the editor has focus and returns on blur; the note menu provides Search; the block menu provides reordering (no drag on touch).
+**Keyboard and touch**: Title Enter -> line break, Cmd/Ctrl+Enter or ArrowDown from the last title line -> body start (a hardware Enter no longer moves on); Cmd/Ctrl+K with a text selection edits a link, without a selection opens the palette; Cmd/Ctrl+B/I/E marks; undo/redo (Cmd/Ctrl+Z, Shift+Z); Escape closes menus/choosers; Tab does not trap in the page but traps inside open dialogs. On touch, while the editor has focus no persistent navigation may cover the caret or sit above the soft keyboard: the shell's touch navigation is hidden and inert while the editor has focus and returns on blur; the note menu provides Search; the block menu provides reordering (no drag on touch).
 
 ### 4.4 `/search` Search page
 
 Serves: J3, J11.
 
 **Data shown**
-- Query box ("Search notes"), filled from `?q=`.
-- Filters: Folder ("Any folder", otherwise every folder as "Parent / Child" path labels) and Tag ("Any tag", otherwise every tag in use), reflected in `?folder=` and `?tag=`.
-- Result count ("1 result" / "N results").
-- Results as note entries (4.6); with a text query each shows the highlighted snippet in place of the plain snippet; with filters only, plain snippets and last-edited order.
-- Idle copy (no query, no filter): "Search by title, text or tag, or pick a folder or tag."
-- No match: "No notes match “<q>”" (text query) or "No results" (filter-only with nothing found).
+- Heading "Search notes" with the kicker "Notes — Search" and the line "Find a note by its words, its folder or its tag."
+- One glass bar (`role="search"` form): the query box ("Search notes", filled from `?q=`, `dir="auto"`) and the two filters as cells: Folder ("Any folder", otherwise every folder as "Parent / Child" path labels) and Tag ("Any tag", otherwise every tag in use), reflected in `?folder=` and `?tag=`. A chosen filter's cell turns charcoal. Below 1100 px the query takes the first row and the filters share the second.
+- Results in one card headed "Results" (level-2 heading) with the count ("1 result" / "N results", announced politely).
+- Results as note entries (4.6, one column); with a text query each shows the highlighted snippet in place of the plain snippet; with filters only, plain snippets and last-edited order.
+- Idle copy (no query, no filter): "Search your notes" with the line "Search by title, text or tag, or pick a folder or tag."
+- No match: "No notes match" followed by the quoted query (wraps, never clipped) and the line "Check the spelling, or try fewer words." (text query), or "No results" with the line "Try another folder or tag." (filter-only with nothing found).
 
 **Actions**
 - Type: the URL updates (history replaced, not added) 200 ms after typing stops; Enter submits at once.
@@ -223,17 +246,17 @@ Serves: J3, J11.
 | Many items | yes | at most 50 results; no pagination |
 | Overlong text | yes | long titles and snippets; very long query |
 
-**Keyboard and touch**: the field is a search box; Enter submits; each filter is a single-choice selector (labelled "Folder" and "Tag") operable by keyboard and touch.
+**Keyboard and touch**: the field is a search box; Enter submits; each filter is a single-choice native selector (labelled "Folder" and "Tag") operable by keyboard and touch. Targets are at least 24 px (44 px on touch).
 
 ### 4.5 `/tags/[id]` Tag page
 
 Serves: J7.
 
-**Data shown**: label identifying this as a tag, the tag name, "N note(s)", and all tagged notes as note entries (4.6), last edited first.
+**Data shown**: the kicker "Tag", the tag name as the page heading (h1) with the accent on its last word, a count pill (tag icon, "1 note" or "N notes"), and all tagged notes as note entries (4.6), last edited first, in the single-column note grid. Names longer than 28 characters drop to the smaller display size and wrap (never truncated).
 
 **Redirect (decision 1)**: when the last note of the open tag page is deleted from its menu, the app navigates Home (no empty state, no error page); the tag disappears from the tag list. This applies only to a change made on this page; a tag id that no longer exists, opened directly or after a reload, is the plain 404.
 
-**Actions**: open a note; note entry menu (Pin/Unpin, Move to…, Delete; a deleted note leaves the list without reload, the last one triggers the redirect above).
+**Actions**: open a note; note entry ⋯ card menu (Pin/Unpin, Move to…, Delete; a deleted note leaves the list without reload, the last one triggers the redirect above).
 
 **States**
 | State | Applies | Behaviour |
@@ -249,14 +272,15 @@ Serves: J7.
 
 ### 4.6 Shared object: Note entry (Home, folder, tag, search)
 How a note is represented wherever notes are listed.
-- Data: icon (when set), title ("Untitled" when empty; line breaks shown as spaces if the entry shows the title on one line), snippet (plain-text excerpt, at most 240 characters; "Empty note" when the body has no text; on search results, highlighted snippet parts), up to 3 tag names plus "+n" for the rest, relative edited time ("just now", "5m ago", "2h ago", "3d ago", "12 Mar", or "12 Mar 2025" when not in the current year; dates from 30 days on), pinned state (exposed with the name "Pinned") when pinned.
-- Actions: open the note; menu "Note actions": Pin/Unpin; "Move to…" (chooser, section 4.3); Delete (confirm "Delete “<title>”? This can't be undone."). The menu opens without opening the note.
+- Data: icon (when set), title ("Untitled" when empty; line breaks shown as spaces if the entry shows the title on one line), snippet (plain-text excerpt, at most 240 characters; "Empty note" when the body has no text; on search results, highlighted snippet parts), tags: a card (Home, folder page) shows the first tag plus "+n" for the rest, a search row and a tag-page entry up to 3 tag names plus "+n", their pills wrapping a long name inside the entry, relative edited time ("just now", "5m ago", "2h ago", "3d ago", "12 Mar", or "12 Mar 2025" when not in the current year; dates from 30 days on), pinned state (exposed with the name "Pinned") when pinned.
+- Actions: open the note; menu "Note actions": Pin/Unpin; "Move to…" (chooser, section 4.3); Delete (confirm "Delete “<title>”?" / "This can't be undone.", "Delete note"). The menu opens without opening the note.
+- Home lists it in Pinned (with a drag handle and Move up / Move down in the menu when two or more are pinned) and in Recently edited; the folder page lists it as a row under "Notes".
 - Edge: no icon, no tags, long title, five tags ("+2"), note with only an image (snippet skips a leading image).
 
-### 4.7 Shared object: Folder entry (Home, folder page)
-How a folder is represented wherever folders are listed.
-- Data: name, "N note(s)" (including descendants, the same count the folder page summary shows), cover image when set (none otherwise).
-- Action: open the folder.
+### 4.7 Shared object: Folder entry (`/folders`, folder page)
+How a folder is represented wherever folders are listed. Home does not list folders.
+- Data: name, "N note(s)" (including descendants, the same count the folder page summary shows), a chevron. Entries are rows, not cover tiles; the cover shows on the folder's own page only.
+- Action: open the folder (`/folders/[id]`). While a folder is being renamed after creation its row holds the inline name field instead.
 
 ---
 
@@ -293,6 +317,7 @@ The redesign keeps the ProseMirror core. This section separates what the core do
 
 ### 5.2 Editor chrome (redesignable; every action must remain)
 
+- **Note column**: the body sits on one solid card; the card is capped at the fingerprint `--measure` plus its inline padding and centred in the area right of the sidebar (note-page header and path share that column).
 - **Formatting controls** (role toolbar, named "Format", offered for a non-empty text selection, not inside code blocks; on touch they must not cover the native selection menu): Bold, Italic, Strikethrough, Inline code (each exposes its active state), Link, Text colour. Link: field "Link URL" (placeholder "Paste or type a link"), apply with Enter or the "Apply link" action, Escape cancels, an empty value removes the link, "Remove link" removes an existing one; a bare host gets `https://` prepended. Text colour: choose one of stone, clay, ochre, moss, sea, plum or "Default"; a "Close colours" action backs out.
 - **"Block actions" control** (with a pointer it targets the block under the pointer and doubles as the drag source; on touch it targets the block containing the cursor): opens "Block menu" with Move up, Move down, Turn into, Delete. Move up is disabled on the first block, Move down on the last. "Turn into" lists Text, Heading 1, Heading 2, Heading 3, Bullet list, Numbered list, Task list, Quote, Code, Callout; text content stays.
 - **Table actions** (offered while the cursor is inside a table): Add row below, Add column right, Delete row, Delete column (each disabled when not possible).
@@ -319,27 +344,28 @@ The redesign keeps the ProseMirror core. This section separates what the core do
 
 **Filters**: `folder` (the folder and all descendants) and `tag`; both combine with a text query and with each other; without text they list all matching notes. Limits: 50 on the search page, 8 in the palette.
 
-**Command palette**: opened from anywhere by Cmd/Ctrl+K (not when a text selection exists in the editor, where it edits a link), by the shell's Search entry (in both postures), the Home search entry point, the note menu "Search" item. It is a dialog named "Search". Contents: empty input shows "Recent" (8 most recently edited notes, each with a relative time) and "Actions" (New note, New folder); typing (120 ms debounce, stale requests cancelled) shows "Notes · N result(s)" with title and highlighted snippet per hit, the same Actions, and "See all results" (opens `/search?q=<query>`); no hits: "No notes match “<q>”" (shown only once that query has been answered). Keyboard: ArrowUp/ArrowDown walk notes, then actions, then "See all results" (wrapping); Enter activates; Escape closes and restores focus to where it was; if opened from the editor with a collapsed or no selection the previous selection and content are restored when closed without choosing. Choosing a note, an action, or See all closes it. "New folder" creates "Untitled folder" at the root and opens its folder page. In the touch posture (today: below 768 px) it owns one history entry, so the back gesture or browser Back closes it without leaving the page, and a note chosen from it replaces that entry (Back does not land on the same page twice); in the pointer posture it adds no history entry. Opening it never alters editor content.
+**Command palette**: opened from anywhere by Cmd/Ctrl+K (not when a text selection exists in the editor, where it edits a link), by the shell's Search entry (in both postures), the Home search entry point, the note menu "Search" item. It is a dialog named "Search": a centred panel over a scrim on pointer devices, full screen on phone (below 768 px) with a "Close" button after the field (it goes back through the history entry). It opens and closes instantly, with no animation. Rows carry a position number; the selected row is the charcoal one with an arrow in a circle; no scope filter (All / Notes / Actions) exists. Contents: empty input shows "Recent" (8 most recently edited notes, each with a relative time) and "Actions" (New note, New folder); typing (120 ms debounce, stale requests cancelled) shows "Notes · N result(s)" with title and highlighted snippet per hit, the same Actions, and "See all results" (opens `/search?q=<query>`, the last entry of the list); no hits: "No notes match “<q>”" (shown only once that query has been answered). Keyboard: ArrowUp/ArrowDown walk notes, then actions, then "See all results" (wrapping); Enter activates; Escape closes and restores focus to where it was; if opened from the editor with a collapsed or no selection the previous selection and content are restored when closed without choosing. Choosing a note, an action, or See all closes it. "New folder" creates "Untitled folder" at the root and opens its folder page. In the touch posture (today: below 768 px) it owns one history entry, so the back gesture or browser Back closes it without leaving the page, and a note chosen from it replaces that entry (Back does not land on the same page twice); in the pointer posture it adds no history entry. Opening it never alters editor content.
 
 ---
 
 ## 7. Cross-cutting behaviour
 
 **Persistent navigation (shell)**
-- Targets always reachable: Home, Search (opens the palette), New note, the folder tree, the tag list.
-- Pointer posture (today: 1024 px and wider): one navigation landmark (accessible name "Sidebar", asserted by e2e) offering Home, Search (with the shortcut hint "⌘K"), New note, the folder tree headed "Folders" with a "New folder" action and, when tags exist, the tag list headed "Tags". The user can reduce it to a compact form and back with a toggle that exposes its expanded state ("Collapse sidebar" / "Expand sidebar"); the choice is remembered per browser (localStorage key `notes-archive:sidebar-collapsed`) and is already in effect on first render, with no visible switch after load.
-- Touch posture (today: below 1024 px): one navigation landmark (accessible name "Bottom bar", asserted by e2e) offering Home, Search, New note and Folders. "Folders" opens a dialog named "Folders" holding the same tree plus the tag list and a "Close" action. That dialog closes on Escape, on the back gesture/browser Back (it owns one history entry and the URL is unchanged afterwards), on choosing any item, and on navigation; an item chosen from it replaces its history entry. While the editor has focus this landmark is hidden from assistive tech and not focusable (`aria-hidden`/inert), returning on blur.
+- Targets always reachable: Home, Search (opens the palette), New note, the folder tree (desktop) or `/folders` (phone), the tag list.
+- Pointer posture (1024 px and wider): one navigation landmark (accessible name "Sidebar", asserted by e2e) offering Home, Search (with the shortcut hint "⌘K"), New note, the focus tree headed "Folders" with a "New folder" action and the sort picker in its header, and, when tags exist, the tag list headed "Tags" below the tree. The focus tree shows the folder the page is about: opening a folder (or a note) focuses the tree on it, with a path row of links up (absent at the top level; a deep path keeps the first and nearest ancestors and folds the middle into one control "Show all <n> parent folders") and the focused folder's subtree below. One control folds the sidebar into a narrow rail and back ("Fold sidebar" / "Unfold sidebar", exposing its expanded state; the rail keeps accessible names for Home, Search, New note and unfold); the choice is remembered per browser (localStorage key `notes-archive:sidebar-collapsed`) and is already in effect on first render, with no visible switch after load; without storage the sidebar is expanded.
+- Touch posture (below 1024 px): one navigation landmark (accessible name "Bottom bar", asserted by e2e) with Home, Folders and Search as glass pills (the current section marked) and a separate round "New note" button. "Folders" navigates to `/folders` (section 4.2a); there is no Folders drawer or dialog any more. Folders are browsed one level per page (`/folders/[id]`, 4.2) and the browser's Back goes up a level. While the editor has focus this landmark is hidden from assistive tech and not focusable (`aria-hidden`/inert), returning on blur.
 - The landmark names "Sidebar" and "Bottom bar" describe today's forms; renaming them is allowed together with migrating the e2e specs that use them (section 8).
-- New note from any entry creates an untitled root note and navigates to it.
+- New note from any entry (sidebar, phone bar "+", Home, folder page, folder menu, palette) creates an untitled note and opens it with the title field focused (placeholders "Untitled" and "Write, or type / for blocks"). It lands in the current folder: the folder of the open folder page, or the folder of the open note (the folder the tree is focused on); from Home, `/folders`, `/search` or a tag page it lands at the top level. One function decides this (`currentFolderId` in `src/lib/shell/capture.ts`), and every entry point goes through `newNote`, which creates the note, refreshes the tree and navigates.
 
 **Folder tree (same behaviour in both postures)**
 - Folders (expand/collapse per folder, control named "Expand <name>" / "Collapse <name>"; a folder with nothing inside is not expandable) and notes inside them; root notes listed after folders; order follows the stored tree sort (below); by default folders sort by name (natural order, numbers by value) and notes by last edited.
 - Items: name ("Untitled" for untitled notes), the emoji for notes with an icon; a name that is shortened for space keeps the full name available (today a `title` tooltip); each item's nesting depth is conveyed.
 - Current note/folder marked as current; its ancestors expand automatically; manual open/close state is kept until reload.
-- Tree sort (decision 8): the user chooses how the tree is ordered, at every nesting level, applying to folders and notes alike. Modes (interpreted, confirmed by Rue on 2026-11-13 (gate 1 / task 2.5); the labels are the designers'): `mixed` = folders by natural name order, notes by last edited (the default and today's behaviour); `name` = folders and notes by natural name order (untitled notes sort as "Untitled"); `edited` = by last edited, newest first (a folder counts as edited when any note inside it, at any depth, was last edited, else by its own update time); `created` = by creation time, newest first. The choice is stored on the server, so it follows the person across devices and is in effect on first render. It affects the tree only, not the folder page, Home, tag or search lists. Changing it updates the tree without reload.
+- Tree sort (decision 8): the user chooses how the tree is ordered, at every nesting level, applying to folders and notes alike. Modes (interpreted, confirmed by Rue on 2026-11-13 (gate 1 / task 2.5); the labels are the designers'): `mixed` = folders by natural name order, notes by last edited (the default and today's behaviour); `name` = folders and notes by natural name order (untitled notes sort as "Untitled"); `edited` = by last edited, newest first (a folder counts as edited when any note inside it, at any depth, was last edited, else by its own update time); `created` = by creation time, newest first. The choice is stored on the server, so it follows the person across devices and is in effect on first render. It affects the tree and the Folders page only, not the folder page, Home, tag or search lists. Changing it updates the tree without reload.
+- Sort picker: a quiet icon button named "Sort folders" in the tree header (desktop) and on `/folders` (phone) opens a menu of the four modes, labelled Default (`mixed`), Name, Last edited and Created, each with a hint (see section 8); exactly the stored mode is checked. Choosing one re-sorts at once and saves it with `PATCH /api/settings`; a failed save shows the toast "Couldn't save — try again" and the previous mode and order return.
 - Empty tree: "No folders yet" with "New folder".
 - The tree's "New folder" action creates a root folder and opens its inline rename. Each folder has a menu named "<name> actions" opened by a control named "<name> menu": New note (inside), New folder (inside, opened in rename mode and the parent expands), Rename (inline field "Folder name"; Enter or blur commits, Escape cancels; empty becomes "Untitled folder"), Move to… (chooser excluding itself and descendants; offers "Root"), Delete.
-- Delete folder: dialog (title "Delete folder") "Delete “<name>”? This deletes N folders and M notes inside it. This can't be undone." (counts include all descendants, "1 folder"/"1 note" singular; an empty folder reads "Delete “<name>”? This can't be undone."), Cancel / Delete. Confirm removes everything; if the open page is the folder or inside it, the app navigates to the folder's parent (or Home). Cancel keeps everything. The dialog is only shown once counts are known.
+- Delete folder: alert dialog (`alertdialog`) titled "Delete “<name>”?" with the message "This deletes N folders and M notes inside it. This can't be undone." (counts include all descendants, "1 folder"/"1 note" singular; a zero count is left out: "This deletes 1 note inside it. This can't be undone.", "This deletes 2 folders inside it. This can't be undone."; an empty folder's message is "This can't be undone."), Cancel / "Delete folder" (trash icon). Confirm removes everything; if the open page is the folder or inside it, the app navigates to the folder's parent (or Home). Cancel keeps everything. The dialog is only shown once counts are known.
 
 **Tag list** (shell): every tag in use, with note count, linking to its tag page; the whole section is absent when no tags exist; counts update without reload after tag edits.
 
@@ -348,7 +374,7 @@ The redesign keeps the ProseMirror core. This section separates what the core do
 - Dialogs (confirm, folder chooser): modal behaviour (the rest of the page is not operable while open); focus moves inside; Tab stays inside; Escape and a click outside cancel; focus returns to the opener on close. Confirm dialogs: Cancel plus a confirm button named like the action ("Delete").
 - Chooser lists use listbox semantics and arrow/Home/End navigation.
 
-**Toasts**: transient messages (about 4 s) for failures: "Couldn't save — try again", "Couldn't upload — try again", "That image is too large", "That file isn't an image", "Files can be up to 16 MB". Announced politely (status). A toast raised just before a redirect or full page load survives to the next page.
+**Toasts**: transient messages (about 4 s) for failures: "Couldn't save — try again" (also a failed sort save), "Pinned order changed elsewhere — reloaded" (a stale pin reorder; the list reloads), "Couldn't upload — try again", "That image is too large", "That file isn't an image", "Files can be up to 16 MB". Announced politely (status). A toast raised just before a redirect or full page load survives to the next page.
 
 **Persistence**
 - Server: SQLite (`DATABASE_PATH`), migrations on start; images, files, covers stored in the database.
@@ -358,7 +384,7 @@ The redesign keeps the ProseMirror core. This section separates what the core do
 
 **Keyboard shortcuts (global)**: Cmd/Ctrl+K opens the palette from anywhere except where it edits a link (editor with a text selection). Escape closes the topmost overlay. No other global shortcuts exist; there is none for New note and none is planned (decision 3).
 
-**Cross-page consistency**: after any change made in a menu, tree or properties row, every visible list of the same data (tree, Home folders and counts, tag list and counts, folder page) updates without a manual reload.
+**Cross-page consistency**: after any change made in a menu, tree or properties row, every visible list of the same data (tree, `/folders` list and counts, tag list and counts, folder page) updates without a manual reload.
 
 **Overflow**: nothing scrolls the page horizontally at any width; wide content (tables) scrolls inside itself. The e2e `layout` spec also asserts today's reading width and list column counts; those are layout, not contract, and are rewritten with the redesign.
 
@@ -372,10 +398,10 @@ Target language is English throughout. All current UI strings are already Englis
 
 | current string | English target | used in spec file |
 |---|---|---|
-| Sidebar | Sidebar | bottom-bar, drawer, folder-create, journey, layout, move-note, sidebar, tag-input, tags-section, tree (+8) |
-| Bottom bar | Bottom bar | bottom-bar, drawer, folder-create, journey, move-note, palette, sidebar, tag-input, tags-section, tree (+8) |
+| Sidebar | Sidebar | bottom-bar, folder-create, journey, layout, move-note, sidebar, tag-input, tags-section, tree (+8) |
+| Bottom bar | Bottom bar | bottom-bar, folder-create, journey, move-note, palette, sidebar, tag-input, tags-section, tree (+8) |
 | Breadcrumb | Breadcrumb | folder-header |
-| Home | Home | bottom-bar, drawer, sidebar, sidebar-collapse |
+| Home | Home | bottom-bar, sidebar, sidebar-collapse |
 | Search | Search | bottom-bar, home-hero, journey, note-menu-search, palette, palette-actions, palette-editor, palette-results, sidebar |
 | Search notes | Search notes | home-hero, journey, palette, palette-actions, palette-editor, palette-results, search-page |
 | Recent | Recent | palette, palette-results |
@@ -386,7 +412,7 @@ Target language is English throughout. All current UI strings are already Englis
 | No results | No results | slash |
 | New note | New note | bottom-bar, folder-actions, folder-create, home-hero, home-welcome, journey, palette-actions, sidebar |
 | New folder | New folder | folder-actions, folder-create, palette-actions, tree-edges |
-| Folders | Folders | bottom-bar, drawer, folder-create, folder-delete, folder-rename-move, home-bento, home-welcome, journey, layout, move-note, sidebar, sidebar-collapse (+5) |
+| Folders | Folders | bottom-bar, folder-create, folder-delete, folder-rename-move, home-bento, home-welcome, journey, layout, move-note, sidebar, sidebar-collapse (+5) |
 | No folders yet | No folders yet | tree-edges |
 | Untitled | Untitled | cards, tree |
 | Untitled folder | Untitled folder | folder-rename-move, palette-actions |
@@ -407,22 +433,22 @@ Target language is English throughout. All current UI strings are already Englis
 | Tags | Tags | tag-page, tags-section |
 | Any tag | Any tag | search-page |
 | Add a tag | Add a tag | journey, tag-input |
-| Add tag | Add tag | tag-input |
 | Cancel | Cancel | card-menu, folder-delete, journey, note-delete |
 | Delete | Delete | block-menu, card-menu, folder-delete, handle, journey, note-delete |
 | Delete folder | Delete folder | folder-delete, journey |
-| Delete “<title>”? This can't be undone. | Delete “<title>”? This can't be undone. | card-menu, folder-delete, journey, note-delete |
-| Delete “<name>”? This deletes N folders and M notes inside it. This can't be undone. | same | folder-delete, journey |
+| Delete (the note confirm button; gate 7 signed hi-fi names it) | Delete note | card-menu, journey, note-delete |
+| Delete “<title>”? This can't be undone. (gate 7 signed hi-fi splits it into dialog title and message) | Delete “<title>”? / This can't be undone. | card-menu, folder-delete, journey, note-delete |
+| Delete “<name>”? This deletes N folders and M notes inside it. This can't be undone. (title and message, as above; a zero count is left out: "This deletes 1 note inside it.") | Delete “<name>”? / This deletes N folders and M notes inside it. This can't be undone. | folder-delete, journey |
 | Rename | Rename | folder-rename-move |
 | Folder name | Folder name | folder-create, folder-rename-move |
 | <name> menu | <name> menu | folder-rename-move, folder-create, journey, folder-delete |
 | Collapse <name> / Expand <name> | same | move-note, tree, tree-edges, folder-rename-move |
-| Collapse sidebar / Expand sidebar | same | sidebar-collapse |
+| Fold sidebar / Unfold sidebar | same | sidebar-collapse |
 | Add cover / Change cover / Remove cover | same | folder-cover |
 | Add icon / Change icon | same | note-icon |
 | Choose an emoji | Choose an emoji | callout, note-icon |
 | Search emoji | Search emoji | note-icon |
-| Remove | Remove | note-icon |
+| Remove icon | Remove icon | note-icon |
 | Title | Title | autosave, autosave-errors, bottom-bar-typing, discard, home-hero, journey, note-delete, note-page, note-switch, palette-actions |
 | Saving… | Saving… | autosave |
 | Saved | Saved | autosave, autosave-errors |
@@ -431,6 +457,7 @@ Target language is English throughout. All current UI strings are already Englis
 | That image is too large | That image is too large | folder-cover, image-block |
 | That file isn't an image | That file isn't an image | folder-cover, image-block |
 | Couldn't upload — try again | Couldn't upload — try again | image-block |
+| Couldn't load — try again | Couldn't load — try again | folder-delete |
 | Files can be up to 16 MB | Files can be up to 16 MB | file-card |
 | Format | Format | bubble, bubble-link, journey |
 | Bold / Italic / Strikethrough / Inline code | same | journey (Italic), bubble |
@@ -438,7 +465,7 @@ Target language is English throughout. All current UI strings are already Englis
 | Link URL | Link URL | bubble-link |
 | Remove link | Remove link | bubble-link |
 | Text colour | Text colour | bubble |
-| Default | Default | bubble |
+| Default | Default | bubble, sort-picker |
 | clay (text colour option name; stone, ochre, moss, sea, plum alike) | clay | bubble |
 | Blocks | Blocks | blocks-slash, callout, file-card, image-block, image-insert, journey, slash, slash-all, slash-phone, toggle |
 | Text / Heading 1 / Heading 2 / Heading 3 / Bullet list / Numbered list / Task list / Quote / Code / Divider / Toggle / Callout / Table / Image / File | same, in this order | slash-all, slash, block-menu, callout, table, toggle, image-block, file-card |
@@ -452,14 +479,20 @@ Target language is English throughout. All current UI strings are already Englis
 | <n> folder(s) · <m> note(s) | same | folder-header |
 | +<n> (count of a note's tags beyond the first 3) | +<n> | cards |
 | <n>h ago | <n>h ago | cards |
+| Sort mode names (`mixed` reads "Default") | Name / Last edited / Created | sort-picker |
+| Hint under each sort mode | Folders A–Z, notes by last edit / Folders and notes A–Z / Newest first | sort-picker |
+| Sort folders | Sort folders | sort-picker |
+| Pinned order changed elsewhere — reloaded | Pinned order changed elsewhere — reloaded | pinned-reorder |
+| Show all <n> parent folders | Show all <n> parent folders | tree-focus |
+| Back to <name> | Back to <name> | drill-down |
 
 Notes on the table:
 - `Neueste`, `Neu` and similar German words in `folder-body`, `tag-page`, `home-pinned` are note titles seeded by the specs, not UI. The folder-page sort label in the app is "Last edited"; no spec asserts it.
-- `primitives`/`mockups` specs match design-showcase strings ("Open dialog", "Specimen drawer", "Delete this note?", "Duplicate", "Move", ...). They belong to the `/__mockups` showcase, which is excluded from this contract and will be replaced.
+- `primitives`/`mockups` specs match design-showcase strings ("Open dialog", "Specimen drawer", "Delete this note?", "Duplicate", "Move", ...). They belong to the `/__mockups` showcase, which is excluded from this contract and has been removed.
 - English target is unchanged for all rows: 0 current strings are German.
 
 ### Strings in the app that no spec matches exactly (also English; designers keep or reword)
-Home intro "Notes — Folders — Tags"; Home heading "Every note, in its place"; "Search by title, text or tag, or pick a folder or tag."; "Any folder"; "<n> result(s)"; "Notes · <n> result(s)"; "Last edited" (sort label); "Folder"/"Tag" labels on those pages; "Edited <date>, <time> · Created <date>"; "Write, or type / for blocks"; "Note body"; "Properties"; "Tag suggestions"; "Add tag"; "Paste or type a link"; "Apply link"; "Close colours"; "Change emoji"; "Language"; "Plain text"; "Uploading"; "Move to" (chooser title); "No emoji match “<q>”"; "Close" (Folders dialog); "Results" (palette list); "Esc" and "⌘K"/"↵" key hints; "just now", "<n>m ago", "<n>d ago", short dates.
+Home intro "Notes — Folders — Tags"; Home heading "Every note, in its place"; "Search by title, text or tag, or pick a folder or tag."; "Any folder"; "<n> result(s)"; "Notes · <n> result(s)"; "Last edited" (sort label); "Folder"/"Tag" labels on those pages; "Tag" (tag page kicker); "1 note" / "<n> notes" (tag page count pill); "Edited <date>, <time> · Created <date>"; "Write, or type / for blocks"; "Note body"; "Properties"; "Tag suggestions"; "Paste or type a link"; "Apply link"; "Close colours"; "Change emoji"; "Language"; "Plain text"; "Uploading"; "Move to" (chooser title); "No emoji match “<q>”"; "Close" (Folders dialog); "Results" (palette list and search page card); "Search your notes"; "Search notes" (search page heading); "Find a note by its words, its folder or its tag."; "Check the spelling, or try fewer words."; "Try another folder or tag."; "Close" (phone palette); "Esc" and "⌘K"/"↵" key hints; "just now", "<n>m ago", "<n>d ago", short dates.
 
 ---
 
@@ -469,7 +502,7 @@ Rule: only hooks that express state or are a required integration point with no 
 
 | hook | signals | why no role/label covers it |
 |---|---|---|
-| `[data-save-state]` (values `idle`, `pending`, `saving`, `saved`, `error`) | the autosave state of the open note | the visible text "Saving…"/"Saved" is not enough: `idle` and `saved` read the same, and tests must wait for `pending`/`saving` to clear before asserting stored data; the status is intentionally not a live region |
+| `[data-save-state]` (values `idle`, `pending`, `saving`, `saved`, `error`, `deleted`) | the autosave state of the open note | the visible text "Saving…"/"Saved" is not enough: `idle` and `saved` read the same, and tests must wait for `pending`/`saving` to clear before asserting stored data; the status is intentionally not a live region |
 | `.ProseMirror` (class, library-owned) | the editable document root, the TipTap/ProseMirror core | the core is kept; the e2e keyboard, paste, drop and selection tests need this exact element (it also carries the label "Note body") |
 | `[data-editor-root]` | the container the editor core is mounted into | scopes the body editor apart from the other text inputs on the note page (title, tag input, link field, caption); there is no landmark role for it |
 | `[data-type="details"]`, `[data-type="detailsContent"]`, `[data-type="taskList"]` | node-type markers rendered by the TipTap extensions (toggle, its content, task list) | generated by the editor core, not chrome; toggles have no role equivalent |
@@ -479,7 +512,7 @@ Rule: only hooks that express state or are a required integration point with no 
 | `[data-card-glow]` | the decorative glow span on a note entry during the open/close morph | it is `aria-hidden` decoration, so it has no role or name; the morph test needs it to prove the glow plays and then clears (allow-listed by Rue on 2026-11-13) |
 | `.prosemirror-dropcursor-block` (class, library-owned) | the drop cursor while a block is dragged | rendered by the ProseMirror dropcursor plugin, not chrome; the drag-handle tests need it to prove where a block will land (allow-listed by Rue on 2026-11-13) |
 
-Not allow-listed (they mark today's layout regions or visual treatments; the redesign may drop or rename them; migrate the tests to roles): `data-bottom-bar` (use the touch navigation landmark by name and `aria-hidden`/inert for its hidden state), `data-sidebar`, `data-drawer`, `data-hero`, `data-welcome`, `data-pinned`, `data-recent`, `data-folders`, `data-subfolders`, `data-notes`, `data-note-grid`, `data-note-card`, `data-card-*` (except `data-card-glow`, allow-listed above), `data-folder-tile`, `data-tile-*`, `data-folder-counts`, `data-cover-header`, `data-note-page`, `data-note-header`, `data-note-title`, `data-note-column`, `data-properties`, `data-tag-chip`, `data-search-page`, `data-search-results`, `data-search-filters`, `data-tag-page`, `data-folder-page`, `data-morph`, `data-glass`, `data-accent`, `data-card`, `data-revealed`, `data-line`, `data-rail`, `data-strength`, `data-glass-sample`, `data-card-sample`, `data-slash-menu`, `data-bubble-menu`, `data-palette`, `data-result`, `data-action`, `data-recent-search`, `data-search-bar`, `data-screen`, `data-callout`, `data-kind`, `data-chip`, `data-cta`. Replacement guidance: a note entry = an `article` containing a heading link; its pinned state = element named "Pinned"; a folder entry = link; each Home/folder-page group = a region named by its heading ("Pinned", "Recently edited", "Folders", "Notes").
+Not allow-listed (they mark today's layout regions or visual treatments; the redesign may drop or rename them; migrate the tests to roles): `data-bottom-bar` (use the touch navigation landmark by name and `aria-hidden`/inert for its hidden state), `data-sidebar`, `data-hero`, `data-welcome`, `data-pinned`, `data-recent`, `data-folders`, `data-subfolders`, `data-notes`, `data-note-grid`, `data-note-card`, `data-card-*` (except `data-card-glow`, allow-listed above), `data-folder-tile`, `data-tile-*`, `data-folder-counts`, `data-cover-header`, `data-note-page`, `data-note-header`, `data-note-title`, `data-note-column`, `data-properties`, `data-tag-chip`, `data-search-page`, `data-search-results`, `data-tag-page`, `data-folder-page`, `data-morph`, `data-glass`, `data-accent`, `data-card`, `data-revealed`, `data-line`, `data-rail`, `data-strength`, `data-glass-sample`, `data-card-sample`, `data-slash-menu`, `data-bubble-menu`, `data-palette`, `data-result`, `data-action`, `data-recent-search`, `data-search-bar`, `data-screen`, `data-callout`, `data-kind`, `data-chip`, `data-cta`. Replacement guidance: a note entry = an `article` containing a heading link; its pinned state = element named "Pinned"; a folder entry = link; each Home/folder-page group = a region named by its heading ("Pinned", "Recently edited", "Folders", "Notes").
 
 ---
 
@@ -488,6 +521,7 @@ Not allow-listed (they mark today's layout regions or visual treatments; the red
 | `src/routes` user-facing route | contract section |
 |---|---|
 | `(app)/+page.svelte` -> `/` | 4.1 |
+| `(app)/folders/+page.svelte` -> `/folders` | 4.2a |
 | `(app)/folders/[id]/+page.svelte` -> `/folders/[id]` | 4.2 |
 | `(app)/notes/[id]/+page.svelte` (+ `NotePage.svelte`) -> `/notes/[id]` | 4.3 (+ section 5) |
 | `(app)/search/+page.svelte` -> `/search` | 4.4 (+ section 6) |
@@ -498,7 +532,7 @@ Not allow-listed (they mark today's layout regions or visual treatments; the red
 | `__test*`, `__mockups*` | excluded by design |
 | no `+error.svelte` at any level | 404/error behaviour in section 4 intro; gate-1 decision 2 |
 
-Coverage: 5 of 5 user-facing page routes (100%), plus the shared shell. Re-checked 2026-11-12 in review against `src/routes` (all `+page`, `+layout` and `+server` files outside `__test`/`__mockups`): no route missing.
+Coverage: 6 of 6 user-facing page routes (100%), plus the shared shell. Re-checked 2026-11-12 in review against `src/routes` (all `+page`, `+layout` and `+server` files outside `__test`/`__mockups`): no route missing.
 
 ---
 

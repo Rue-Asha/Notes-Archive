@@ -1,14 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
-import { calm, open, reset, seed } from './helpers.ts';
-
-// the sidebar on desktop, the drawer on phone
-async function treeScope(page: Page, info: { project: { name: string } }) {
-	if (info.project.name === 'desktop') return page.getByRole('navigation', { name: 'Sidebar' });
-	await page.getByRole('navigation', { name: 'Bottom bar' }).getByRole('button', { name: 'Folders' }).click();
-	return page.getByRole('dialog', { name: 'Folders' });
-}
+import { expect, test } from '@playwright/test';
+import { calm, isDesktop, open, reset, seed, treeScope } from './helpers.ts';
 
 test('Scenario: Tree shows folders with their sub-folders and notes', async ({ page, request }, info) => {
+	test.skip(!isDesktop(info), 'the tree is the sidebar; the phone drills down (drill-down)');
 	await reset(request);
 	await seed(request, {
 		folders: [{ name: 'Reisen' }, { name: 'Japan', parent: 0 }],
@@ -41,6 +35,7 @@ test('Scenario: Tree shows folders with their sub-folders and notes', async ({ p
 });
 
 test('Scenario: Current item is highlighted in the tree', async ({ page, request }, info) => {
+	test.skip(!isDesktop(info), 'the tree is the sidebar; the phone drills down (drill-down)');
 	await reset(request);
 	const { notes } = await seed(request, {
 		folders: [{ name: 'Reisen' }, { name: 'Japan', parent: 0 }, { name: 'Kyoto', parent: 1 }],
@@ -53,10 +48,13 @@ test('Scenario: Current item is highlighted in the tree', async ({ page, request
 	const current = tree.getByRole('link', { name: 'Tempel', exact: true });
 	await expect(current).toHaveAttribute('aria-current', 'page');
 	await expect(tree.getByRole('link', { name: 'Daneben', exact: true })).not.toHaveAttribute('aria-current', 'page');
-	for (const name of ['Reisen', 'Japan', 'Kyoto']) await expect(tree.getByRole('link', { name, exact: true })).toBeVisible();
+	// the tree focuses Kyoto: its ancestors sit in the path row
+	for (const name of ['Reisen', 'Japan']) await expect(tree.getByRole('navigation', { name: 'Path' }).getByRole('link', { name })).toBeVisible();
+	await expect(tree.getByRole('button', { name: 'Kyoto menu' })).toBeVisible();
 });
 
 test('Scenario: Untitled note in the tree reads Untitled', async ({ page, request }, info) => {
+	test.skip(!isDesktop(info), 'the tree is the sidebar; the phone drills down (drill-down)');
 	await reset(request);
 	await seed(request, { folders: [{ name: 'Reisen' }], notes: [{ folder: 0 }] });
 	await calm(page);

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import Button from '#lib/components/button/Button.svelte';
 	import { COPY } from '#lib/copy.ts';
 	import type { SaveState } from '#lib/types.ts';
+	import Icon from '#lib/ui/Icon.svelte';
 
 	let { state, onretry }: { state: SaveState; onretry(): void } = $props();
 
@@ -10,37 +12,15 @@
 		saving: COPY.saving,
 		saved: COPY.saved,
 		error: COPY.saveFailed,
-		deleted: ''
+		deleted: COPY.noteDeleted
 	};
 </script>
 
 <!-- quiet on purpose: no live region and no transition, the toast speaks up when a save fails -->
 {#if state === 'error'}
-	<button type="button" class="status error" data-save-state={state} onclick={onretry}>{labels[state]}</button>
+	<Button variant="danger" size="s" data-save-state={state} onclick={onretry}><Icon name="alert" size={16} />{labels[state]}</Button>
 {:else}
-	<span class="status" data-save-state={state}>{labels[state]}</span>
+	<p class="detail-status" data-save-state={state}>
+		{#if state === 'saved' || state === 'idle'}<Icon name="check" size={14} />{/if}{labels[state]}
+	</p>
 {/if}
-
-<style>
-	.status {
-		margin-inline-end: var(--s-2);
-		color: var(--ink-2);
-		font-size: var(--t-small);
-		white-space: nowrap;
-	}
-
-	button {
-		min-block-size: var(--control);
-		padding: 0 var(--s-3);
-		border: 0;
-		border-radius: var(--r-pill);
-		background: var(--danger-soft);
-		font: inherit;
-		font-size: var(--t-small);
-		font-weight: 500;
-	}
-
-	.error {
-		color: var(--danger);
-	}
-</style>

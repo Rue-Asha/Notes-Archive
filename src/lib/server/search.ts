@@ -97,23 +97,31 @@ export function searchNotes(q: SearchQuery): SearchHit[] {
 		const ids = getDb()
 			.prepare(`SELECT notes.id FROM notes WHERE 1${filter.sql} ORDER BY notes.updated_at DESC, notes.id DESC LIMIT ?`)
 			.all(...filter.params, q.limit ?? -1);
-		return withCards(ids.map((r) => Number(r.id))).map((note) => ({ note, parts: [] }));
+		return withCards(ids.map((r) => Number(r.id))).map((note) => ({ note, parts: [], inBody: false }));
 	}
 	// bm25 weights alone let a body that repeats the word beat a long title, so a title hit is its own sort key
 	const inTitle = `title : (${terms(q.q)!.join(' OR ')})`;
 	const rows = getDb()
 		.prepare(
-			`SELECT notes_fts.rowid AS id, snippet(notes_fts, -1, char(2), char(3), '${ELLIPSIS}', 12) AS snip, notes.title, notes.body_text
+			`SELECT notes_fts.rowid AS id, snippet(notes_fts, 0, char(2), char(3), '${ELLIPSIS}', 12) AS title_snip,
+				snippet(notes_fts, 1, char(2), char(3), '${ELLIPSIS}', 12) AS body_snip,
+				snippet(notes_fts, 2, char(2), char(3), '${ELLIPSIS}', 12) AS tags_snip, notes.title, notes.body_text
 			FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid
 			WHERE notes_fts MATCH ?${filter.sql}
 			ORDER BY notes_fts.rowid IN (SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?) DESC, bm25(notes_fts, 10, 1, 5) LIMIT ?`
 		)
 		.all(match, ...filter.params, inTitle, limit);
 	const found = withCards(rows.map((r) => Number(r.id)));
-	return rows.map((r, i) => ({
-		note: found[i],
-		parts: snippetParts(String(r.snip), [String(r.body_text), String(r.title)])
-	}));
+	return rows.map((r, i) => {
+		// a body hit is the snippet even when the title matched better; otherwise the title's words, else the tags'
+		const inBody = String(r.body_snip).includes('\x02');
+		const parts = inBody
+			? snippetParts(String(r.body_snip), [String(r.body_text)])
+			: String(r.title_snip).includes('\x02')
+				? snippetParts(String(r.title_snip), [String(r.title)])
+				: snippetParts(String(r.tags_snip), [found[i].tags.map((t) => t.name).join(' ')]);
+		return { note: found[i], parts, inBody };
+	});
 }
 
 // cards in the order of the given ids

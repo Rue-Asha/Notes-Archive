@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto, invalidate } from '$app/navigation';
 	import { COPY } from '#lib/copy.ts';
+	import { toast } from '#lib/shell/toast.ts';
 	import type { FolderDeleteCounts, TreeFolder } from '#lib/types.ts';
 	import Dialog from '#lib/ui/Dialog.svelte';
 
@@ -18,9 +19,14 @@
 		shown = target;
 		counts = null;
 		fetch(`/api/folders/${target.id}`)
-			.then((res) => res.json())
+			.then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
 			.then((body) => {
 				if (folder === target) counts = body.counts;
+			})
+			.catch(() => {
+				if (folder !== target) return;
+				toast(COPY.loadFailed, 'error');
+				onclose();
 			});
 	});
 
@@ -36,9 +42,9 @@
 
 <Dialog
 	open={folder !== null && counts !== null}
-	title="Delete folder"
-	message={shown && counts ? COPY.deleteFolder(shown.name, counts) : ''}
-	confirmLabel="Delete"
+	title={shown ? COPY.deleteAsk(shown.name) : ''}
+	message={counts ? COPY.deleteFolder(counts) : ''}
+	confirmLabel={COPY.deleteFolderLabel}
 	danger
 	onconfirm={confirm}
 	oncancel={onclose}

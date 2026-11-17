@@ -20,7 +20,7 @@ test('Scenario: Typing saves automatically', async ({ page, request }) => {
 	await expect(status).toHaveText(COPY.saving);
 	await expect(status).toHaveText(COPY.saved);
 
-	await page.keyboard.press('Enter');
+	await page.keyboard.press('ControlOrMeta+Enter');
 	await page.keyboard.type('Erste Zeile');
 	await page.keyboard.press('Enter');
 	await page.keyboard.type('Zweite Zeile');
