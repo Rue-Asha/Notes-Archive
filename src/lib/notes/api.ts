@@ -1,13 +1,8 @@
-import { goto } from '$app/navigation';
 import type { Id, NotePatch } from '#lib/types.ts';
 
 const JSON_HEADERS = { 'content-type': 'application/json' };
 
-export async function newNote(folderId: Id | null = null): Promise<void> {
-	const res = await fetch('/api/notes', { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ folderId }) });
-	const { id } = (await res.json()) as { id: Id };
-	await goto(`/notes/${id}`);
-}
+export { newNote } from '#lib/shell/capture.ts';
 
 export async function newFolder(parentId: Id | null = null): Promise<Id> {
 	const res = await fetch('/api/folders', { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ parentId }) });

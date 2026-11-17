@@ -136,7 +136,7 @@ describe('folder delete', () => {
 });
 
 describe('folder page counts', () => {
-	it('Scenario: Header and parent tile count the same', () => {
+	it('Scenario: Header and parent row count the same', () => {
 		const { folders } = seedArchive({
 			folders: [{ name: 'Reisen' }, { name: 'Japan', parent: 0 }, { name: 'Kyoto', parent: 1 }],
 			notes: [
@@ -147,8 +147,8 @@ describe('folder page counts', () => {
 			]
 		});
 		const header = (folderPageLoad as unknown as (e: unknown) => { counts: { folders: number; notes: number } })({ params: { id: String(folders[1]) } });
-		const tile = listFolderTiles(folders[0]).find((t) => t.id === folders[1]);
+		const row = listFolderTiles(folders[0]).find((t) => t.id === folders[1]);
 		expect(header.counts).toEqual({ folders: 1, notes: 4 });
-		expect(header.counts.notes).toBe(tile?.noteCount);
+		expect(header.counts.notes).toBe(row?.noteCount);
 	});
 });

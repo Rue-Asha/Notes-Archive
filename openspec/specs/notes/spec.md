@@ -4,16 +4,31 @@
 TBD - created by archiving change build-notes-archive. Update Purpose after archive.
 ## Requirements
 ### Requirement: Creating a note
-"New note" SHALL create an untitled note — in the current folder when started from a folder page or a folder's menu, otherwise at the root — and open it with the cursor in the title; a new note left completely empty (no title, no content, no icon, no tags, not pinned) SHALL be discarded when the user navigates away, while a note with only a title is kept.
+"New note" (sidebar, phone bar "+", Home, folder page, folder menu, palette) SHALL create an untitled note in the current folder — the folder of the open folder page, or the folder of the open note — and otherwise at the top level, and open it with the cursor in the title and the title and body placeholders shown; a new note left completely empty (no title, no content, no icon, no tags, not pinned) SHALL be discarded silently when the user navigates away, while a note with only a title is kept.
 
 #### Scenario: Opening a new empty note focuses the title
 - **WHEN** a note just created through `POST /api/notes` is opened
 - **THEN** the title field has focus and shows the "Untitled" placeholder
 - **proof:** e2e
 
+#### Scenario: New note shows its placeholders
+- **WHEN** "New note" is chosen on Home
+- **THEN** the title shows "Untitled" and the body shows "Write, or type / for blocks" as placeholders
+- **proof:** e2e
+
+#### Scenario: New note from the shell lands in the current folder
+- **WHEN** "New note" is chosen in the sidebar while folder "Japan"'s page is open, and the phone bar "+" is tapped while a note in "Japan" is open
+- **THEN** both new notes are stored in "Japan"
+- **proof:** e2e
+
+#### Scenario: New note without a current folder lands at the top level
+- **WHEN** "New note" is chosen on Home, on `/search` and from the palette on a tag page
+- **THEN** each new note has no folder
+- **proof:** e2e
+
 #### Scenario: Empty new note is discarded on leaving
 - **WHEN** a new note is opened and the user navigates to Home without typing
-- **THEN** `counts` reports no notes
+- **THEN** `counts` reports no notes and no message is shown
 - **proof:** e2e
 
 #### Scenario: Note with only a title is kept
@@ -32,15 +47,15 @@ TBD - created by archiving change build-notes-archive. Update Purpose after arch
 - **proof:** unit
 
 ### Requirement: Note page
-The note page SHALL show an optional icon (emoji picker; click to change or remove), a large title, a properties row (Folder, Tags, Pinned) and then the body; untitled notes SHALL read "Untitled" in cards, the tree and the tab title.
+The note page SHALL show an optional icon (emoji picker; click to change or remove), a large multi-line title, the properties (icon, Folder chooser, Tags, Pinned) in a glass bar under the title, collapsible, and then the body on the white card; on the phone the properties SHALL start collapsed into one summary line (folder path · tag count) that expands on tap; each property change SHALL save immediately; untitled notes SHALL read "Untitled" in entries, the tree and the tab title.
 
 #### Scenario: Note page shows icon, title and body
 - **WHEN** a note with icon 🌿, title "Garten" and a body paragraph opens
-- **THEN** the page shows the icon, the title in the display font as the page's `h1` field, and the paragraph in the editor below
+- **THEN** the page shows the icon, the title as the page's level-1 heading field, and the paragraph in the editor below
 - **proof:** e2e
 
 #### Scenario: Pick, change and remove the note icon
-- **WHEN** "Add icon" is clicked and 📚 is picked, then the icon is clicked and 🌿 picked, then the icon is clicked and "Remove" chosen
+- **WHEN** "Add icon" is clicked and 📚 is picked, then the icon is clicked and 🌿 picked, then the icon is clicked and "Remove icon" chosen
 - **THEN** after each step and a reload the stored icon is 📚, then 🌿, then none
 - **proof:** e2e
 
@@ -57,6 +72,36 @@ The note page SHALL show an optional icon (emoji picker; click to change or remo
 #### Scenario: Very long title wraps
 - **WHEN** a 200-character title is typed on phone
 - **THEN** the title wraps onto several lines inside the column and nothing scrolls horizontally
+- **proof:** e2e
+
+#### Scenario: Properties show under the title
+- **WHEN** a note opens at 1280×800
+- **THEN** the properties Folder, Tags and Pinned are expanded between the title and the body, and one control collapses and expands them with `aria-expanded`
+- **proof:** e2e
+
+#### Scenario: Properties collapse into a summary on the phone
+- **WHEN** a note in "Reisen/Japan" with three tags opens at 390×844
+- **THEN** the properties show one summary line with the folder path and "3 tags", and tapping it expands them
+- **proof:** e2e
+
+#### Scenario: Property changes save at once
+- **WHEN** the folder, a tag and the pin are changed on the note page
+- **THEN** each change is stored before the next one is made, without typing in the body
+- **proof:** e2e
+
+#### Scenario: Many tags wrap without horizontal scroll
+- **WHEN** a note with 40 tags, some 40 characters long, opens at 320 px with the properties expanded
+- **THEN** the tags wrap onto several lines and nothing scrolls horizontally
+- **proof:** e2e
+
+#### Scenario: Long folder path stays readable in the properties
+- **WHEN** a note twelve folders deep opens on the phone
+- **THEN** the summary line and the Folder row shorten or wrap the path inside the card, and the full path is available as the chooser's accessible name
+- **proof:** e2e
+
+#### Scenario: Note without tags shows no tag count
+- **WHEN** a note without tags opens on the phone
+- **THEN** the summary line shows the folder path and no tag count
 - **proof:** e2e
 
 ### Requirement: Autosave
@@ -99,16 +144,26 @@ Two devices editing the same note: the last write wins.
 - **proof:** unit
 
 ### Requirement: Note cards
-Note cards on Home, folder, tag and search pages SHALL show the icon, the title ("Untitled" when empty), a 2–3 line plain-text snippet ("Empty note" when the body has no text), up to three tag chips plus "+n", the relative edited time and a pin marker, and SHALL offer a card menu with Pin/Unpin, Move to… and Delete.
+Note cards on Home, folder, tag and search pages SHALL show the icon, the title ("Untitled" when empty), a plain-text snippet clamped to at most 3 lines ("Empty note" when the body has no text) and the edited time; on Home they SHALL also show the folder, the first tag and "+n" for the rest, on one meta line where the time keeps its full width and no tag runs into it (source: Rue, gate 7, signed hi-fi). On the search page a result SHALL be a numbered row ("01", "02", …) instead of a card plate, with the folder after a folder icon, up to three tags plus "+n" on a meta line that wraps, and the absolute date ("Tue 17 Nov", the year once it is another year's) instead of the relative time (source: Rue, gate 7, signed hi-fi). Every note card SHALL offer a card menu with Pin/Unpin, Move to… and Delete.
 
 #### Scenario: Note card shows its parts
-- **WHEN** a pinned note with icon, title, a long body and two tags, edited two hours ago, is on its folder page
-- **THEN** its card shows the icon, title, a snippet clamped to at most 3 lines, both tag chips, "2h ago" and the pin marker
+- **WHEN** a note with icon, title, a long body and two tags in folder "Reisen", edited two hours ago, is in Home's Recently edited
+- **THEN** its card shows the icon, title, a snippet clamped to at most 3 lines, "Reisen", the first tag with "+1" and "2h ago"
 - **proof:** e2e
 
-#### Scenario: Card shows at most three tags and +n
-- **WHEN** a note has five tags
-- **THEN** its card shows three chips and "+2"
+#### Scenario: Card shows its first tag and +n
+- **WHEN** a note with five tags is in Home's Recently edited
+- **THEN** its card shows the first tag and "+4"
+- **proof:** e2e
+
+#### Scenario: Long tags never run into the time
+- **WHEN** pinned and recent notes with two and five long tags are on Home and on their tag page at 375, 768 and 1280 px
+- **THEN** every card's time is shown whole with no tag pill reaching into it, and "+n" is never cut
+- **proof:** e2e
+
+#### Scenario: Search results are numbered rows with folder and date
+- **WHEN** `/search?q=kyoto` finds two notes, one in "Reisen" edited on 3 March 2025 with five tags
+- **THEN** the rows start "01" and "02", the first shows a folder icon with "Reisen", three tags and "+2", and its date reads "Mon 3 Mar 2025"
 - **proof:** e2e
 
 #### Scenario: Note without text shows Empty note
@@ -132,11 +187,16 @@ Note cards on Home, folder, tag and search pages SHALL show the icon, the title 
 - **proof:** unit
 
 ### Requirement: Deleting a note
-Deleting a note SHALL ask "Delete “<title>”? This can't be undone." and on confirm remove the note, its tag links and its uploaded images and files; deleting the open note SHALL land on its parent folder page, or Home for a root note; cancelling keeps everything.
+Deleting a note SHALL ask in an alert dialog (`alertdialog`, as the hi-fi `Dialog alert`) titled "Delete “<title>”?" with the message "This can't be undone.", Cancel (focused) and a danger button "Delete note" with a trash icon; on a phone the two buttons stack full width (source: Rue, gate 7, signed hi-fi overlays/Dialog). On confirm it SHALL remove the note, its tag links and its uploaded images and files; deleting the open note SHALL land on its parent folder page, or Home for a root note; cancelling keeps everything.
 
 #### Scenario: Deleting the open note asks first and lands on its folder
-- **WHEN** "Delete" is chosen in the note header menu of note "Rezept" inside folder "Küche" and confirmed
-- **THEN** the dialog read "Delete “Rezept”? This can't be undone.", the page is `/folders/<Küche id>`, and the note no longer exists
+- **WHEN** "Delete" is chosen in the note header menu of note "Rezept" inside folder "Küche" and "Delete note" is confirmed
+- **THEN** the alert dialog was titled "Delete “Rezept”?" with the message "This can't be undone." and the confirm button "Delete note", the page is `/folders/<Küche id>`, and the note no longer exists
+- **proof:** e2e
+
+#### Scenario: Delete buttons stack on a phone
+- **WHEN** the delete dialog opens at 390 px wide
+- **THEN** Cancel and "Delete note" each span the dialog's width, Cancel above "Delete note"
 - **proof:** e2e
 
 #### Scenario: Cancelled note delete keeps everything
@@ -188,16 +248,16 @@ When a save changes a note's content, the images and files that the previously s
 - **proof:** unit
 
 ### Requirement: Pinning
-Notes SHALL be pinned and unpinned from the properties row or the card menu; pinned notes SHALL appear in Home's Pinned tile in a manual order that the user can change, a newly pinned note SHALL go to the top of that order, and unpinning the last pinned note SHALL hide the tile. The server SHALL store the order and SHALL reorder the whole pinned list in one request; a reorder that does not list exactly the currently pinned notes SHALL be refused with 409 and change nothing. Databases from before this requirement SHALL keep the order they showed (most recently pinned first).
+Notes SHALL be pinned and unpinned from the note's properties or the card menu; pinned notes SHALL appear in Home's Pinned list in a manual order that the user can change, a newly pinned note SHALL go to the top of that order, and unpinning the last pinned note SHALL hide the list. The server SHALL store the order and SHALL reorder the whole pinned list in one request; a reorder that does not list exactly the currently pinned notes SHALL be refused with 409 and change nothing. Databases from before this requirement SHALL keep the order they showed (most recently pinned first).
 
 #### Scenario: Pin from the properties row
-- **WHEN** "Pinned" is switched on in a note's properties row and the page reloads
+- **WHEN** "Pinned" is switched on in a note's properties and the page reloads
 - **THEN** the switch is on and the stored note has a pin time
 - **proof:** e2e
 
 #### Scenario: Pin from a card menu
 - **WHEN** "Pin" is chosen in a card menu
-- **THEN** the card shows the pin marker and its menu now offers "Unpin"
+- **THEN** the note is listed in Home's "Pinned" region and its card menu now offers "Unpin"
 - **proof:** e2e
 
 #### Scenario: Pinned notes appear on Home most recently pinned first
@@ -205,7 +265,7 @@ Notes SHALL be pinned and unpinned from the properties row or the card menu; pin
 - **THEN** Home's "Pinned" region lists B before A
 - **proof:** e2e
 
-#### Scenario: Unpinning the last note hides the Pinned tile
+#### Scenario: Unpinning the last note hides the Pinned list
 - **WHEN** the only pinned note is unpinned from its card menu on Home
 - **THEN** the "Pinned" region disappears without a reload
 - **proof:** e2e
@@ -267,4 +327,60 @@ A note title SHALL be allowed to contain line breaks. The server SHALL store a t
 - **WHEN** `titleLine` receives "Reise\n\nPlan" and an empty or blank title
 - **THEN** it returns "Reise Plan" and "Untitled"
 - **proof:** unit
+
+### Requirement: Title editing
+The title SHALL accept several lines: Enter inserts a line break; Cmd/Ctrl+Enter, or ArrowDown on the last line, SHALL put the caret at the start of the body; pasted CRLF text SHALL keep its line breaks as LF; the title SHALL be the page's level-1 heading.
+
+#### Scenario: Enter in the title adds a line break
+- **WHEN** "Japan" is typed in the title, then Enter, then "2026"
+- **THEN** the title shows two lines and the stored title is "Japan\n2026"
+- **proof:** e2e
+
+#### Scenario: Cmd or Ctrl+Enter moves to the body
+- **WHEN** Cmd/Ctrl+Enter is pressed anywhere in the title
+- **THEN** the caret is at the start of the body
+- **proof:** e2e
+
+#### Scenario: ArrowDown on the last title line moves to the body
+- **WHEN** ArrowDown is pressed on the first of two title lines, then again on the second
+- **THEN** the first press moves to the second line and the second press puts the caret at the start of the body
+- **proof:** e2e
+
+#### Scenario: Title is the page heading
+- **WHEN** a note titled "Garten" opens
+- **THEN** exactly one level-1 heading exists on the page and its accessible name is "Garten"
+- **proof:** e2e
+
+#### Scenario: Pasted CRLF text keeps its line breaks
+- **WHEN** "Eins\r\nZwei" is pasted into an empty title
+- **THEN** the title shows two lines and the stored title is "Eins\nZwei"
+- **proof:** e2e
+
+#### Scenario: Many short title lines stay in the column
+- **WHEN** a title of twelve short lines is typed at 375 px
+- **THEN** every line shows inside the column and nothing scrolls horizontally
+- **proof:** e2e
+
+### Requirement: Save status
+The note page SHALL show "Saving…" and "Saved"; a failed save SHALL turn the status into the actionable "Couldn't save — try again" plus one toast per run of failures; a note deleted elsewhere SHALL show "This note was deleted" and saving SHALL stop. The status SHALL NOT be a live region.
+
+#### Scenario: Save status shows Saving and Saved
+- **WHEN** text is typed in the body
+- **THEN** the status reads "Saving…" while the save runs and "Saved" after it
+- **proof:** e2e
+
+#### Scenario: Failed saves show one toast and a retry status
+- **WHEN** three saves in a row fail and the status is then activated
+- **THEN** exactly one toast "Couldn't save — try again" appeared, the status reads "Couldn't save — try again" as a button, and activating it saves again
+- **proof:** e2e
+
+#### Scenario: Saving stops after the note was deleted elsewhere
+- **WHEN** the open note is deleted in another tab and the body is edited
+- **THEN** the status reads "This note was deleted" and no further save request is sent
+- **proof:** e2e
+
+#### Scenario: Save status is not a live region
+- **WHEN** the save status is inspected
+- **THEN** neither it nor an ancestor has `aria-live` or a `status` role
+- **proof:** e2e
 

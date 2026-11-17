@@ -9,9 +9,11 @@ test('Scenario: Deleting the open note asks first and lands on its folder', asyn
 
 	await page.getByRole('button', { name: 'Note menu' }).click();
 	await page.getByRole('menuitem', { name: 'Delete' }).click();
-	const dialog = page.getByRole('dialog', { name: /Delete/ });
-	await expect(dialog).toContainText("Delete “Rezept”? This can't be undone.");
-	await dialog.getByRole('button', { name: 'Delete' }).click();
+	const dialog = page.getByRole('alertdialog', { name: /Delete/ });
+	await expect(dialog.getByRole('heading', { name: 'Delete “Rezept”?' })).toBeVisible();
+	await expect(dialog.getByText("This can't be undone.", { exact: true })).toBeVisible();
+	await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+	await dialog.getByRole('button', { name: 'Delete note', exact: true }).click();
 
 	await page.waitForURL(`**/folders/${folders[0]}`);
 	expect(await storedNote(request, notes[0])).toBeNull();
@@ -26,11 +28,30 @@ test('Scenario: Deleting a root note lands on Home', async ({ page, request }) =
 
 	await page.getByRole('button', { name: 'Note menu' }).click();
 	await page.getByRole('menuitem', { name: 'Delete' }).click();
-	await expect(page.getByRole('dialog', { name: /Delete/ })).toContainText("Delete “Untitled”? This can't be undone.");
-	await page.getByRole('dialog', { name: /Delete/ }).getByRole('button', { name: 'Delete' }).click();
+	await expect(page.getByRole('alertdialog', { name: /Delete/ }).getByRole('heading', { name: 'Delete “Untitled”?' })).toBeVisible();
+	await expect(page.getByRole('alertdialog', { name: /Delete/ }).getByText("This can't be undone.", { exact: true })).toBeVisible();
+	await page.getByRole('alertdialog', { name: /Delete/ }).getByRole('button', { name: 'Delete' }).click();
 
 	await page.waitForURL((url) => url.pathname === '/');
 	expect(await storedNote(request, notes[0])).toBeNull();
+});
+
+test('Scenario: Delete buttons stack on a phone', async ({ page, request }, info) => {
+	test.skip(info.project.name !== 'phone', 'the phone sheet');
+	await reset(request);
+	const { notes } = await seed(request, { notes: [{ title: 'Rezept' }] });
+	await calm(page);
+	await open(page, `/notes/${notes[0]}`);
+
+	await page.getByRole('button', { name: 'Note menu' }).click();
+	await page.getByRole('menuitem', { name: 'Delete' }).click();
+	const dialog = page.getByRole('alertdialog', { name: 'Delete “Rezept”?' });
+	await expect(dialog).toBeVisible();
+	const box = (await dialog.boundingBox())!;
+	const cancel = (await dialog.getByRole('button', { name: 'Cancel' }).boundingBox())!;
+	const remove = (await dialog.getByRole('button', { name: 'Delete note', exact: true }).boundingBox())!;
+	for (const b of [cancel, remove]) expect(b.width).toBeGreaterThan(box.width * 0.8);
+	expect(remove.y).toBeGreaterThanOrEqual(cancel.y + cancel.height);
 });
 
 test('Scenario: Cancelled note delete keeps everything', async ({ page, request }) => {
@@ -41,7 +62,7 @@ test('Scenario: Cancelled note delete keeps everything', async ({ page, request 
 
 	await page.getByRole('button', { name: 'Note menu' }).click();
 	await page.getByRole('menuitem', { name: 'Delete' }).click();
-	const dialog = page.getByRole('dialog', { name: /Delete/ });
+	const dialog = page.getByRole('alertdialog', { name: /Delete/ });
 	await dialog.getByRole('button', { name: 'Cancel' }).click();
 	await expect(dialog).toHaveCount(0);
 

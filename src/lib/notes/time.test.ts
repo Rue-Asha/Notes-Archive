@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { relativeTime } from './time.ts';
+import { dayDate, longDay, relativeTime, shortDate } from './time.ts';
 
 const now = new Date('2026-11-02T12:00:00.000Z');
 const ago = (ms: number) => new Date(now.getTime() - ms).toISOString();
@@ -20,5 +20,26 @@ describe('relativeTime', () => {
 	it('adds the year for another year and treats the future as just now', () => {
 		expect(relativeTime('2025-03-05T10:00:00.000Z', now)).toBe('5 Mar 2025');
 		expect(relativeTime(ago(-5 * M), now)).toBe('just now');
+	});
+});
+
+describe('longDay', () => {
+	it('spells out the weekday, the day and the month', () => {
+		expect(longDay(new Date(2026, 10, 14, 12))).toBe('Saturday 14 November');
+		expect(longDay(new Date(2026, 8, 1, 12))).toBe('Tuesday 1 September');
+	});
+});
+
+describe('shortDate', () => {
+	it('shows the day and month, and the year only for another year', () => {
+		const now = new Date(2026, 10, 16, 12);
+		expect(shortDate(new Date(2026, 10, 14, 9).toISOString(), now)).toBe('14 Nov');
+		expect(shortDate(new Date(2025, 2, 3, 9).toISOString(), now)).toBe('3 Mar 2025');
+	});
+});
+
+describe('dayDate', () => {
+	it('puts the short weekday before the day and month', () => {
+		expect(dayDate(new Date(2026, 10, 14, 9).toISOString(), new Date(2026, 10, 16, 12))).toBe('Sat 14 Nov');
 	});
 });

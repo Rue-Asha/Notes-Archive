@@ -118,11 +118,46 @@ test('Scenario: Note column is capped and centred on wide screens', async ({ pag
 	await open(page, `/notes/${notes[0]}`);
 
 	const box = (await page.locator('[data-editor-root]').boundingBox())!;
-	expect(box.width).toBeLessThanOrEqual(720);
-	expect(box.width).toBeGreaterThan(700);
+	// from 1100 px the cap is 1.25 × --measure (in the body's own font) plus the card's inline padding
+	const { measure, padding } = await page.evaluate(() => {
+		const root = document.querySelector<HTMLElement>('[data-editor-root]')!;
+		const probe = document.createElement('div');
+		probe.style.inlineSize = 'var(--measure)';
+		root.append(probe);
+		const measure = probe.getBoundingClientRect().width;
+		probe.remove();
+		const card = getComputedStyle(root.closest('[data-note-column]')!);
+		return { measure, padding: parseFloat(card.paddingLeft) + parseFloat(card.paddingRight) };
+	});
+	expect(box.width).toBeLessThanOrEqual(measure * 1.25 + padding);
+	expect(box.width).toBeGreaterThan(measure * 1.25 * 0.9);
 
-	const sidebar = page.getByRole('navigation', { name: 'Sidebar' });
-	const left = (await sidebar.isVisible()) ? ((b) => b.x + b.width)((await sidebar.boundingBox())!) : 0;
-	const right = await page.evaluate(() => document.documentElement.clientWidth);
+	// centred in the content area: the page column right of the sidebar, inside the frame
+	const { left, right } = await page.getByRole('main').evaluate((el) => {
+		const r = el.getBoundingClientRect();
+		const cs = getComputedStyle(el);
+		return { left: r.left + parseFloat(cs.paddingLeft), right: r.right - parseFloat(cs.paddingRight) };
+	});
+	const sidebar = (await page.getByRole('navigation', { name: 'Sidebar' }).boundingBox())!;
+	expect(left).toBeGreaterThan(sidebar.x + sidebar.width);
 	expect(Math.abs(box.x + box.width / 2 - (left + right) / 2)).toBeLessThanOrEqual(2);
+});
+
+test('Scenario: Note column widens at 1100 px and fills the content area at 1280', async ({ page, request }, info) => {
+	test.skip(info.project.name !== 'desktop', 'wide viewports run on desktop');
+	await reset(request);
+	const { notes } = await seed(request, { notes: [{ title: 'Breit', body: 'Ein Absatz. '.repeat(80) }] });
+	await calm(page);
+	const column = () => page.locator('[data-note-column]').evaluate((el) => el.getBoundingClientRect().width);
+	const area = () => page.getByRole('main').evaluate((el) => {
+		const cs = getComputedStyle(el);
+		return el.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+	});
+
+	await page.setViewportSize({ width: 1099, height: 900 });
+	await open(page, `/notes/${notes[0]}`);
+	const narrow = await column();
+	await page.setViewportSize({ width: 1280, height: 900 });
+	await expect.poll(column).toBeGreaterThan(narrow * 1.1);
+	expect(await column()).toBeGreaterThanOrEqual((await area()) * 0.95);
 });

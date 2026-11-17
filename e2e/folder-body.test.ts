@@ -23,30 +23,31 @@ test('Scenario: Folder page shows sub-folders and notes by last edited', async (
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	const tiles = page.getByRole('region', { name: 'Folders' }).getByRole('link');
+	const tiles = page.getByRole('main').getByRole('list', { name: 'Folders' }).getByRole('link');
 	await expect(tiles).toHaveCount(2);
 	await expect(tiles.nth(0).getByText('Island', { exact: true })).toBeVisible();
 	await expect(tiles.nth(1).getByText('Japan', { exact: true })).toBeVisible();
 	await expect(tiles.first().getByText('2 notes', { exact: true })).toBeVisible();
 	await expect(tiles.first()).toHaveAttribute('href', `/folders/${folders[2]}`);
-	await expect(page.getByRole('article').getByRole('heading')).toHaveText(['Neueste', 'Mittlere', 'Älteste']);
+	await expect(page.getByRole('main').locator('[data-note-title]')).toHaveText(['Neueste', 'Mittlere', 'Älteste']);
 	expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
-test('Scenario: Folder without a cover shows a typographic tile', async ({ page, request }) => {
-	const { folders } = await reisen(request);
+test('Scenario: Folder note rows show the absolute date', async ({ page, request }) => {
+	await reset(request);
+	const today = new Date();
+	const { folders } = await seed(request, {
+		folders: [{ name: 'Reisen' }],
+		notes: [
+			{ title: 'Heute', body: 'a', folder: 0, updatedAt: today.toISOString() },
+			{ title: 'Damals', body: 'b', folder: 0, updatedAt: '2025-03-03T10:00:00.000Z' }
+		]
+	});
 	await calm(page);
 	await open(page, `/folders/${folders[0]}`);
 
-	const folderTiles = page.getByRole('region', { name: 'Folders' });
-	const plain = folderTiles.getByRole('link', { name: /Island/ });
-	await expect(plain.getByRole('img').or(plain.getByRole('presentation'))).toHaveCount(0);
-	const name = plain.getByText('Island', { exact: true });
-	expect(await name.evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Newsreader');
-	expect(await plain.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
-
-	const covered = folderTiles.getByRole('link', { name: /Japan/ });
-	await expect(covered.getByRole('presentation')).toHaveCount(1);
+	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	await expect(page.locator('[data-note-row] time')).toHaveText([`${today.getDate()} ${months[today.getMonth()]}`, '3 Mar 2025']);
 });
 
 test('Unknown folder is a 404', async ({ request }) => {

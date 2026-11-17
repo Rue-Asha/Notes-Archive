@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '#lib/styles/global.css';
 	import { onMount, type Snippet } from 'svelte';
 	import Toast from '#lib/shell/Toast.svelte';
 

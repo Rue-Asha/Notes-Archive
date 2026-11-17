@@ -1,0 +1,44 @@
+/* Hi-fi mockups: the list cards the fingerprint leaves to the app (buttons live in ../ui/Btn.svelte).
+   Plain classes with an hf- prefix; Frame.svelte loads this once for every hifi screen.
+   Notes is instant on purpose (DESIGN.md, Motion): colour changes on hover, nothing glides. */
+
+/* A list in a solid card: rows divided by a hairline. */
+.hf-list {
+	overflow: hidden;
+	border-radius: var(--radius-card);
+	background: var(--surface-raised);
+	box-shadow: var(--shadow-lift);
+}
+.hf-list > li + li {
+	box-shadow: var(--rule-above);
+}
+.hf-row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	inline-size: 100%;
+	min-block-size: var(--space-14);
+	padding: var(--space-2-5) var(--space-5);
+	border: 0;
+	background: none;
+	color: var(--ink);
+	text-align: start;
+	text-decoration: none;
+	font-size: var(--type-body-size);
+	line-height: var(--type-body-line);
+}
+.hf-row > svg {
+	color: var(--ink-secondary);
+}
+@media (hover: hover) {
+	.hf-row:hover {
+		background: var(--surface-tint);
+	}
+}
+
+/* A region that scrolls up and down; the fade and chevron cue come from layout.css (scroll-cue primitive). */
+.hf-scroll-y {
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding-block-end: var(--space-6);
+}

@@ -1,0 +1,30 @@
+{
+	"version": "2.0.0",
+	"files": {
+		"src/lib/styles/fingerprint/tokens.css": "6b505c40673fed08d19451ffb1584ba71db9cee181c43d9d614712c6c8afdd77",
+		"src/lib/styles/fingerprint/base.css": "f8778b2d5a4e93e9ccc21d74be6dcea9101e55dbfd1c808e1726840c2d9271ef",
+		"src/lib/styles/fingerprint/motion.css": "6946e3182aa1b395c52bd3a562a68a89f71137162a9236a99e4830afe244adbc",
+		"src/lib/styles/fingerprint/layout.css": "30f3ef244c9d3aac0e0303ff682e65d425f5a4e0272cf4d5f952abe1cbd89749",
+		"src/lib/styles/fingerprint/fonts.css": "3519aa741eaab0dd2330c1c16e46254df502d8803fc5b981f96ab610301d4f2d",
+		"DESIGN.md": "7c61ffdc6d3352284bb909d0cc24824f4492ad223b56134d6fea1c2d133d67a7",
+		"DESIGN-reference.md": "6505d3dfc7ae6b88d74bf8df542d71c9f5121cb3803aad6790496b56a9873f12",
+		"DESIGN.json": "021f277ac08552e5fe280a221491ef0d5342262e0c7c0b3c18a1f1e847118eb1",
+		"scripts/fingerprint/banned.md": "b401597db8b2f174139513cafd767deba299628e85c04d154c4e8562376986ae",
+		"scripts/fingerprint/check-slop.mjs": "a6ce416c99b1067585ada76013e82c3b6f640229773b693d85a9f7c2dc54b4b2",
+		"scripts/fingerprint/check-drift.mjs": "3a1f8762c8f49847ed5ecc7672a8bcc03039d89533f38bd757581ef5edfffcf8",
+		"static/fonts/fingerprint/gilda-display-latin.woff2": "d2b0a9deb02fe9d4d8348e4c4f470e53588175de06a563574af8d8c896b089e2",
+		"static/fonts/fingerprint/gilda-display-latin-ext.woff2": "1550b21a79ba2dcc033dc49a8d0befb8d8ac98a76b4bbe2948360c0cfe129dbc",
+		"static/fonts/fingerprint/dm-sans-latin.woff2": "ca72d2bcea8f4daa783dbdfa2d9b46068c3ce38168e05918fb867aa453b4f890",
+		"static/fonts/fingerprint/dm-sans-latin-ext.woff2": "5d18d31d23ada61ebee1d589b11d5da30db9e158f589d5e35221ba2b1a45de54",
+		"static/fonts/fingerprint/dm-sans-italic-latin.woff2": "d5c53a50536536971ea27318a590dbf723a190dd2f608e7a92929a021cc0ebaa",
+		"static/fonts/fingerprint/dm-sans-italic-latin-ext.woff2": "b72f7226650dcbc66e1e6ccdc9e53dc8c66107357eeac2d2a4ca18942c42f360",
+		"static/fonts/fingerprint/GildaDisplay-OFL.txt": "e8d94225bdcfecfb5a6e14bc0e2bb26fe48670f28ac46a7d676d9a90d8bfbe24",
+		"static/fonts/fingerprint/DMSans-OFL.txt": "9af36190332437f5ecd09974de43c1f7c77a310a996cdd8ceb25628b458840e1",
+		"static/apple-touch-icon.png": "98871f4e52498d6e255f9a3994581be84db06025030cfef8d050a98385eb3a2e",
+		"static/favicon.ico": "40f8b13e3ed46dc7932d394be709e9bae2370340806a1f80974d43a37fd2a27c",
+		"static/favicon.svg": "95bcc88134e992c5af5211478b561158a8897add4214357b4bd4e50845b98539",
+		"static/icon-192.png": "978a807a6e690e6049ed6d2a887e063bbaa8eba94080f6a19b897bcaef13e8a6",
+		"static/icon-512.png": "1a59875045f9ef0384e0890b78a921a0b4e25909ba94ec109f40a05591547fb6",
+		"static/icon-maskable-512.png": "65527ee95f93945a7b07ac94c6643abbec6820d8d5d6c3f3c87aa5ee63f3d894"
+	}
+}

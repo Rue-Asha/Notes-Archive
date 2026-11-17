@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/state';
+	import Button from '#lib/components/button/Button.svelte';
 	import { COPY } from '#lib/copy.ts';
 	import { titleLine } from '#lib/title.ts';
 	import type { Id, Note, NotePatch } from '#lib/types.ts';
@@ -16,12 +17,12 @@
 	let open = $state(false);
 	let moving = $state(false);
 	let deleting = $state(false);
-	let anchor = $state<HTMLButtonElement | null>(null);
+	let anchor = $state<HTMLElement | null>(null);
 
 	const items = $derived<MenuItem[]>([
-		{ label: 'Search', icon: 'search', onselect: openPalette },
+		{ label: 'Search', icon: 'search', kbd: 'Ctrl K', onselect: openPalette },
 		{ label: note.pinned ? 'Unpin' : 'Pin', icon: 'pin', onselect: () => onchange({ pinned: !note.pinned }) },
-		{ label: 'Move to…', icon: 'move', onselect: () => (moving = true) },
+		{ label: 'Move to…', icon: 'folder', onselect: () => (moving = true) },
 		{ label: 'Delete', icon: 'trash', danger: true, onselect: () => (deleting = true) }
 	]);
 
@@ -33,9 +34,9 @@
 	}
 </script>
 
-<button type="button" class="more glass" aria-label="Note menu" aria-haspopup="menu" aria-expanded={open} bind:this={anchor} onclick={() => (open = !open)}>
-	<Icon name="more" />
-</button>
+<span class="host" bind:this={anchor}>
+	<Button variant="quiet" icon label="Note menu" aria-haspopup="menu" aria-expanded={open} onclick={() => (open = !open)}><Icon name="more" size={20} /></Button>
+</span>
 <Menu {open} {anchor} label="Note menu" {items} onclose={() => (open = false)} />
 <FolderPicker
 	open={moving}
@@ -47,26 +48,10 @@
 	}}
 	oncancel={() => (moving = false)}
 />
-<Dialog open={deleting} title="Delete note" message={COPY.deleteNote(titleLine(note.title))} confirmLabel="Delete" danger onconfirm={remove} oncancel={() => (deleting = false)} />
+<Dialog open={deleting} title={COPY.deleteAsk(titleLine(note.title))} message={COPY.cantUndo} confirmLabel={COPY.deleteNoteLabel} danger onconfirm={remove} oncancel={() => (deleting = false)} />
 
 <style>
-	.more {
-		display: inline-grid;
-		place-items: center;
-		flex: none;
-		inline-size: var(--control);
-		block-size: var(--control);
-		padding: 0;
-		border: 0;
-		border-radius: var(--r-pill);
-		transition: transform var(--d-fast) var(--ease-out);
-	}
-
-	.more:hover {
-		transform: scale(1.05);
-	}
-
-	.more:active {
-		transform: scale(0.94);
+	.host {
+		display: inline-flex;
 	}
 </style>

@@ -1,0 +1,34 @@
+/* Gate 4 wireframe parts shared by home, note and editor: greyscale, hairlines instead of shadows. */
+.w-page { display: grid; gap: var(--space-6); min-inline-size: 0; }
+.w-head { display: grid; gap: var(--space-3); justify-items: start; min-inline-size: 0; }
+.w-head h1 { font-size: var(--type-display-l-size); line-height: var(--type-display-l-line); letter-spacing: var(--type-display-l-tracking); max-inline-size: 100%; overflow-wrap: anywhere; }
+.w-kicker { font-size: var(--type-kicker-size); line-height: var(--type-kicker-line); letter-spacing: var(--type-kicker-tracking); font-weight: var(--type-kicker-weight); text-transform: uppercase; color: var(--ink-secondary); }
+
+.w-card { background: var(--surface-card); border-radius: var(--radius-card-s); border: var(--stroke-hairline) solid var(--hairline); padding: var(--space-5); min-inline-size: 0; }
+.w-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-1-5) var(--space-4); margin-block-end: var(--space-3); }
+.w-card-head h2 { font-size: var(--type-display-s-size); line-height: var(--type-display-s-line); letter-spacing: var(--type-display-s-tracking); }
+.w-note { font-size: var(--type-caption-size); line-height: var(--type-caption-line); color: var(--ink-muted); font-variant-numeric: var(--numeric-figures); }
+
+.w-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-block-size: var(--control-height-s); padding-inline: var(--space-4); border: 0; border-radius: var(--radius-control); background: var(--surface-control-solid); color: var(--ink); box-shadow: var(--ring-control); font-size: var(--type-label-size); line-height: var(--type-label-line); font-weight: var(--type-label-weight); text-decoration: none; max-inline-size: 100%; }
+.w-btn.primary { background: var(--surface-inverse); color: var(--ink-on-inverse); box-shadow: none; }
+.w-btn.quiet { background: transparent; box-shadow: none; }
+.w-btn:disabled, .w-btn[aria-disabled="true"] { opacity: var(--disabled-opacity); cursor: default; }
+.w-icon { display: inline-grid; place-items: center; inline-size: var(--control-height-s); block-size: var(--control-height-s); flex: none; border: 0; border-radius: var(--radius-round); background: transparent; color: var(--ink-secondary); }
+@media (hover: hover) and (pointer: fine) { .w-icon, .w-btn.quiet { min-inline-size: var(--target); } .w-icon:hover, .w-btn.quiet:hover { background: var(--surface-tint); } }
+
+.w-menu { display: grid; min-inline-size: 12rem; max-inline-size: min(20rem, 100%); padding: var(--space-1-5); border-radius: var(--radius-item); background: var(--surface-raised); box-shadow: var(--ring-hairline); z-index: var(--z-menu); list-style: none; }
+.w-menu > li { display: flex; }
+.w-menu button { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-block-size: var(--control-height-s); padding-inline: var(--space-3); border: 0; border-radius: var(--radius-text); background: transparent; text-align: start; font-size: var(--type-label-size); }
+.w-menu button:hover:not(:disabled) { background: var(--surface-tint); }
+.w-menu button:disabled { opacity: var(--disabled-opacity); cursor: default; }
+.w-menu > li[role="separator"] { block-size: var(--stroke-hairline); margin-block: var(--space-1); background: var(--hairline); }
+
+.w-chip { display: inline-flex; align-items: center; gap: var(--space-1); max-inline-size: 100%; min-block-size: var(--control-height-xs); padding-inline: var(--space-3); border-radius: var(--radius-pill); background: var(--surface-tint); font-size: var(--type-caption-size); line-height: var(--type-caption-line); overflow-wrap: anywhere; }
+.w-chip button { display: inline-grid; place-items: center; inline-size: var(--target); block-size: var(--target); margin-inline-end: calc(-1 * var(--space-2)); border: 0; background: transparent; border-radius: var(--radius-round); color: var(--ink-secondary); }
+
+.w-kbd { display: inline-block; padding: 0 var(--space-1-5); border-radius: var(--radius-text); box-shadow: var(--ring-hairline); font-family: var(--font-ui); font-size: var(--type-caption-size); color: var(--ink-muted); }
+.w-tag-label { font-size: var(--type-caption-size); color: var(--ink-muted); }
+
+/* a labelled state on a screen sheet; rules, not boxes of colour */
+.w-states { display: grid; gap: var(--space-6); }
+.w-states > h2 { font-size: var(--type-display-s-size); line-height: var(--type-display-s-line); }

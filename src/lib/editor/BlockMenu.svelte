@@ -96,7 +96,7 @@
 	]);
 </script>
 
-<button type="button" class="handle" class:touch aria-label="Block actions" bind:this={button} onmousedown={(e) => touch && e.preventDefault()} onclick={toggle}>
+<button type="button" class="handle" class:touch data-press="round" aria-label="Block actions" bind:this={button} onmousedown={(e) => touch && e.preventDefault()} onclick={toggle}>
 	<Icon name="grip" size={18} />
 </button>
 
@@ -107,33 +107,37 @@
 	.handle {
 		display: inline-grid;
 		place-items: center;
-		inline-size: 28px;
-		block-size: 28px;
+		inline-size: max(var(--control-height-s), var(--target));
+		block-size: max(var(--control-height-s), var(--target));
 		padding: 0;
 		border: 0;
-		border-radius: var(--r-sm);
+		border-radius: var(--radius-round);
 		background: transparent;
-		color: var(--muted);
+		color: var(--ink-secondary);
 		cursor: grab;
 	}
 
-	.handle:hover {
-		background: var(--row-hover);
-		color: var(--ink);
-	}
-
 	.touch {
-		inline-size: 36px;
-		block-size: 36px;
-		border-radius: var(--r-md);
+		background: var(--surface-inverse);
+		color: var(--ink-on-inverse);
 		cursor: pointer;
 	}
 
-	:global(.ProseMirror.touch-handle) {
-		padding-inline-end: 40px;
+	@media (hover: hover) {
+		.handle:not(.touch):hover {
+			background: var(--surface-tint);
+			color: var(--ink);
+		}
 	}
 
-	:global(.prosemirror-dropcursor-block) {
-		background-color: var(--accent) !important;
+	.handle:focus-visible {
+		background: var(--surface-inverse);
+		color: var(--ink-on-inverse);
+		outline-color: var(--focus-ring-on-inverse);
+		box-shadow: var(--focus-halo);
+	}
+
+	:global(.ProseMirror.touch-handle:focus > .has-handle) {
+		padding-inline-end: calc(max(var(--control-height-s), var(--target)) + var(--space-1));
 	}
 </style>

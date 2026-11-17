@@ -1,12 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { calm, open, reset, seed } from './helpers.ts';
-
-// the sidebar on desktop, the drawer on phone
-async function treeScope(page: Page, info: { project: { name: string } }) {
-	if (info.project.name === 'desktop') return page.getByRole('navigation', { name: 'Sidebar' });
-	await page.getByRole('navigation', { name: 'Bottom bar' }).getByRole('button', { name: 'Folders' }).click();
-	return page.getByRole('dialog', { name: 'Folders' });
-}
+import { expect, test } from '@playwright/test';
+import { calm, folderLink, isDesktop, open, reset, seed, treeScope } from './helpers.ts';
 
 test('Scenario: Empty tree offers New folder', async ({ page, request }, info) => {
 	await reset(request);
@@ -18,62 +11,32 @@ test('Scenario: Empty tree offers New folder', async ({ page, request }, info) =
 	await expect(tree.getByRole('button', { name: 'New folder' })).toBeVisible();
 });
 
-test('Scenario: Long names truncate with a tooltip', async ({ page, request }, info) => {
-	const name = 'Eine sehr lange Ordnerbezeichnung die garantiert nicht in die schmale Seitenleiste passt';
+test('Long folder names wrap on the Folders page', async ({ page, request }, info) => {
+	test.skip(isDesktop(info), 'the focus tree has its own long-name and deep-path scenarios (tree-focus)');
+	const name = 'Eine sehr lange Ordnerbezeichnung die garantiert nicht in eine schmale Zeile passt und deshalb umbricht';
 	await reset(request);
 	await seed(request, { folders: [{ name }] });
 	await calm(page);
 	await open(page, '/');
 	const tree = await treeScope(page, info);
 
-	const row = tree.getByRole('link', { name, exact: true });
-	await expect(row).toHaveAttribute('title', name);
-	const label = row.getByText(name, { exact: true });
-	expect(await label.evaluate((el) => getComputedStyle(el).textOverflow)).toBe('ellipsis');
-	expect(await label.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
-	expect((await row.boundingBox())!.height).toBeLessThan(48);
-});
-
-test('Scenario: Deep nesting caps the indent', async ({ page, request }, info) => {
-	const names = Array.from({ length: 10 }, (_, i) => `Ebene ${i + 1}`);
-	await reset(request);
-	const { folders } = await seed(request, { folders: names.map((name, i) => (i === 0 ? { name } : { name, parent: i - 1 })) });
-	await calm(page);
-	await open(page, `/folders/${folders[9]}`);
-	const tree = await treeScope(page, info);
-
-	const xs: number[] = [];
-	for (const name of names) {
-		const link = tree.getByRole('link', { name, exact: true });
-		await expect(link).toBeVisible();
-		xs.push((await link.boundingBox())!.x);
-	}
-	for (let i = 1; i < 6; i++) expect(xs[i]).toBeGreaterThan(xs[i - 1]);
-	for (let i = 6; i < 10; i++) expect(xs[i]).toBe(xs[5]);
-});
-
-test('Scenario: Choosing a tree item closes the drawer', async ({ page, request }, info) => {
-	test.skip(info.project.name !== 'phone', 'the drawer only exists below 1024 px');
-	await reset(request);
-	const { notes } = await seed(request, { folders: [{ name: 'Reisen' }], notes: [{ title: 'Packliste', folder: 0 }] });
-	await calm(page);
-	await open(page, '/');
-	const drawer = await treeScope(page, info);
-
-	await drawer.getByRole('button', { name: 'Expand Reisen' }).click();
-	await drawer.getByRole('link', { name: 'Packliste', exact: true }).click();
-	await page.waitForURL(`**/notes/${notes[0]}`);
-	await expect(drawer).toBeHidden();
+	const row = folderLink(tree, name);
+	await expect(row).toBeVisible();
+	await expect.poll(async () => (await row.boundingBox())?.height ?? 0).toBeGreaterThan(56);
+	expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
 test('Scenario: A multi-line title shows on one line in the tree', async ({ page, request }, info) => {
 	await reset(request);
-	await seed(request, { notes: [{ title: 'Reise\n\nPlan' }] });
+	const { folders } = await seed(request, { folders: [{ name: 'Reisen' }], notes: [{ title: 'Reise\n\nPlan', folder: 0 }] });
 	await calm(page);
-	await open(page, '/');
-	const tree = await treeScope(page, info);
-
-	const link = tree.getByRole('link', { name: 'Reise Plan', exact: true });
-	await expect(link).toBeVisible();
-	await expect(link).toHaveAttribute('title', 'Reise Plan');
+	if (isDesktop(info)) {
+		await open(page, `/folders/${folders[0]}`);
+		const link = (await treeScope(page, info)).getByRole('link', { name: 'Reise Plan', exact: true });
+		await expect(link).toBeVisible();
+		await expect(link).toHaveAttribute('title', 'Reise Plan');
+	} else {
+		await open(page, `/folders/${folders[0]}`);
+		await expect(page.getByRole('main').locator('[data-note-title]')).toHaveText('Reise Plan');
+	}
 });

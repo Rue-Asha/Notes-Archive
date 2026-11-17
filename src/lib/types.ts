@@ -116,6 +116,8 @@ export interface SnippetPart {
 export interface SearchHit {
 	note: NoteCard;
 	parts: SnippetPart[];
+	// false when only the title or the tags matched: the parts then come from the title (or the tags), not the body
+	inBody: boolean;
 }
 
 export interface SearchQuery {

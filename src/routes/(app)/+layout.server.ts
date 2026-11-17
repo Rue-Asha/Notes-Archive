@@ -5,5 +5,6 @@ import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = ({ depends }) => {
 	depends('app:tree');
-	return { tree: getTree(getTreeSort()), tags: listTags() };
+	const treeSort = getTreeSort();
+	return { tree: getTree(treeSort), tags: listTags(), treeSort };
 };

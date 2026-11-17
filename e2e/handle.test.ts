@@ -64,13 +64,27 @@ test('The handle sits beside the cursor block on touch', async ({ page, request 
 	await editor(page).getByText('Zwei').click();
 
 	await expect(handle(page)).toBeVisible();
+	// the block's box holds the text and, at its end, the strip the handle sits in: the handle starts in that strip,
+	// past the text, level with the block's top
 	await expect
 		.poll(async () => {
 			const h = (await handle(page).boundingBox())!;
-			const p = (await editor(page).getByText('Zwei').boundingBox())!;
-			return Math.abs(h.y - p.y) < p.height && h.x >= p.x + p.width;
+			const block = await editor(page)
+				.getByText('Zwei')
+				.evaluate((el) => {
+					const box = el.getBoundingClientRect();
+					const range = document.createRange();
+					range.selectNodeContents(el);
+					return { top: box.top, right: box.right, strip: box.right - parseFloat(getComputedStyle(el).paddingInlineEnd), textEnd: range.getBoundingClientRect().right };
+				});
+			return {
+				level: Math.abs(h.y - block.top) <= 1,
+				inStrip: h.x >= block.strip && h.x < block.right,
+				pastText: h.x >= block.textEnd,
+				stripWide: block.right - block.strip >= 40
+			};
 		})
-		.toBe(true);
+		.toEqual({ level: true, inStrip: true, pastText: true, stripWide: true });
 });
 
 test('The handle shows beside a tapped divider and opens its block menu on touch', async ({ page, request }, info) => {

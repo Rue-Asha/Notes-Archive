@@ -13,7 +13,7 @@ test('Scenario: Pick, change and remove the note icon', async ({ page, request }
 	const steps: [opener: string, choice: string, stored: string | null][] = [
 		['Add icon', 'books', '📚'],
 		['Change icon', 'herb', '🌿'],
-		['Change icon', 'Remove', null]
+		['Change icon', 'Remove icon', null]
 	];
 	for (const [opener, choice, stored] of steps) {
 		await page.getByRole('button', { name: opener }).click();

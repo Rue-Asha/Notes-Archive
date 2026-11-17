@@ -3,81 +3,57 @@
 ## Purpose
 TBD - created by archiving change build-notes-archive. Update Purpose after archive.
 ## Requirements
-### Requirement: Card to note morph
-Opening a note from a note card SHALL morph the card into the note page header with a View Transition, and going back SHALL reverse it; under reduced motion there SHALL be no morph.
-
-#### Scenario: Note card morphs into the note page
-- **WHEN** a note card on a folder page is clicked
-- **THEN** `document.startViewTransition` is called and, during the transition, the old card and the new note header both carry `view-transition-name: note-<id>`
-- **proof:** e2e
-
-#### Scenario: Back from a note reverses the morph
-- **WHEN** the browser goes back from that note to the folder page
-- **THEN** a view transition runs with the note header and the card named `note-<id>`
-- **proof:** e2e
-
-#### Scenario: Reduced motion skips the morph
-- **WHEN** reduced motion is preferred and a note card is clicked
-- **THEN** no element carries a `note-<id>` view-transition name and the note opens
-- **proof:** e2e
-
-### Requirement: Page transitions
-Navigations that don't morph SHALL fade and slide through a View Transition; reduced motion SHALL shorten them to a fade of at most 120 ms; a browser without View Transitions SHALL navigate plainly.
-
-#### Scenario: Other navigations fade
-- **WHEN** Home → a tag page is navigated through the sidebar
-- **THEN** `document.startViewTransition` is called and no `note-<id>` name is set
-- **proof:** e2e
-
-#### Scenario: Reduced motion uses a short fade
-- **WHEN** reduced motion is preferred and Home → a tag page is navigated
-- **THEN** the root transition's animations last at most 120 ms and move nothing (opacity only)
-- **proof:** e2e
-
-#### Scenario: Browser without View Transitions navigates plainly
-- **WHEN** `document.startViewTransition` is removed before navigating
-- **THEN** the navigation completes with the new URL and content and no page error
-- **proof:** e2e
-
-### Requirement: Lists stagger in
-Card lists SHALL fade and rise in with a short stagger per card (capped), and under reduced motion SHALL appear at once.
-
-#### Scenario: Cards stagger in
-- **WHEN** a folder page with six notes opens
-- **THEN** every card ends with `data-revealed`, and the first card's stagger delay is smaller than the sixth card's
-- **proof:** e2e
-
-#### Scenario: Reduced motion shows lists at once
-- **WHEN** reduced motion is preferred and the same page opens
-- **THEN** every card is fully opaque with `data-revealed` on first paint and has no stagger delay
-- **proof:** e2e
-
-### Requirement: Glass hover glow
-Glass cards SHALL show a soft glow when hovered with a fine pointer, animating opacity only.
-
-#### Scenario: Glass cards glow on hover
-- **WHEN** a note card is hovered on desktop
-- **THEN** its glow layer's opacity rises above 0 while hovered and returns to 0 after the pointer leaves
-- **proof:** e2e
-
 ### Requirement: Quiet editor
-While typing in the editor nothing SHALL animate except menus opening (slash menu, bubble toolbar, block menu).
+While typing in the editor nothing SHALL animate, and the editor menus that typing or a selection opens (slash menu, bubble toolbar) SHALL open without animation; the block menu, opened from the drag handle, opens softly like every other menu (Requirement: Things the user makes move).
 
 #### Scenario: Typing in the editor runs no animations
 - **WHEN** a sentence is typed into a note body
 - **THEN** `document.getAnimations()` holds no animation whose target is inside the editor or the note page
 - **proof:** e2e
 
-#### Scenario: Editor menus open with a short animation
+#### Scenario: Editor menus open without animation
 - **WHEN** the slash menu opens with motion allowed
-- **THEN** the menu has a running opacity/transform animation of at most 160 ms, and under reduced motion it has none
+- **THEN** the menu has no running animation
 - **proof:** e2e
 
 ### Requirement: Motion on real devices
-The motion set SHALL feel smooth and calm on Rue's phone and desktop.
+The fingerprint motion set (press feedback, the gliding current pill, the pinned reorder) and the app's own motion (rows arriving, leaving and making room, menus and dialogs opening and closing) SHALL feel smooth and calm on Rue's phone and desktop; navigation and the command palette SHALL stay instant.
 
 #### Scenario: Motion feels smooth on real devices
-- **WHEN** Rue navigates Home → folder → note and back, opens the palette and menus on her phone and desktop
-- **THEN** the morph, fades, staggers and glows look smooth and nothing animates while she types
-- **proof:** manual (visual judgement on real hardware at Gate 2)
+- **WHEN** Rue navigates Home → folder → note and back, switches phone-bar sections, creates, renames, moves, pins and deletes notes and folders, reorders a pinned note, opens the palette, menus and dialogs on her phone and desktop
+- **THEN** presses, the pill, the reorder, arriving and leaving rows and opening menus and dialogs look smooth and short, navigation and the palette are instant, and nothing animates while she types
+- **proof:** manual (visual judgement on real hardware at Gate 7)
+
+### Requirement: Things the user makes move
+What the user makes happen SHALL move briefly, with only `transform` and `opacity`, timed by the fingerprint motion tokens (Rue, 2026-11-16): a row she creates in the tree, a folder list, a folder's notes, the Home lists or a tag page SHALL settle in (opacity and a 6 px drop with a scale from 0.98, `--motion-glide`, `--ease-out`), including the first row that replaces an empty state; a removed row SHALL fade and shrink a touch in `--motion-quick`; the rows that stay SHALL glide to their new place when one is added, removed, renamed into another position, moved or pinned (`--motion-glide`, `--ease-in-out`). Menus and popovers (note, card, folder, block and sort menus) SHALL open with a fade and a scale from 0.97 out of their trigger's side in `--motion-quick` (160 ms) and close in three quarters of that; dialogs and sheets SHALL fade and rise (a bottom sheet from its edge, a centred dialog by a few pixels and from 0.97) in 160–260 ms. Pressed rows SHALL darken and pressed pills scale (`data-press`). Navigation, a folder opened by its chevron, the command palette, the slash menu and the bubble toolbar SHALL stay instant, and under `prefers-reduced-motion` all of this SHALL be instant.
+
+#### Scenario: A new folder arrives in the tree and its neighbours make room
+- **WHEN** "New folder" is pressed in the sidebar next to folders "Beta" and "Gamma", and the new folder is named "Alpha"
+- **THEN** the new tree row animates in with opacity and transform only, in at most 300 ms, and once "Alpha" sorts first, "Beta" and "Gamma" glide to their new place
+- **proof:** e2e
+
+#### Scenario: The first folder arrives on an empty Folders page
+- **WHEN** the first folder is created from the empty Folders page on the phone
+- **THEN** its row animates in with opacity and transform only
+- **proof:** e2e
+
+#### Scenario: Unpinning a note on Home lets it go and the rest make room
+- **WHEN** one of three pinned notes is unpinned from its card menu on Home
+- **THEN** the Pinned list rows animate with opacity and transform only while it leaves and the rest close the gap
+- **proof:** e2e
+
+#### Scenario: Menus and dialogs open and close softly
+- **WHEN** the note menu opens and closes, then the delete dialog opens
+- **THEN** the menu opens with one opacity-and-transform animation of 150–200 ms and closes with one no longer than that, and the dialog transitions opacity and transform in 150–300 ms and, as a confirmation, closes in at most 160 ms
+- **proof:** e2e
+
+#### Scenario: Navigation stays instant
+- **WHEN** one folder page links to another in-app
+- **THEN** no list row animates
+- **proof:** e2e
+
+#### Scenario: Reduced motion makes all of it instant
+- **WHEN** the browser reports `prefers-reduced-motion: reduce`, a folder is created and renamed and the delete dialog is opened
+- **THEN** no element animation runs and the dialog has no transition
+- **proof:** e2e
 

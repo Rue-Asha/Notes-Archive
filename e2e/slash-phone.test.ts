@@ -34,41 +34,26 @@ test('Scenario: Slash menu stays within the visible viewport on phone', async ({
 		.toBe(true);
 });
 
-for (const motion of ['allowed', 'reduced'] as const) {
-	test(`Scenario: Editor menus open with a short animation (${motion})`, async ({ page, request }) => {
-		await reset(request);
-		const { notes } = await seed(request, { notes: [{ title: 'Bewegung', body: '' }] });
-		if (motion === 'reduced') await calm(page);
-		await open(page, `/notes/${notes[0]}`);
-		// the 140 ms intro is over before a poll could see it, so record what the menu asks the browser to run
-		await page.evaluate(() => {
-			const seen: { role: string | null; duration: number; props: string[] }[] = [];
-			(window as unknown as { __animations: typeof seen }).__animations = seen;
-			const animate = Element.prototype.animate;
-			Element.prototype.animate = function (this: Element, keyframes, options) {
-				const frames = keyframes as Keyframe[];
-				seen.push({
-					role: this.getAttribute('role'),
-					duration: typeof options === 'number' ? options : Number(options?.duration ?? 0),
-					props: Object.keys(frames[0] ?? {})
-				});
-				return animate.call(this, keyframes, options);
-			};
-		});
-
-		await editor(page).click();
-		await page.keyboard.type('/');
-		await expect(menu(page)).toBeVisible();
-
-		const seen = await page.evaluate(
-			() => (window as unknown as { __animations: { role: string | null; duration: number; props: string[] }[] }).__animations
-		);
-		const ran = seen.filter((a) => a.role === 'listbox' && a.duration > 0);
-		if (motion === 'reduced') expect(ran).toEqual([]);
-		else {
-			expect(ran.length).toBeGreaterThan(0);
-			expect(ran.every((a) => a.duration <= 160)).toBe(true);
-			expect(ran.some((a) => a.props.includes('opacity') && a.props.includes('transform'))).toBe(true);
-		}
+test('Scenario: Editor menus open without animation', async ({ page, request }) => {
+	await reset(request);
+	const { notes } = await seed(request, { notes: [{ title: 'Bewegung', body: '' }] });
+	await open(page, `/notes/${notes[0]}`);
+	// an intro would be over before a poll could see it, so record what the menu asks the browser to run
+	await page.evaluate(() => {
+		const seen: (string | null)[] = [];
+		(window as unknown as { __animated: typeof seen }).__animated = seen;
+		const animate = Element.prototype.animate;
+		Element.prototype.animate = function (this: Element, keyframes, options) {
+			seen.push(this.getAttribute('role'));
+			return animate.call(this, keyframes, options);
+		};
 	});
-}
+
+	await editor(page).click();
+	await page.keyboard.type('/');
+	await expect(menu(page)).toBeVisible();
+
+	expect(await menu(page).evaluate((el) => el.getAnimations({ subtree: true }).length)).toBe(0);
+	const seen = await page.evaluate(() => (window as unknown as { __animated: (string | null)[] }).__animated);
+	expect(seen.filter((role) => role === 'listbox')).toEqual([]);
+});

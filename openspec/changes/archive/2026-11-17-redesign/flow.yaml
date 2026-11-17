@@ -1,0 +1,24 @@
+track: feature
+triage: 'feature — from-scratch UI redesign of Notes Archive on fingerprint 1.0.0 (ecosystem-ui-revamp gates 3–8). Appetite: several sessions, in phases.'
+base: main
+gate0: 2026-11-14
+gate1: 2026-11-14
+gate2: '2026-11-17'
+learnings:
+  - "check-slop has no baseline/exclude option, so proof can't be green right after a first sync onto an existing UI (103 violations in Notes); an app-owned baseline filter bridged it (planner, redesign)"
+  - "sync.sh adds app.html icon links and the manifest only on the first sync, which runs before the icon exists; the icon unit adds them by hand (planner, redesign)"
+  - "check-slop flags comma-joined token lists (box-shadow: var(--a), var(--b)) as shadow-raw — false positive (planner, redesign)"
+  - "flow-unit start on a resumed wave needs the unit name as the annotation spells it (U2, not 2); a bare number silently created duplicate empty worktrees beside the interrupted ones (orchestrator, redesign wave 2)"
+  - "wireframe builders U2 and U3 bundled all four tasks into one commit; a resume brief should repeat one commit per task (builders, redesign wave 2)"
+  - "a wire screen class named .stage collides with the vendored layout.css .stage::after veil and washes out the shots; avoid .stage/.stage-photo in app code (U3, redesign wave 2)"
+  - "Playwright MCP has no Chrome on this machine; builders shoot with the repo's playwright chromium and need NOTES_ARCHIVE_TEST=1 on the dev server (U3, U4, redesign wave 2)"
+  - "parallel hi-fi units never see the unit that owns the shared Frame; plan an integration step (or put the Frame unit in an earlier wave) before the gate review (orchestrator, redesign wave 4)"
+  - "flock plus a nested `( ... ) &` inside one background shell call dies with the call; run flock as the foreground command of a background job (U8, redesign wave 4)"
+  - "e2e-decoupling builders deleted tests that openspec specs still name as proof; the brief must say: rg every `proof:` line in openspec/specs and keep or migrate each named test (orchestrator, ecosystem 3.1/3.2)"
+  - "flow-unit assigns ports per repo only; parallel units in several repos collide (4701..) — the orchestrator assigns repo-specific port ranges in the brief (orchestrator, ecosystem 2.7)"
+  - "a shipper subagent's `git push origin v<ver>` is denied by the auto-mode classifier even with Gate 2 consent; the orchestrator pushes the tag after the merge, or Rue allows `git push origin v*` (orchestrator, ecosystem 2.7/3.1)"
+  - "three fresh-context design reviews were needed at Gate 5: the parallel hi-fi units never saw the Frame owner and drifted to Notion/Raycast looks; brief hi-fi builders with the family moves per surface up front (orchestrator, redesign gate 5)"
+  - "gate-7 polish passes in three apps each read Rue's 'chrome text must not select' differently (controls only vs headings too); state the family rule verbatim in every app's brief (orchestrator, redesign gate 7)"
+  - "Playwright's webServer serves the existing `node build` without rebuilding; run `npm run build` before targeted e2e, or a 'fails without the fix' check runs against a stale build (fixer, redesign gate 7)"
+  - "locator.click() on a sticky dock scrolls the page itself; scroll-position regressions must tap coordinates (touchscreen.tap), or they measure Playwright, not the app (fixer + design pass, redesign gate 7)"
+  - "a session restart wiped the scratchpad (before shots, scripts, scratch worktrees); keep contact-sheet scripts in a durable path or regenerate them from a committed script (polish passes, redesign gate 7)"

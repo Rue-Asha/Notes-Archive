@@ -8,10 +8,10 @@
 
 <style>
 	mark {
-		padding: 0 2px;
-		border-radius: 4px;
+		padding-inline: var(--space-0-5);
+		border-radius: var(--radius-text);
 		background: var(--accent-soft);
 		color: var(--ink);
-		font-weight: 600;
+		font-weight: var(--weight-semibold);
 	}
 </style>

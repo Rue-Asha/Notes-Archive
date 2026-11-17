@@ -5,6 +5,12 @@ import { jpeg, pasteFiles, pasteText } from './media-helpers.ts';
 
 const menu = (page: Page) => page.getByRole('listbox', { name: 'Blocks' });
 const props = (page: Page) => page.getByRole('group', { name: 'Properties' });
+
+// the phone folds the properties into one line
+async function expandProps(page: Page) {
+	const summary = page.getByRole('group', { name: 'Properties' }).getByRole('button', { name: /^Properties/ });
+	if (await summary.count()) await summary.click();
+}
 const palette = (page: Page) => page.getByRole('dialog', { name: 'Search' });
 
 const paragraph = (text?: string): JSONContent => (text ? { type: 'paragraph', content: [{ type: 'text', text }] } : { type: 'paragraph' });
@@ -20,10 +26,10 @@ async function slash(page: Page, name: string) {
 	await expect(menu(page)).toBeHidden();
 }
 
-// the new-note button on Home; the bottom bar's copy is inert while the editor has focus on phone
+// the welcome state's new-note button on an empty archive; the bottom bar's copy is inert while the editor has focus on phone
 async function startNote(page: Page) {
 	await open(page, '/');
-	await page.getByRole('region', { name: /Every note/ }).getByRole('button', { name: 'New note' }).click();
+	await page.getByRole('main').getByRole('button', { name: 'New note' }).click();
 	await page.waitForURL(/\/notes\/\d+$/);
 	await expect(page.getByRole('textbox', { name: 'Title' })).toBeFocused();
 	// Enter in the title only reaches the body once the editor has mounted
@@ -33,7 +39,7 @@ async function startNote(page: Page) {
 
 // the editor takes focus a tick after Enter, and keys typed in between would land in the title
 async function enterBody(page: Page) {
-	await page.keyboard.press('Enter');
+	await page.keyboard.press('ControlOrMeta+Enter');
 	await expect(editor(page)).toBeFocused();
 }
 
@@ -166,6 +172,7 @@ test('Done: file the note in a nested folder, tag it and pin it', async ({ page,
 	const saves = watchSaves(page);
 	await open(page, `/notes/${notes[0]}`);
 
+	await expandProps(page);
 	await props(page).getByRole('button', { name: 'Folder' }).click();
 	await page.getByRole('dialog', { name: 'Choose a folder' }).getByRole('option', { name: 'Japan' }).click();
 	await expect(props(page).getByRole('button', { name: 'Folder' })).toContainText('Japan');
@@ -215,21 +222,22 @@ test('Done: delete the note and a folder, each after a confirmation', async ({ p
 
 	await page.getByRole('button', { name: 'Note menu' }).click();
 	await page.getByRole('menuitem', { name: 'Delete' }).click();
-	const dialog = page.getByRole('dialog', { name: /Delete/ });
+	const dialog = page.getByRole('alertdialog', { name: /Delete/ });
 	await dialog.getByRole('button', { name: 'Cancel' }).click();
 	expect(await storedNote(request, notes[0])).not.toBeNull();
 	await page.getByRole('button', { name: 'Note menu' }).click();
 	await page.getByRole('menuitem', { name: 'Delete' }).click();
-	await expect(dialog).toContainText("Delete “Packliste”? This can't be undone.");
+	await expect(dialog.getByRole('heading', { name: 'Delete “Packliste”?' })).toBeVisible();
+	await expect(dialog.getByText("This can't be undone.", { exact: true })).toBeVisible();
 	await dialog.getByRole('button', { name: 'Delete' }).click();
 	await expect.poll(() => storedNote(request, notes[0])).toBeNull();
 	await page.waitForURL(/\/folders\/\d+$/);
 
-	if (info.project.name === 'phone') await page.getByRole('navigation', { name: 'Bottom bar' }).getByRole('button', { name: 'Folders' }).click();
-	const tree = info.project.name === 'phone' ? page.getByRole('dialog', { name: 'Folders' }) : page.getByRole('navigation', { name: 'Sidebar' });
-	await tree.getByRole('button', { name: 'Reisen menu' }).click();
+	// the note's folder page is open: the phone deletes the folder from its menu, desktop from the sidebar tree
+	if (info.project.name === 'phone') await page.getByRole('main').getByRole('button', { name: 'Folder menu' }).click();
+	else await page.getByRole('navigation', { name: 'Sidebar' }).getByRole('button', { name: 'Reisen menu' }).click();
 	await page.getByRole('menuitem', { name: 'Delete' }).click();
-	const folderDialog = page.getByRole('dialog', { name: 'Delete folder' });
+	const folderDialog = page.getByRole('alertdialog', { name: /^Delete “/ });
 	await expect(folderDialog).toContainText('This deletes 1 folder and 1 note inside it');
 	await folderDialog.getByRole('button', { name: 'Delete' }).click();
 
@@ -252,6 +260,7 @@ test('Done: reloading shows everything exactly as left', async ({ page, request 
 	await page.keyboard.press('Enter');
 	await slash(page, 'Callout');
 	await page.keyboard.type('Tickets im Rucksack');
+	await expandProps(page);
 	await props(page).getByRole('button', { name: 'Folder' }).click();
 	await page.getByRole('dialog', { name: 'Choose a folder' }).getByRole('option', { name: 'Japan' }).click();
 	const tags = props(page).getByRole('combobox', { name: 'Add a tag' });
@@ -267,6 +276,7 @@ test('Done: reloading shows everything exactly as left', async ({ page, request 
 	await expect(editor(page).getByRole('heading', { level: 1 })).toHaveText('Ankunft');
 	await expect(editor(page)).toContainText('Der Zug kam pünktlich.');
 	await expect(editor(page).getByRole('note').first()).toContainText('Tickets im Rucksack');
+	await expandProps(page);
 	await expect(props(page).getByRole('button', { name: 'Folder' })).toContainText('Japan');
 	await expect(props(page).getByRole('button', { name: /^Remove / })).toHaveCount(1);
 	await expect(props(page).getByRole('button', { name: 'Remove Herbst' })).toBeVisible();

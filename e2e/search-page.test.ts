@@ -83,3 +83,25 @@ test('Scenario: Search page with only filters lists matching notes', async ({ pa
 	await expect(field(page)).toHaveValue('');
 	await expect(titles(page)).toHaveText(['Packliste', 'Garten in Kyoto', 'Gartenreise Wien']);
 });
+
+test('Scenario: Search results are numbered rows with folder and date', async ({ page, request }) => {
+	await reset(request);
+	await seed(request, {
+		folders: [{ name: 'Reisen' }],
+		notes: [
+			{ title: 'Kyoto', body: 'Tempel', folder: 0, tags: ['eins', 'zwei', 'drei', 'vier', 'fünf'], updatedAt: '2025-03-03T10:00:00.000Z' },
+			{ title: 'Kyoto Reste', body: 'Mehr', updatedAt: '2025-02-01T10:00:00.000Z' }
+		]
+	});
+	await calm(page);
+	await open(page, '/search?q=kyoto');
+
+	await expect(cards(page)).toHaveCount(2);
+	await expect(page.locator('[data-search-results] .pos')).toHaveText(['01', '02']);
+	await expect(cards(page).locator('[data-card-icon]')).toHaveCount(0);
+	const row = cards(page).filter({ hasText: 'Reisen' });
+	await expect(row.locator('[data-card-folder] svg')).toHaveCount(1);
+	await expect(row.locator('[data-card-folder]')).toHaveText('Reisen');
+	await expect(row.locator('[data-card-tag], [data-card-more-tags]')).toHaveText(['eins', 'zwei', 'drei', '+2']);
+	await expect(row.locator('[data-card-time]')).toHaveText('Mon 3 Mar 2025');
+});

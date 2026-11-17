@@ -8,7 +8,7 @@ const focusable = 'a[href], button:not(:disabled), input:not(:disabled), select:
 
 export function trapTab(event: KeyboardEvent, root: HTMLElement): void {
 	if (event.key !== 'Tab') return;
-	const items = [...root.querySelectorAll<HTMLElement>(focusable)];
+	const items = [...root.querySelectorAll<HTMLElement>(focusable)].filter((el) => el.tabIndex >= 0);
 	if (!items.length) {
 		event.preventDefault();
 		return;

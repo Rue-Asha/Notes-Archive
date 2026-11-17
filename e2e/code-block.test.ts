@@ -24,3 +24,15 @@ test('Scenario: Code block highlights syntax and switches language', async ({ pa
 	expect(node.attrs?.language).toBe('typescript');
 	expect(node.content![0].text).toBe('const a = 1');
 });
+
+test('Regression: the language picker does not make iOS zoom on touch', async ({ page, request }, info) => {
+	await reset(request);
+	const { notes } = await seed(request, {
+		notes: [{ title: 'Quelltext', content: { type: 'doc', content: [{ type: 'codeBlock', attrs: { language: null }, content: [{ type: 'text', text: 'x' }] }] } }]
+	});
+	await calm(page);
+	await open(page, `/notes/${notes[0]}`);
+	const size = await editor(page).getByRole('combobox', { name: 'Language' }).evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+	if (info.project.name === 'phone') expect(size).toBeGreaterThanOrEqual(16);
+	else expect(size).toBeLessThan(16);
+});

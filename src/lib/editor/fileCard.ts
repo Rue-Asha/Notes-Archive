@@ -59,7 +59,7 @@ export const FileCard = Node.create({
 			text.className = 'file-text';
 			const name = document.createElement('strong');
 			const size = document.createElement('small');
-			size.className = 'tnum';
+			size.className = 'figures';
 			text.append(name, size);
 			const arrow = document.createElement('span');
 			arrow.className = 'file-open';

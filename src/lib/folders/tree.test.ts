@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Tree, TreeFolder } from '#lib/types.ts';
-import { ancestorsOf, indentLevel } from './tree.ts';
+import { ancestorsOf, indentLevel, noteTotal } from './tree.ts';
 
 const folder = (id: number, children: TreeFolder[] = [], noteIds: number[] = []): TreeFolder => ({
 	id,
@@ -35,5 +35,11 @@ describe('ancestorsOf', () => {
 	it('is empty for root notes and unknown ids', () => {
 		expect(ancestorsOf(tree, { note: 99 })).toEqual([]);
 		expect(ancestorsOf(tree, { folder: 404 })).toEqual([]);
+	});
+});
+
+describe('noteTotal', () => {
+	it('counts the notes of a folder and everything below it', () => {
+		expect(tree.folders.map(noteTotal)).toEqual([2, 0]);
 	});
 });

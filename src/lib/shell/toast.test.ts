@@ -95,6 +95,50 @@ describe('toaster', () => {
 		expect(storage.data.size).toBe(0);
 	});
 
+	it('parks a showing toast on unload so the next page shows it for the time it had left', () => {
+		const storage = fakeStorage();
+		const before = createToaster(storage);
+		before.attach();
+		before.toast("Couldn't upload — try again", 'error');
+		vi.advanceTimersByTime(1000);
+		before.park();
+		expect(texts(before)).toEqual([]);
+		expect(storage.data.has(STORAGE_KEY)).toBe(true);
+
+		const afterReload = createToaster(storage);
+		afterReload.attach();
+		expect(get(afterReload.toasts).map((i) => [i.message, i.tone])).toEqual([["Couldn't upload — try again", 'error']]);
+		vi.advanceTimersByTime(TOAST_MS - 1001);
+		expect(texts(afterReload)).toEqual(["Couldn't upload — try again"]);
+		vi.advanceTimersByTime(1);
+		expect(texts(afterReload)).toEqual([]);
+	});
+
+	it('drops a parked toast whose time ran out before the next page attached', () => {
+		const storage = fakeStorage();
+		const before = createToaster(storage);
+		before.attach();
+		before.toast('Saved');
+		before.park();
+		vi.advanceTimersByTime(TOAST_MS);
+
+		const afterReload = createToaster(storage);
+		afterReload.attach();
+		expect(texts(afterReload)).toEqual([]);
+		expect(storage.data.size).toBe(0);
+	});
+
+	it('parks nothing once the toasts are gone', () => {
+		const storage = fakeStorage();
+		const t = createToaster(storage);
+		t.attach();
+		t.toast('Saved');
+		t.dismiss(get(t.toasts)[0].id);
+		t.park();
+
+		expect(storage.data.size).toBe(0);
+	});
+
 	it('queues again after the host detaches', () => {
 		const t = createToaster(null);
 		const detach = t.attach();

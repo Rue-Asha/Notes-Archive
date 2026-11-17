@@ -8,21 +8,27 @@ export type ToastTone = 'info' | 'error';
 interface Queued {
 	message: string;
 	tone: ToastTone;
+	// set on a toast parked by a page unload: it shows only for the time it had left
+	until?: number;
 }
 
-export interface ToastItem extends Queued {
+export interface ToastItem {
 	id: number;
+	message: string;
+	tone: ToastTone;
 }
 
 type Store = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 // A message waits in the queue (sessionStorage when there is one) until a host is mounted, so one raised just
-// before a redirect, even a full page load, shows on the page the redirect lands on.
+// before a redirect, even a full page load, shows on the page the redirect lands on. A toast already showing when the
+// page unloads is parked back in the queue with the time it had left.
 export function createToaster(storage: Store | null, ms = TOAST_MS) {
 	const toasts = writable<ToastItem[]>([]);
 	let waiting: Queued[] = [];
 	let hosts = 0;
 	let next = 0;
+	const showing = new Map<number, Queued & { until: number }>();
 
 	const read = (): Queued[] => (storage ? JSON.parse(storage.getItem(STORAGE_KEY) ?? '[]') : waiting);
 	function write(list: Queued[]) {
@@ -32,6 +38,7 @@ export function createToaster(storage: Store | null, ms = TOAST_MS) {
 	}
 
 	function dismiss(id: number) {
+		showing.delete(id);
 		toasts.update((list) => list.filter((t) => t.id !== id));
 	}
 
@@ -39,10 +46,13 @@ export function createToaster(storage: Store | null, ms = TOAST_MS) {
 		const queued = read();
 		if (!queued.length) return;
 		write([]);
-		for (const item of queued) {
+		const now = Date.now();
+		for (const { message, tone, until = now + ms } of queued) {
+			if (until <= now) continue;
 			const id = ++next;
-			toasts.update((list) => [...list, { id, ...item }]);
-			setTimeout(() => dismiss(id), ms);
+			showing.set(id, { message, tone, until });
+			toasts.update((list) => [...list, { id, message, tone }]);
+			setTimeout(() => dismiss(id), until - now);
 		}
 	}
 
@@ -51,13 +61,29 @@ export function createToaster(storage: Store | null, ms = TOAST_MS) {
 		if (hosts) flush();
 	}
 
+	function park() {
+		if (!showing.size) return;
+		write([...read(), ...showing.values()]);
+		showing.clear();
+		toasts.set([]);
+	}
+
 	function attach(): () => void {
 		hosts++;
 		flush();
 		return () => void hosts--;
 	}
 
-	return { toasts: { subscribe: toasts.subscribe }, toast, flush, dismiss, attach };
+	return { toasts: { subscribe: toasts.subscribe }, toast, flush, dismiss, attach, park };
 }
 
-export const { toasts, toast, flush, dismiss, attach } = createToaster(typeof window === 'undefined' ? null : sessionStorage);
+// reading sessionStorage throws a SecurityError when the browser blocks site data; the queue then lives in memory
+function session(): Store | null {
+	try {
+		return typeof window === 'undefined' ? null : window.sessionStorage;
+	} catch {
+		return null;
+	}
+}
+
+export const { toasts, toast, flush, dismiss, attach, park } = createToaster(session());

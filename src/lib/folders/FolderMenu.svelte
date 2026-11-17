@@ -20,7 +20,7 @@
 		{ label: COPY.newNote, icon: 'plus', onselect: onnewnote },
 		{ label: COPY.newFolder, icon: 'folder', onselect: onnewfolder },
 		{ label: 'Rename', icon: 'file', onselect: onrename },
-		{ label: 'Move to…', icon: 'move', onselect: onmove },
+		{ label: 'Move to…', icon: 'folder', onselect: onmove },
 		{ label: 'Delete', icon: 'trash', danger: true, onselect: ondelete }
 	]);
 </script>
