@@ -272,6 +272,11 @@
 		white-space: nowrap;
 	}
 
+	/* a tag's own width must not count toward the list's min-content, or one long word keeps the list (and the card's meta line) from shrinking */
+	.tag:not(.more) {
+		contain: inline-size;
+	}
+
 	.tag.more {
 		flex: none;
 		min-inline-size: 0;
@@ -287,6 +292,7 @@
 	}
 
 	.long .tag {
+		contain: none;
 		min-inline-size: 0;
 		max-inline-size: 100%;
 		overflow-wrap: anywhere;

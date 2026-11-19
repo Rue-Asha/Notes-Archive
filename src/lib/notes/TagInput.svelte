@@ -72,6 +72,8 @@
 			placeholder="Add a tag"
 			autocomplete="off"
 			autocapitalize="off"
+			autocorrect="off"
+			spellcheck="false"
 			enterkeyhint="done"
 		/>
 	</label>
@@ -194,7 +196,7 @@
 		border: 0;
 		border-radius: var(--radius-pill);
 		background: var(--surface-raised);
-		box-shadow: var(--ring-control);
+		box-shadow: var(--ring-hairline);
 		color: var(--ink);
 		/* 16px: iOS zooms the page into anything smaller */
 		font: inherit;

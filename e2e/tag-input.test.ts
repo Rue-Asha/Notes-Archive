@@ -116,3 +116,21 @@ test('Scenario: Whitespace-only and duplicate tags are ignored in the input', as
 	await input.press('Enter');
 	await expectChips(page, ['Reise']);
 });
+
+test('Scenario: The tag field has the hairline border of the chips beside it', async ({ page, request }) => {
+	await reset(request);
+	const { notes } = await seed(request, { notes: [{ title: 'Trip', body: 'x', tags: ['Reise'] }] });
+	await calm(page);
+	await open(page, `/notes/${notes[0]}`);
+	await expand(page);
+
+	const shadow = await page.getByRole('combobox', { name: 'Add a tag' }).evaluate((el) => {
+		const probe = document.createElement('div');
+		probe.style.boxShadow = 'var(--ring-hairline)';
+		document.body.append(probe);
+		const hairline = getComputedStyle(probe).boxShadow;
+		probe.remove();
+		return { own: getComputedStyle(el).boxShadow, hairline };
+	});
+	expect(shadow.own).toBe(shadow.hairline);
+});

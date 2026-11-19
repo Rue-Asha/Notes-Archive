@@ -41,6 +41,8 @@ export const COPY = {
 	searchHint: 'Search notes',
 	foldSidebar: 'Fold sidebar',
 	unfoldSidebar: 'Unfold sidebar',
+	expandAll: 'Expand all folders',
+	collapseAll: 'Collapse all folders',
 	sortMenu: 'Sort folders',
 	sortLabel: { mixed: 'Default', name: 'Name', edited: 'Last edited', created: 'Created' } satisfies Record<TreeSort, string>,
 	sortHint: {

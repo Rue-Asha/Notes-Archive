@@ -171,6 +171,35 @@ test('Scenario: A failed search clears the hits and says so', async ({ page, req
 	await page.waitForURL((url) => url.pathname === '/search' && url.searchParams.get('q') === 'betax');
 });
 
+test('Regression: Typing back to an answered term after a failure does not claim there are no matches', async ({ page, request }) => {
+	await reset(request);
+	await seed(request, { notes: [{ title: 'Beta', body: 'Zweiter' }] });
+	await calm(page);
+	await open(page, '/');
+	await page.route(searchFor('betax'), (route) => route.abort());
+	await page.keyboard.press('ControlOrMeta+k');
+	await input(page).fill('beta');
+	const notesGroup = palette(page).getByRole('group', { name: 'Notes' });
+	await expect(notesGroup.getByRole('option')).toHaveCount(1);
+	await input(page).fill('betax');
+	await expect(palette(page).getByRole('status').filter({ hasText: "Couldn't load — try again" })).toBeVisible();
+
+	// "beta" was answered before the failure, but its hits are gone: until it answers again the list is not "No notes match"
+	let release!: () => void;
+	const held = new Promise<void>((resolve) => (release = resolve));
+	await page.route(searchFor('beta'), async (route) => {
+		await held;
+		await route.continue();
+	});
+	const asked = page.waitForRequest((req) => searchFor('beta')(new URL(req.url())));
+	await input(page).fill('beta');
+	await asked;
+	await expect(palette(page).getByText('No notes match')).toHaveCount(0);
+	await expect(notesGroup).toHaveCount(0);
+	release();
+	await expect(notesGroup.getByRole('option')).toHaveCount(1);
+});
+
 test('Regression: See all results runs while the answer is pending', async ({ page, request }) => {
 	await reset(request);
 	await seed(request, { notes: [{ title: 'Beta', body: 'Zweiter' }] });

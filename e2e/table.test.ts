@@ -73,3 +73,31 @@ test('Scenario: Wide table scrolls inside its block on phone', async ({ page, re
 	const page$ = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
 	expect(page$.scroll).toBeLessThanOrEqual(page$.client);
 });
+
+test('Scenario: Table cells are told apart by hairlines and a shaded header row', async ({ page, request }) => {
+	await reset(request);
+	const content: JSONContent = { type: 'doc', content: [table(3, 3, (r, c) => `Zelle ${r}-${c}`), { type: 'paragraph' }] };
+	const { notes } = await seed(request, { notes: [{ title: 'Linien', content }] });
+	await calm(page);
+	await open(page, `/notes/${notes[0]}`);
+
+	const style = (selector: string) =>
+		editor(page).locator(selector).first().evaluate((el) => {
+			const cs = getComputedStyle(el);
+			const side = (s: 'Top' | 'Right' | 'Bottom' | 'Left') => ({ width: parseFloat(cs[`border${s}Width`]), color: cs[`border${s}Color`] });
+			return { top: side('Top'), right: side('Right'), bottom: side('Bottom'), left: side('Left'), background: cs.backgroundColor, weight: cs.fontWeight };
+		});
+	const th = await style('th');
+	const td = await style('td');
+
+	for (const cell of [th, td]) {
+		for (const side of [cell.top, cell.right, cell.bottom, cell.left]) {
+			expect(side.width).toBeGreaterThan(0);
+			expect(side.width).toBeLessThanOrEqual(1);
+			expect(side.color).not.toBe('rgba(0, 0, 0, 0)');
+		}
+	}
+	expect(th.background).not.toBe(td.background);
+	expect(th.background).not.toBe('rgba(0, 0, 0, 0)');
+	expect(Number(th.weight)).toBeGreaterThan(Number(td.weight));
+});

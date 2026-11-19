@@ -44,7 +44,7 @@
 	}
 </script>
 
-<input class="rename" class:focus={focused} type="text" aria-label="Folder name" autocomplete="off" bind:value={draft} onkeydown={key} onblur={commit} use:pick />
+<input class="rename" class:focus={focused} type="text" aria-label="Folder name" autocomplete="off" autocorrect="off" spellcheck="false" bind:value={draft} onkeydown={key} onblur={commit} use:pick />
 
 <style>
 	.rename {

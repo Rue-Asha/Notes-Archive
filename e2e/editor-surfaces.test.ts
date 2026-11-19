@@ -108,3 +108,22 @@ test('Regression: Enter right after End splits at the caret', async ({ page, req
 		await expect(editor(page).locator('h2, p')).toHaveText(['Ankunft', `Eins. ${text}`, 'Q', `Zwei. ${text}`]);
 	}
 });
+
+test('Regression: Floating editor menus are solid, so the text beside them never shows through', async ({ page, request }) => {
+	const cell = (type: string, text: string): JSONContent => ({ type, content: [paragraph(text)] });
+	const table: JSONContent = { type: 'table', content: [{ type: 'tableRow', content: [cell('tableHeader', 'A'), cell('tableHeader', 'B')] }, { type: 'tableRow', content: [cell('tableCell', 'C'), cell('tableCell', 'D')] }] };
+	await openDoc(page, request, { type: 'doc', content: [paragraph('Wir kaufen Käse und Wein. '.repeat(8)), table, paragraph('')] });
+
+	const alpha = (locator: ReturnType<Page['locator']>) => locator.evaluate((el) => getComputedStyle(el).backgroundColor);
+	const solid = (color: string) => expect(color).toMatch(/^rgb\(/);
+
+	await editor(page).getByRole('cell').first().click();
+	solid(await alpha(page.getByRole('toolbar', { name: 'Table' })));
+
+	await editor(page).getByRole('paragraph').first().dblclick({ position: { x: 20, y: 8 } });
+	solid(await alpha(page.getByRole('toolbar', { name: 'Format' })));
+
+	await editor(page).getByRole('paragraph').last().click();
+	await page.keyboard.type('/');
+	solid(await alpha(page.getByRole('listbox', { name: 'Blocks' })));
+});

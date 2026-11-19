@@ -443,12 +443,13 @@
 .prose td {
 	min-inline-size: 128px;
 	padding: var(--space-2) var(--space-3);
-	box-shadow: var(--rule-below);
+	border: var(--stroke-hairline) solid var(--hairline);
 	text-align: start;
 	vertical-align: top;
 }
 
 .prose th {
+	background: var(--surface-sunken);
 	font-weight: var(--weight-semibold);
 }
 

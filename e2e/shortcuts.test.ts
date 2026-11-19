@@ -118,7 +118,7 @@ test('Scenario: Note column is capped and centred on wide screens', async ({ pag
 	await open(page, `/notes/${notes[0]}`);
 
 	const box = (await page.locator('[data-editor-root]').boundingBox())!;
-	// from 1100 px the cap is 1.25 × --measure (in the body's own font) plus the card's inline padding
+	// from 1100 px the cap is 1.5 × --measure (in the body's own font) plus the card's inline padding
 	const { measure, padding } = await page.evaluate(() => {
 		const root = document.querySelector<HTMLElement>('[data-editor-root]')!;
 		const probe = document.createElement('div');
@@ -129,8 +129,19 @@ test('Scenario: Note column is capped and centred on wide screens', async ({ pag
 		const card = getComputedStyle(root.closest('[data-note-column]')!);
 		return { measure, padding: parseFloat(card.paddingLeft) + parseFloat(card.paddingRight) };
 	});
-	expect(box.width).toBeLessThanOrEqual(measure * 1.25 + padding);
-	expect(box.width).toBeGreaterThan(measure * 1.25 * 0.9);
+	expect(box.width).toBeLessThanOrEqual(measure * 1.5 + padding);
+	// the sidebar's room is the frame's, so the column takes all of it; folding the sidebar hands the column more, up to the cap
+	const area = () => page.getByRole('main').evaluate((el) => {
+		const cs = getComputedStyle(el);
+		return el.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+	});
+	const column = () => page.locator('[data-note-column]').evaluate((el) => el.getBoundingClientRect().width);
+	expect(await column()).toBeGreaterThanOrEqual((await area()) * 0.95);
+	await page.getByRole('button', { name: 'Fold sidebar' }).click();
+	await expect.poll(column).toBeGreaterThan(measure * 1.25 + padding);
+	expect(await column()).toBeLessThanOrEqual(measure * 1.5 + padding + 1);
+	await page.getByRole('button', { name: 'Unfold sidebar' }).click();
+	await expect.poll(async () => Math.abs((await column()) - (await area()))).toBeLessThanOrEqual(2);
 
 	// centred in the content area: the page column right of the sidebar, inside the frame
 	const { left, right } = await page.getByRole('main').evaluate((el) => {

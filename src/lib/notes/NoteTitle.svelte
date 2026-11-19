@@ -73,7 +73,8 @@
 		rows="1"
 		aria-label="Title"
 		placeholder={COPY.untitled}
-		spellcheck="true"
+		spellcheck="false"
+		{...{ autocorrect: 'off' }}
 		oninput={input}
 		onkeydown={keydown}
 		onfocus={() => (focused = true)}

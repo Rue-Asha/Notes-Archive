@@ -132,9 +132,8 @@
 		max-inline-size: calc(100vw - 16px);
 		padding: var(--space-1);
 		border-radius: var(--radius-pill);
-		background: var(--surface-glass-strong);
-		-webkit-backdrop-filter: var(--glass-filter);
-		backdrop-filter: var(--glass-filter);
+		/* solid: it floats over the text it sits next to, and a glass fill lets that text show through */
+		background: var(--surface-raised);
 		box-shadow: var(--elevation-card);
 	}
 

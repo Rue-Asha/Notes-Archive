@@ -39,6 +39,8 @@ export const Image = Node.create({
 			input.type = 'text';
 			input.className = 'image-caption';
 			input.placeholder = 'Add a caption';
+			input.spellcheck = false;
+			input.setAttribute('autocorrect', 'off');
 			input.autocomplete = 'off';
 			input.setAttribute('aria-label', 'Caption');
 			figcaption.append(input);

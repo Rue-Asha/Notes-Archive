@@ -28,7 +28,7 @@
 <div class="field">
 	<label class="input">
 		<Icon name="link" size={16} />
-		<input type="text" inputmode="url" aria-label="Link URL" placeholder="Paste or type a link" bind:value onkeydown={keys} use:focus />
+		<input type="text" inputmode="url" spellcheck="false" autocorrect="off" autocapitalize="off" aria-label="Link URL" placeholder="Paste or type a link" bind:value onkeydown={keys} use:focus />
 	</label>
 	<span class="actions">
 		{#if href}

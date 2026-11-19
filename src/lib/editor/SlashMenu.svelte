@@ -111,9 +111,8 @@
 		max-block-size: min(26rem, 100dvh - var(--space-4));
 		padding: var(--space-3) var(--space-2) var(--space-2);
 		border-radius: var(--radius-card-s);
-		background: var(--surface-glass-strong);
-		-webkit-backdrop-filter: var(--glass-filter);
-		backdrop-filter: var(--glass-filter);
+		/* solid: it floats over the text it sits next to, and a glass fill lets that text show through */
+		background: var(--surface-raised);
 		box-shadow: var(--elevation-card);
 	}
 

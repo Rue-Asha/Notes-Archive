@@ -94,6 +94,11 @@ Cmd/Ctrl+K (outside a text selection in the editor) and every search button SHAL
 - **THEN** the first Enter opens nothing and the palette stays; the second opens "Beta"
 - **proof:** e2e
 
+#### Scenario: Typing back to an answered term after a failure does not claim there are no matches
+- **WHEN** "beta" has answered, the search for "betax" fails and "beta" is typed again while its answer is pending
+- **THEN** the list shows neither the old hit nor "No notes match", and the hit appears once the answer arrives
+- **proof:** e2e
+
 #### Scenario: A failed search clears the hits and says so
 - **WHEN** "beta" has answered with one hit and the search for "betax" fails
 - **THEN** the hit is gone, the list says "Couldn't load — try again", the highlighted first row is "New note" rather than a stale hit, and "See all results" still opens `/search?q=betax`

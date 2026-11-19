@@ -1,5 +1,5 @@
 <script module lang="ts">
-	export type IconName = 'home' | 'search' | 'plus' | 'folder' | 'folderPlus' | 'chevronRight' | 'chevronDown' | 'chevronLeft' | 'sort' | 'sidebar' | 'more' | 'note' | 'check' | 'tag' | 'image' | 'arrow' | 'clock';
+	export type IconName = 'home' | 'search' | 'plus' | 'folder' | 'folderPlus' | 'chevronRight' | 'chevronDown' | 'chevronLeft' | 'sort' | 'sidebar' | 'more' | 'note' | 'check' | 'tag' | 'image' | 'arrow' | 'clock' | 'expandAll' | 'collapseAll';
 
 	const shapes: Record<IconName, string> = {
 		home: '<path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
@@ -18,7 +18,9 @@
 		tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/>',
 		image: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/>',
 		arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
-		clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+		clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+		expandAll: '<path d="M8 9l4-4 4 4M8 15l4 4 4-4"/>',
+		collapseAll: '<path d="M8 5l4 4 4-4M8 19l4-4 4 4"/>'
 	};
 </script>
 

@@ -89,6 +89,16 @@ The note page SHALL show an optional icon (emoji picker; click to change or remo
 - **THEN** each change is stored before the next one is made, without typing in the body
 - **proof:** e2e
 
+#### Scenario: One long unbreakable tag stays inside the card and keeps the time
+- **WHEN** a pinned note on Home has one 48-character tag without spaces
+- **THEN** the tag ends inside the card and before the time, and the time stays inside the card
+- **proof:** e2e
+
+#### Scenario: The tag field has the hairline border of the chips beside it
+- **WHEN** a note with a tag opens
+- **THEN** the "Add a tag" field's border is the fingerprint `--ring-hairline`, not the heavier `--ring-control`
+- **proof:** e2e
+
 #### Scenario: Many tags wrap without horizontal scroll
 - **WHEN** a note with 40 tags, some 40 characters long, opens at 320 px with the properties expanded
 - **THEN** the tags wrap onto several lines and nothing scrolls horizontally
@@ -144,7 +154,7 @@ Two devices editing the same note: the last write wins.
 - **proof:** unit
 
 ### Requirement: Note cards
-Note cards on Home, folder, tag and search pages SHALL show the icon, the title ("Untitled" when empty), a plain-text snippet clamped to at most 3 lines ("Empty note" when the body has no text) and the edited time; on Home they SHALL also show the folder, the first tag and "+n" for the rest, on one meta line where the time keeps its full width and no tag runs into it (source: Rue, gate 7, signed hi-fi). On the search page a result SHALL be a numbered row ("01", "02", …) instead of a card plate, with the folder after a folder icon, up to three tags plus "+n" on a meta line that wraps, and the absolute date ("Tue 17 Nov", the year once it is another year's) instead of the relative time (source: Rue, gate 7, signed hi-fi). Every note card SHALL offer a card menu with Pin/Unpin, Move to… and Delete.
+Note cards on Home, folder, tag and search pages SHALL show the icon, the title ("Untitled" when empty), a plain-text snippet clamped to at most 3 lines ("Empty note" when the body has no text) and the edited time; on Home they SHALL also show the folder, the first tag and "+n" for the rest, on one meta line where the time keeps its full width and no tag runs into it (source: Rue, gate 7, signed hi-fi). On the search page a result SHALL be a numbered row ("01", "02", …) instead of a card plate, with the folder after a folder icon, up to three tags plus "+n" on a meta line that wraps, and the absolute date ("Tue 17 Nov", the year once it is another year's) instead of the relative time (source: Rue, gate 7, signed hi-fi). A single long tag name without spaces SHALL be clipped with an ellipsis inside the card's meta line and never run past the card or into the time. Every note card SHALL offer a card menu with Pin/Unpin, Move to… and Delete.
 
 #### Scenario: Note card shows its parts
 - **WHEN** a note with icon, title, a long body and two tags in folder "Reisen", edited two hours ago, is in Home's Recently edited
