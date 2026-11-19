@@ -32,6 +32,23 @@
 	const expanded = (id: Id) => manual.get(id) ?? view.expand.includes(id);
 	const toggle = (id: Id) => manual.set(id, !expanded(id));
 
+	// every folder of the shown level that has something inside, at any depth
+	const branches = $derived.by(() => {
+		const ids: Id[] = [];
+		const walk = (folders: TreeFolder[]) => {
+			for (const f of folders) {
+				if (f.children.length || f.notes.length) ids.push(f.id);
+				walk(f.children);
+			}
+		};
+		walk(view.folders);
+		return ids;
+	});
+	const allOpen = $derived(branches.length > 0 && branches.every(expanded));
+	const setAll = () => {
+		for (const id of branches) manual.set(id, !allOpen);
+	};
+
 	let all = $state(false);
 	const path = $derived(shortenPath(view.path, all));
 	$effect(() => {
@@ -144,6 +161,9 @@
 	<div class="head">
 		<h2 class="ruled" id="{uid}-folders">{COPY.folders}</h2>
 		<div class="tools">
+			{#if branches.length}
+				<Button variant="quiet" size="xs" icon label={allOpen ? COPY.collapseAll : COPY.expandAll} onclick={setAll}><Icon name={allOpen ? 'collapseAll' : 'expandAll'} size={16} /></Button>
+			{/if}
 			{#if !empty}
 				<Button variant="quiet" size="xs" icon label={COPY.newFolder} onclick={() => create(view.focus?.id ?? null)}><Icon name="folderPlus" size={16} /></Button>
 			{/if}

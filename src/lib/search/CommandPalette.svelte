@@ -98,6 +98,7 @@
 			if (value) {
 				failed = value;
 				hits = [];
+				answered = '';
 				active = 0;
 			}
 			return;

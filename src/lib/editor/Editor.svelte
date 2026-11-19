@@ -28,7 +28,7 @@
 			element: root,
 			extensions,
 			content: sanitize(content, getSchema(extensions)),
-			editorProps: { attributes: { class: 'prose', 'aria-label': 'Note body' } },
+			editorProps: { attributes: { class: 'prose', 'aria-label': 'Note body', spellcheck: 'false', autocorrect: 'off' } },
 			onTransaction: () => version++,
 			onUpdate: ({ editor }) => onchange(editor.getJSON() as JSONContent),
 			onFocus: () => {

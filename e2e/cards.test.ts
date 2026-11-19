@@ -108,3 +108,20 @@ test('a whitespace-only title reads Untitled on the card', async ({ page, reques
 
 	await expect(page.locator('[data-note-row] [data-note-title]')).toHaveText('Untitled');
 });
+
+test('Regression: One long unbreakable tag stays inside the card and keeps the time', async ({ page, request }) => {
+	await reset(request);
+	await seed(request, {
+		folders: [{ name: 'Reisen' }],
+		notes: [{ title: 'Packliste', body: 'Socken.', folder: 0, tags: ['ReiseplanungMitSehrLangemTagNamenOhneLeerzeichen'], pinnedAt: '2026-11-02T09:00:00.000Z' }]
+	});
+	await calm(page);
+	await open(page, '/');
+
+	const card = (await page.getByRole('main').locator('[data-note-card]').first().boundingBox())!;
+	const tag = (await page.getByRole('main').locator('[data-card-tag]').first().boundingBox())!;
+	const time = (await page.getByRole('main').locator('[data-card-time]').first().boundingBox())!;
+	expect(tag.x + tag.width).toBeLessThanOrEqual(card.x + card.width);
+	expect(time.x + time.width).toBeLessThanOrEqual(card.x + card.width);
+	expect(tag.x + tag.width).toBeLessThanOrEqual(time.x + 1);
+});

@@ -4,7 +4,7 @@
 TBD - created by archiving change build-notes-archive. Update Purpose after archive.
 ## Requirements
 ### Requirement: Wide layouts
-At 1100 px and wider the note column SHALL widen to 1.25 × the fingerprint `--measure` (85ch) plus the card's padding — the long end of a comfortable line, so the writing area fills the frame's content column at 1280 px — and stay capped there and centred in the content area right of the sidebar; below 1100 px it stays at `--measure` plus padding. Below 1100 px a pointer can be a finger, so every button and every folder note row SHALL keep a target of at least 44 px (source: Rue, gate 7, signed hi-fi). Home SHALL show Pinned and Recently edited side by side at 1100 px and wider; between 1024 and 1099 px the sidebar stays and Home's lists stack.
+At 1100 px and wider the note column SHALL widen to 1.5 × the fingerprint `--measure` (102ch) plus the card's padding (32 px a side) — a generous cap, so the writing area fills the frame's content column at 1280 px and, with the sidebar folded to its rail, grows toward the cap — and stay capped there and centred in the content area right of the sidebar; below 1100 px it stays at `--measure` plus padding. Below 1100 px a pointer can be a finger, so every button and every folder note row SHALL keep a target of at least 44 px (source: Rue, gate 7, signed hi-fi). Home SHALL show Pinned and Recently edited side by side at 1100 px and wider; between 1024 and 1099 px the sidebar stays and Home's lists stack.
 
 #### Scenario: Controls keep a 44 px target below the wide layout
 - **WHEN** a folder page opens at 1024 px, at 1280 px and on the phone
@@ -13,7 +13,7 @@ At 1100 px and wider the note column SHALL widen to 1.25 × the fingerprint `--m
 
 #### Scenario: Note column is capped and centred on wide screens
 - **WHEN** a note opens at 1600×900
-- **THEN** the note body is no wider than 1.25 × `--measure` plus the card's inline padding, wider than 0.9 of that measure, and its centre is within 2 px of the centre of the content area (the page column right of the sidebar, inside the frame)
+- **THEN** the note column takes at least 95 % of the content area, the note body is no wider than 1.5 × `--measure` plus the card's inline padding, folding the sidebar makes the column wider than 1.25 × `--measure` plus that padding (and no wider than the cap), unfolding restores it, and the body's centre is within 2 px of the centre of the content area (the page column right of the sidebar, inside the frame)
 - **proof:** e2e
 
 #### Scenario: Note column widens at 1100 px and fills the content area at 1280
@@ -131,7 +131,7 @@ Opening a note from anywhere (tree, folder page, Home, search, palette) SHALL fo
 - **proof:** e2e
 
 ### Requirement: Tree expansion and keyboard
-The chevron SHALL expand or collapse a folder in place without navigating; the manual open state SHALL last until reload; a folder with nothing inside SHALL have no chevron; the current item's ancestors SHALL expand on their own. The tree SHALL use `tree`/`treeitem` semantics with `aria-expanded`: Up/Down move between visible items, Right expands or moves to the first child, Left collapses or moves to the parent, Enter opens.
+The chevron SHALL expand or collapse a folder in place without navigating; the manual open state SHALL last until reload; a folder with nothing inside SHALL have no chevron; the current item's ancestors SHALL expand on their own. The tree SHALL use `tree`/`treeitem` semantics with `aria-expanded`: Up/Down move between visible items, Right expands or moves to the first child, Left collapses or moves to the parent, Enter opens. One button in the tree's header SHALL expand every folder of the shown level at any depth and, once all are open, collapse them again; its accessible name is "Expand all folders" or "Collapse all folders" (the same button keeps the focus), it is absent while no folder has anything inside, and it works through the same open state as the chevrons (until reload) so the arrow keys and the one roving tab stop walk the expanded tree unchanged.
 
 #### Scenario: Chevron expands without navigating
 - **WHEN** the chevron of a folder with a sub-folder and two notes is clicked, then clicked again
@@ -151,6 +151,11 @@ The chevron SHALL expand or collapse a folder in place without navigating; the m
 #### Scenario: Tree focuses the open note folder and marks its row
 - **WHEN** a note three levels below the root is open
 - **THEN** the tree focuses the note's folder and marks the note's row as the current page; expanding the ancestors stays covered by the focus unit test
+- **proof:** e2e
+
+#### Scenario: One control expands and collapses every folder of the tree
+- **WHEN** the tree has nested folders and "Expand all folders" is activated from the keyboard, the arrow keys then walk down, and "Collapse all folders" is clicked
+- **THEN** every folder with content is open (`aria-expanded` true) and its notes and sub-folders show, the button is renamed and keeps the focus, ArrowDown reaches the deepest folder from the first item, and collapsing hides them all again without the URL changing; with only an empty folder the control is absent
 - **proof:** e2e
 
 #### Scenario: Arrow keys move through the tree

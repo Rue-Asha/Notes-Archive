@@ -154,3 +154,47 @@ test('Regression: Enter and Escape in a rename give the focus back to the row', 
 		await expect(item(page, 'Leer')).toBeFocused();
 	}
 });
+
+test('Scenario: One control expands and collapses every folder of the tree', async ({ page, request }) => {
+	await reset(request);
+	await seed(request, {
+		folders: [{ name: 'Reisen' }, { name: 'Japan', parent: 0 }, { name: 'Kyoto', parent: 1 }, { name: 'Leer' }],
+		notes: [{ title: 'Packliste', folder: 0 }, { title: 'Tempel', folder: 2 }]
+	});
+	await calm(page);
+	await open(page, '/');
+	const tree = sidebar(page);
+	const deep = ['Japan', 'Kyoto', 'Packliste', 'Tempel'];
+
+	const expand = tree.getByRole('button', { name: 'Expand all folders' });
+	await expand.focus();
+	await page.keyboard.press('Enter');
+	for (const name of deep) await expect(tree.getByRole('link', { name, exact: true })).toBeVisible();
+	for (const name of ['Reisen', 'Japan', 'Kyoto']) await expect(item(page, name)).toHaveAttribute('aria-expanded', 'true');
+	await expect(item(page, 'Leer')).not.toHaveAttribute('aria-expanded');
+	await expect(expand).toHaveCount(0);
+	await expect(tree.getByRole('button', { name: 'Collapse all folders' })).toBeFocused();
+
+	// the arrow keys still walk the whole expanded tree from its one tab stop
+	await item(page, 'Reisen').focus();
+	// top level is Leer, Reisen: from Reisen two steps down reach Japan, then Kyoto
+	for (let i = 0; i < 2; i++) await page.keyboard.press('ArrowDown');
+	await expect(item(page, 'Kyoto')).toBeFocused();
+	for (let i = 0; i < 2; i++) await page.keyboard.press('ArrowDown');
+	await expect(item(page, 'Packliste')).toBeFocused();
+
+	await tree.getByRole('button', { name: 'Collapse all folders' }).click();
+	for (const name of deep) await expect(tree.getByRole('link', { name, exact: true })).toBeHidden();
+	await expect(item(page, 'Reisen')).toHaveAttribute('aria-expanded', 'false');
+	await expect(tree.getByRole('button', { name: 'Expand all folders' })).toBeVisible();
+	expect(new URL(page.url()).pathname).toBe('/');
+});
+
+test('Scenario: The expand control stays away while no folder has anything inside', async ({ page, request }) => {
+	await reset(request);
+	await seed(request, { folders: [{ name: 'Leer' }] });
+	await calm(page);
+	await open(page, '/');
+	await expect(sidebar(page).getByRole('button', { name: 'New folder' })).toBeVisible();
+	await expect(sidebar(page).getByRole('button', { name: /all folders/ })).toHaveCount(0);
+});

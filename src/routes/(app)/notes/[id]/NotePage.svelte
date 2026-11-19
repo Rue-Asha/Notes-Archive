@@ -164,8 +164,9 @@
 
 <style>
 	/* the column is the note's measure plus the card's padding, centred in whatever area the shell gives the page.
-	   From 1100 px the measure widens to 85ch, the long end of a comfortable line for notes that are scanned more
-	   than read, so the writing area fills the frame's content column at 1280 instead of leaving a third of it empty */
+	   From 1100 px the measure widens to 102ch (1.5 ×) and the card's padding eases to --space-8: the writing area
+	   fills the frame's content column and, with the sidebar folded to its rail, grows to that generous cap instead
+	   of stopping at a third of the screen. Tables, images and code use the whole column. */
 	.note-wrap {
 		--card-pad-x: var(--space-9);
 		--note-measure: var(--measure);
@@ -181,7 +182,8 @@
 
 	@media (min-width: 1100px) {
 		.note-wrap {
-			--note-measure: calc(var(--measure) * 1.25);
+			--note-measure: calc(var(--measure) * 1.5);
+			--card-pad-x: var(--space-8);
 		}
 	}
 

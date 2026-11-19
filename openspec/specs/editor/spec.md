@@ -142,7 +142,7 @@ Hovering a block on desktop SHALL show a ⋮⋮ handle; dragging it SHALL move t
 - **proof:** unit
 
 ### Requirement: Extra blocks
-The editor SHALL provide Toggle (collapsible title with nested content, open state not saved), Callout (emoji and a panel on the fingerprint's `--surface-sunken`, as in the hi-fi, with text), Quote, Code block with syntax highlighting and a language picker, Table (add and remove rows and columns, header row), Divider and Task list (checkbox toggles persist); nested lists and toggles inside toggles SHALL work, a table on phone SHALL scroll horizontally inside its block, and dragging a toggle SHALL move its content with it.
+The editor SHALL provide Toggle (collapsible title with nested content, open state not saved), Callout (emoji and a panel on the fingerprint's `--surface-sunken`, as in the hi-fi, with text), Quote, Code block with syntax highlighting and a language picker, Table (add and remove rows and columns, header row; every cell has a hairline border and the header row a shaded, semibold cell so cells and columns read apart), Divider and Task list (checkbox toggles persist); nested lists and toggles inside toggles SHALL work, a table on phone SHALL scroll horizontally inside its block, and dragging a toggle SHALL move its content with it.
 
 #### Scenario: Slash menu inserts toggle, callout and table
 - **WHEN** Toggle, Callout and Table are chosen from the slash menu in turn
@@ -169,9 +169,24 @@ The editor SHALL provide Toggle (collapsible title with nested content, open sta
 - **THEN** the code shows highlighted tokens (`.hljs-keyword` on `const`) and the stored node has `language: "typescript"`
 - **proof:** e2e
 
+#### Scenario: Floating editor menus are solid
+- **WHEN** the table toolbar, the bubble toolbar and the slash menu are open over text
+- **THEN** each has a fully opaque background (the 0.82 glass let the text beside it show through)
+- **proof:** e2e
+
+#### Scenario: Native spellcheck and autocorrect stay off where text is typed
+- **WHEN** a note opens
+- **THEN** the title, the note body and the tag field have `spellcheck` false and `autocorrect="off"`, so no browser squiggle marks German words; the folder rename, link and caption fields carry the same attributes (a real German linter is a separate, later feature)
+- **proof:** e2e
+
 #### Scenario: Table adds and removes rows and columns
 - **WHEN** in a 3×3 table with a header row "Add row below", "Add column right", "Delete row" and "Delete column" are used in turn
 - **THEN** the table is 4×3, 4×4, 3×4 and 3×3 after each step and its first row stays a header row
+- **proof:** e2e
+
+#### Scenario: Table cells are told apart by hairlines and a shaded header row
+- **WHEN** a 3×3 table with a header row is shown
+- **THEN** every header and body cell has a visible border of at most 1 px on all four sides, header cells have a background other than the body cells' and a heavier font weight
 - **proof:** e2e
 
 #### Scenario: Wide table scrolls inside its block on phone
